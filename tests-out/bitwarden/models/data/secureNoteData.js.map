@@ -1,0 +1,1 @@
+{"version":3,"file":"secureNoteData.js","sourceRoot":"","sources":["../../../../bitwarden/models/data/secureNoteData.ts"],"names":[],"mappings":";;;AAGA,MAAa,cAAc;IACzB,IAAI,CAAiB;IAErB,YAAY,IAAoB;QAC9B,IAAI,IAAI,IAAI,IAAI,EAAE;YAChB,OAAO;SACR;QAED,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC,IAAI,CAAC;IACxB,CAAC;CACF;AAVD,wCAUC"}
