@@ -1,0 +1,21 @@
+{
+  "name": "playwright-playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "vscode-debug": "playwright test --config ./playwright.config.ts --workers=1 --trace on"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.35.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

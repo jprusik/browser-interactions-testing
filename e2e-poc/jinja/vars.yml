@@ -1,0 +1,7 @@
+sites:
+  - name: "somesite"
+    url: "https://somesite.example.com"
+    autofill_method: "loginWithAutofillOnPageLoad"
+    failure_text: "Invalid credentials"
+
+# treating the real values as secrets for now; I haven't reviewed all of the site names

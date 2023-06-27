@@ -1,0 +1,159 @@
+import {
+  test as base,
+  chromium,
+  expect,
+  type BrowserContext,
+  Page,
+} from "@playwright/test";
+import path from "path";
+
+export const test = base.extend<{
+  context: BrowserContext;
+  extensionId: string;
+}>({
+  context: async ({}, use) => {
+    const pathToBitwarden = path.join(
+      __dirname,
+      "../extensions/bitwarden-chrome"
+    );
+    const context = await chromium.launchPersistentContext("", {
+      headless: false,
+      colorScheme: "dark",
+      ignoreDefaultArgs: ["--enable-automation"], // disable chrome automation message
+      args: [
+        `--disable-extensions-except=${pathToBitwarden}`,
+        `--load-extension=${pathToBitwarden}`,
+      ],
+    });
+    await use(context);
+  },
+  extensionId: async ({ context }, use) => {
+    // for manifest v2:
+    let [background] = context.backgroundPages();
+    if (!background) background = await context.waitForEvent("backgroundpage");
+
+    // for manifest v3:
+    // let [background] = context.serviceWorkers();
+    // if (!background) background = await context.waitForEvent("serviceworker");
+
+    const extensionId = background.url().split("/")[2];
+    await use(extensionId);
+  },
+});
+
+export const expect = test.expect;
+
+// TODO: pull these with environment variables, an .env file, or args
+export const baseUrl = "https://url.example.com";
+export const userEmail = "username@example.com";
+export const userPassword = "password1234";
+export const bitwardenExtensionPage =
+  "chrome-extension://imemcodbmhmdfpgpbamhdennnljjlhbf/popup/index.html";
+export const screenshotsDir = path.join(__dirname, "../screenshots");
+
+test.beforeEach(async ({ context }) => {
+  // open bitwarden extension popup
+  const bwLoginPage = await context.newPage();
+
+  await bwLoginPage.goto(bitwardenExtensionPage);
+
+  // configure environment
+  await bwLoginPage.goto(bitwardenExtensionPage + "#/environment");
+  await bwLoginPage.waitForSelector("input[id='baseUrl']");
+  await bwLoginPage.fill("input[id='baseUrl']", baseUrl);
+  await bwLoginPage.screenshot({
+    path: path.join(screenshotsDir, `environment_configured.png`),
+  });
+  await bwLoginPage.click("button[type='submit']");
+
+  // login
+  await bwLoginPage.waitForSelector("input[id='email']");
+  await bwLoginPage.fill("input[id='email']", userEmail);
+  await bwLoginPage.waitForSelector("button[type='submit']");
+  await bwLoginPage.click("button[type='submit']");
+  // await bwLoginPage.keyboard.press("Enter");
+  await bwLoginPage.waitForSelector("input[id='masterPassword']");
+  // await bwLoginPage.pause();
+  await bwLoginPage.waitForTimeout(1000); // bad, I know
+  await bwLoginPage.fill("input[id='masterPassword']", userPassword);
+  await bwLoginPage.screenshot({
+    path: path.join(screenshotsDir, `password_entered.png`),
+  });
+  await bwLoginPage.waitForSelector("button[type='submit']");
+  await bwLoginPage.click("button[type='submit']");
+  await bwLoginPage.waitForSelector("h2[class='box-header']");
+  await bwLoginPage.screenshot({
+    path: path.join(screenshotsDir, `login_button_clicked.png`),
+  });
+  await bwLoginPage.screenshot({
+    path: path.join(screenshotsDir, `bitwarden-logged-in.png`),
+  });
+
+  // configure autofill-on-page-load
+  await bwLoginPage.getByRole("button", { name: "Settings" }).click();
+  await bwLoginPage.getByRole("button", { name: "Auto-fill" }).click();
+  await bwLoginPage.getByLabel("Auto-fill on page load").check();
+  // await bwLoginPage.pause();
+});
+
+export const loginWithKeyboardShortcut = async ({ page }) => {
+  await page.keyboard.press("Meta+Shift+l"); // doesn't autofill for some reason; manual key presses work though?
+
+  await page.fill(
+    "input[id='email']",
+    "Use the Ctrl/Cmd+Shift+L to autofill this field"
+  );
+
+  await page.pause();
+  await page.keyboard.press("Enter");
+};
+
+export const loginWithAutofillOnPageLoad = async ({ page }) => {
+  await page.keyboard.press("Enter");
+};
+
+export const loginTest = async (
+  page: Page,
+  url: string,
+  loginFunction: { (page: any): Promise<void>; (arg0: any): void },
+  loginSuccess: string
+) => {
+  try {
+    try {
+      await page.goto(url);
+    } catch (error) {
+      console.error("Error occurred during page navigation:", error);
+    }
+    await loginFunction(page);
+    await page.screenshot({
+      path: path.join(screenshotsDir, `${url}-autofill.png`),
+    });
+    const loginFailedMessage = page.getByText(loginSuccess);
+    expect(loginFailedMessage).toBeTruthy();
+  } finally {
+  }
+};
+
+test("oldkbintest", async ({ context }) => {
+  const kbinPage = await context.newPage();
+  await kbinPage.goto("https://kbin.social/");
+  await kbinPage.getByRole("link", { name: "Log in" }).click();
+  // login
+  loginWithAutofillOnPageLoad;
+  await kbinPage.screenshot({
+    path: path.join(screenshotsDir, `kbin-autofill.png`),
+  });
+  const loginFailedMessage = kbinPage.getByText("Invalid credentials");
+  expect(loginFailedMessage).toBeTruthy();
+});
+{% for i in range(sites|length) %}
+test("{{ sites[i]['name'] }}", async ({ context }) => {
+  const page = await context.newPage();
+  await loginTest(
+    page,
+    "{{ sites[i]['url'] }}",
+    {{ sites[i]['autofill_method'] }},
+    "{{ sites[i]['failure_text'] }}"
+  );
+});
+{% endfor %}
