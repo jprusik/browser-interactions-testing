@@ -1,4 +1,5 @@
 # General
+.env
 .DS_Store
 Thumbs.db
 
@@ -24,6 +25,10 @@ node_modules
 npm-debug.log
 
 # Playwright
-/test-results/
-/playwright-report/
+build/*
+!build/PUT_EXTENSION_BUILD_HERE
+tests-out
+test-results
+playwright-report
+--cache-strategy
 /playwright/.cache/
