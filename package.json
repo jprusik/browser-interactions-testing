@@ -34,9 +34,11 @@
   "scripts": {
     "prepare": "husky install && npm run setup:clients",
     "pretest": "rimraf tests-out && tsc --incremental -p tests/tsconfig.json",
+    "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
+    "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch",
     "test:autofill": "npm run pretest && playwright test --reporter=line",
     "test:autofill:debug": "npm run pretest && playwright test --debug",
-    "setup:clients": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
+    "setup:clients": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cp dev-server.local.pem clients/apps/web/dev-server.local.pem && cd clients && npm ci",
     "build:clients": "cd clients/apps/browser && rimraf build && npm run build",
     "build:clients:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",
     "build:clients:mv3": "cd clients/apps/browser && rimraf build && npm run build:mv3",

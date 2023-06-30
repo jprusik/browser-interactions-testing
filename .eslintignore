@@ -1,0 +1,12 @@
+**/build
+**/dist
+**/coverage
+**/node_modules
+**/webpack.*.js
+**/jest.config.js
+**/gulpfile.js
+
+clients
+tests-out
+test-results
+playwright-report
