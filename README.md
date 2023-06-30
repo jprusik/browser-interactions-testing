@@ -1,3 +1,36 @@
 # Autofill Playwright Tests
 
-Playwright tests for autofill functionality.
+This project leverages [Playwright](https://playwright.dev/) to run automated form-fill tests against real builds of the Bitwarden browser extension.
+
+## Limitations
+
+- Extension builds can only be tested against Chromium clients at present
+
+## Requirements
+
+- [git](https://git-scm.com/downloads)
+- (optional) [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (otherwise manage your node version to `.nvmrc` manually)
+
+## Setup
+
+- Create an `.env` file in the root directory with values pointing to the vault you want to test against (use `.env.example` as guidance)
+- Install node (with `nvm install` if `nvm` is installed)
+- If targeting a local environment, [generate an SSL certificate for the Web Vault client](https://contributing.bitwarden.com/getting-started/clients/web-vault/#ssl-certificate) named `dev-server.local.pem` and place it in the project root directory
+- Do a clean-install with `npm ci` (this will also fetch and set up the Bitwarden clients repo)
+  - If prompted, run `npx playwright install` as well
+  - (Optional) Checkout the local `clients` to the branch you want to test the extension with (`master` by default)
+- Build the extension to test against with `npm run build:clients` Other build options:
+  - `build:clients:prod`: build the production version of the extension
+  - `build:clients:mv3`: build the extension using Manifest v3 (builds otherwise default to v2)
+  - `build:clients:autofill`: build the extension with the new (v2) Autofill features
+  - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
+- For the targeted environment, configure the vault with the credentials you put in `.env`
+- Login to the vault of the targeted environment, and create items for each of the test credentials (`testPages`) found in `tests/constants.ts`. Note, that the cipher entries for `test-pages` should use exact URI matching.
+
+## Running tests
+
+- If targeting a local environment:
+  - Ensure your targeted `API` and `Identity` services [are configured and running](https://contributing.bitwarden.com/getting-started/server/guide)
+  - Ensure the Web Vault client is running with `npm run test:webserve`
+- Run headless testing with `npm run test:autofill`
+- Run headed tests in debug mode with `npm run test:autofill:debug`
