@@ -1,7 +1,10 @@
 # General
-.env
 .DS_Store
 Thumbs.db
+
+# Secrets
+.env
+dev-server.local.pem
 
 # IDEs and editors
 .idea/
@@ -25,10 +28,9 @@ node_modules
 npm-debug.log
 bitwarden-clients-0.0.0.tgz
 clients
+server
 
 # Playwright
-build/*
-!build/PUT_EXTENSION_BUILD_HERE
 tests-out
 test-results
 playwright-report
