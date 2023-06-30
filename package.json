@@ -16,6 +16,7 @@
     "@playwright/test": "1.35.1",
     "@types/chrome": "0.0.237",
     "@types/firefox-webext-browser": "111.0.1",
+    "cross-env": "7.0.3",
     "husky": "8.0.3",
     "lint-staged": "13.2.2",
     "prettier": "2.8.8",
@@ -31,9 +32,15 @@
     "*": "prettier --cache --write --ignore-unknown"
   },
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky install && npm run setup:clients",
     "pretest": "rimraf tests-out && tsc --incremental -p tests/tsconfig.json",
     "test:autofill": "npm run pretest && playwright test --reporter=line",
-    "test:autofill:debug": "npm run pretest && playwright test --debug"
+    "test:autofill:debug": "npm run pretest && playwright test --debug",
+    "setup:clients": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
+    "build:clients": "cd clients/apps/browser && rimraf build && npm run build",
+    "build:clients:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",
+    "build:clients:mv3": "cd clients/apps/browser && rimraf build && npm run build:mv3",
+    "build:clients:autofill": "cd clients/apps/browser && rimraf build && cross-env AUTOFILL_VERSION=2 npm run build",
+    "build:clients:autofill:mv3": "cd clients/apps/browser && rimraf build && cross-env AUTOFILL_VERSION=2 MANIFEST_VERSION=3 npm run build"
   }
 }

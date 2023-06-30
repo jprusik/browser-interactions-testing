@@ -23,6 +23,8 @@ Thumbs.db
 # Node
 node_modules
 npm-debug.log
+bitwarden-clients-0.0.0.tgz
+clients
 
 # Playwright
 build/*

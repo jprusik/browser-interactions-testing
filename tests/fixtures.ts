@@ -7,7 +7,11 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
-    const pathToExtension = path.join(__dirname, "../build");
+    const pathToExtension = path.join(
+      __dirname,
+      "../",
+      process.env.EXTENSION_BUILD_PATH
+    );
     const context = await chromium.launchPersistentContext("", {
       headless: false, // should always be `false`, even when testing headless Chrome
       args: [
