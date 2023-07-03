@@ -1,5 +1,12 @@
 import path from "path";
+import fs from "fs";
 import { test as base, chromium, type BrowserContext } from "@playwright/test";
+
+const pathToExtension = path.join(
+  __dirname,
+  "../",
+  process.env.EXTENSION_BUILD_PATH
+);
 
 export const test = base.extend<{
   context: BrowserContext;
@@ -7,11 +14,6 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
-    const pathToExtension = path.join(
-      __dirname,
-      "../",
-      process.env.EXTENSION_BUILD_PATH
-    );
     const context = await chromium.launchPersistentContext("", {
       headless: false, // should always be `false`, even when testing headless Chrome
       args: [
@@ -34,8 +36,11 @@ export const test = base.extend<{
   },
   extensionId: async ({ context }, use) => {
     let background;
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(pathToExtension, "manifest.json"), "utf8")
+    );
 
-    if (process.env.MANIFEST_VERSION === "3") {
+    if (manifest?.manifest_version === 3) {
       background = context.serviceWorkers()[0];
 
       if (!background) background = await context.waitForEvent("serviceworker");
