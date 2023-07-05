@@ -10,10 +10,17 @@ test.describe("Extension autofills forms when triggered", () => {
     context,
     extensionId,
   }) => {
-    const [backgroundPage] = context.backgroundPages();
-    const contextPages = context.pages();
+    const [backgroundPage] = await context.backgroundPages();
 
     await test.step("Close the extension welcome page when it pops up", async () => {
+      // If not in debug, wait for the extension to open the welcome page before continuing
+      if (!["1", "console"].includes(process.env.PWDEBUG)) {
+        await context.waitForEvent("page");
+      }
+
+      let contextPages = await context.pages();
+      expect(contextPages.length).toBe(2);
+
       const welcomePage = contextPages[1];
       if (welcomePage) {
         welcomePage.close();
@@ -76,6 +83,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
         for (const inputKey of Object.keys(inputs)) {
           await expect
+            // @TODO do not soft expect on local test pages
             .soft(testPage.locator(inputs[inputKey].selector))
             .toHaveValue(inputs[inputKey].value);
         }

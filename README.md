@@ -4,7 +4,7 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 
 ## Limitations
 
-- Extension builds can only be tested against Chromium clients at present
+- Extension builds can only be tested with Chromium clients at present
 
 ## Requirements
 
