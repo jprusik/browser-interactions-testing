@@ -5,7 +5,7 @@ import { test as base, chromium, type BrowserContext } from "@playwright/test";
 const pathToExtension = path.join(
   __dirname,
   "../",
-  process.env.EXTENSION_BUILD_PATH
+  process.env.EXTENSION_BUILD_PATH,
 );
 
 export const test = base.extend<{
@@ -37,19 +37,22 @@ export const test = base.extend<{
   extensionId: async ({ context }, use) => {
     let background;
     const manifest = JSON.parse(
-      fs.readFileSync(path.join(pathToExtension, "manifest.json"), "utf8")
+      fs.readFileSync(path.join(pathToExtension, "manifest.json"), "utf8"),
     );
 
     if (manifest?.manifest_version === 3) {
       background = context.serviceWorkers()[0];
 
-      if (!background) background = await context.waitForEvent("serviceworker");
+      if (!background) {
+        background = await context.waitForEvent("serviceworker");
+      }
     } else {
       // for manifest v2:
       background = context.backgroundPages()[0];
 
-      if (!background)
+      if (!background) {
         background = await context.waitForEvent("backgroundpage");
+      }
     }
 
     const extensionId = background.url().split("/")[2];
