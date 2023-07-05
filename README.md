@@ -25,7 +25,7 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   - `build:clients:autofill`: build the extension with the new (v2) Autofill features
   - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
 - For the targeted environment, configure the vault with the credentials you put in `.env`
-- Login to the vault of the targeted environment, and create items for each of the test credentials (`testPages`) found in `tests/constants.ts`
+- Login to the vault of the targeted environment, and create items for each of the test credentials (`testPages`) found in `tests/constants.ts`. Note, that the cipher entries for `test-pages` should use exact URI matching.
 
 ## Running tests
 
