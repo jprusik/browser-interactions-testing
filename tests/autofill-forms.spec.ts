@@ -1,9 +1,17 @@
 import { Page } from "@playwright/test";
+import path from "path";
 
 import { testPages } from "./constants";
 import { test, expect } from "./fixtures";
 
+export const screenshotsOutput = path.join(__dirname, "../screenshots");
+
 let testPage: Page;
+
+const vaultEmail = process?.env?.VAULT_EMAIL || "";
+const vaultPassword = process?.env?.VAULT_PASSWORD || "";
+const serverHostURL = process?.env?.SERVER_HOST_URL;
+const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 
 test.describe("Extension autofills forms when triggered", () => {
   test("Log in to the vault, open pages, and autofill forms", async ({
@@ -29,7 +37,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
     await test.step("Close the extension welcome page when it pops up", async () => {
       // If not in debug, wait for the extension to open the welcome page before continuing
-      if (!["1", "console"].includes(process.env.PWDEBUG)) {
+      if (!debugIsActive) {
         await context.waitForEvent("page");
       }
 
@@ -44,36 +52,44 @@ test.describe("Extension autofills forms when triggered", () => {
       testPage = contextPages[0];
     });
 
-    await test.step("Log in to the extension vault", async () => {
-      await testPage.goto(
-        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout`,
-      );
-      await testPage.getByLabel("Email address").click();
-      await testPage
-        .getByLabel("Email address")
-        .fill(process?.env?.VAULT_EMAIL || "");
-      await testPage.getByRole("button", { name: "Continue" }).click();
+    await test.step("Configure the environment", async () => {
+      // @TODO check for and fill other settings
+      if (serverHostURL) {
+        await testPage.goto(
+          `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`,
+          { waitUntil: "load" },
+        );
+        await testPage.waitForSelector("input#baseUrl");
 
+        await testPage.fill("input#baseUrl", serverHostURL);
+
+        await testPage.screenshot({
+          path: path.join(screenshotsOutput, `environment_configured.png`),
+        });
+
+        await testPage.click("button[type='submit']");
+      }
+    });
+
+    await test.step("Log in to the extension vault", async () => {
       // @TODO temporary workaround for the live URL-encoding not matching output of `encodeURI` or `encodeURIComponent`
-      const urlEncodedLoginEmail = encodeURI(
-        process?.env?.VAULT_EMAIL || "",
-      ).replace("+", "%2B");
-      await testPage.waitForURL(
+      const urlEncodedLoginEmail = encodeURI(vaultEmail).replace("+", "%2B");
+
+      await testPage.goto(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/login?email=${urlEncodedLoginEmail}`,
         { waitUntil: "load" },
       );
-      await testPage
-        .getByLabel("Master password")
-        .fill(process?.env?.VAULT_PASSWORD || "");
-      await testPage
-        .getByRole("button", { name: "Log in with master password" })
-        .click();
+
+      await testPage.waitForSelector("input#masterPassword");
+      await testPage.fill("input#masterPassword", vaultPassword);
+      await testPage.waitForSelector("form button[type='submit']");
+      await testPage.click("form button[type='submit']");
+
       await testPage.waitForURL(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
         { waitUntil: "load" },
       );
-      const vaultIsLoaded = testPage.locator("main app-vault-select");
-      await vaultIsLoaded.waitFor();
+      await testPage.waitForSelector("main app-vault-select");
     });
 
     for (const page of testPages) {
@@ -92,6 +108,13 @@ test.describe("Extension autofills forms when triggered", () => {
             // @TODO do not soft expect on local test pages
             .soft(testPage.locator(inputs[inputKey].selector))
             .toHaveValue(inputs[inputKey].value);
+
+          await testPage.screenshot({
+            path: path.join(
+              screenshotsOutput,
+              `${url}-${inputKey}-autofill.png`,
+            ),
+          });
 
           const inputKeyIndex = inputKeys.lastIndexOf(inputKey);
 

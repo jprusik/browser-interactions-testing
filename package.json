@@ -28,7 +28,7 @@
   },
   "scripts": {
     "prepare": "husky install && npm run setup:clients",
-    "pretest": "rimraf tests-out && tsc --incremental -p tests/tsconfig.json",
+    "pretest": "rimraf tests-out && rimraf screenshots && tsc --incremental -p tests/tsconfig.json",
     "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
     "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch",
     "test:autofill": "npm run pretest && playwright test --reporter=line",

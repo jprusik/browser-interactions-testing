@@ -36,3 +36,4 @@ test-results
 playwright-report
 --cache-strategy
 /playwright/.cache/
+screenshots

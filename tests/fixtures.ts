@@ -28,7 +28,7 @@ export const test = base.extend<{
       ],
       viewport: {
         width: 1000,
-        height: 1200,
+        height: 1000,
       },
     });
     await use(context);
