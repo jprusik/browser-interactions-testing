@@ -12,6 +12,21 @@ test.describe("Extension autofills forms when triggered", () => {
   }) => {
     const [backgroundPage] = await context.backgroundPages();
 
+    function doAutofill() {
+      backgroundPage.evaluate(() =>
+        chrome.tabs.query(
+          { active: true },
+          (tabs) =>
+            tabs[0] &&
+            chrome.tabs.sendMessage(tabs[0]?.id || 0, {
+              command: "collectPageDetails",
+              tab: tabs[0],
+              sender: "autofill_cmd",
+            }),
+        ),
+      );
+    }
+
     await test.step("Close the extension welcome page when it pops up", async () => {
       // If not in debug, wait for the extension to open the welcome page before continuing
       if (!["1", "console"].includes(process.env.PWDEBUG)) {
@@ -31,7 +46,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
     await test.step("Log in to the extension vault", async () => {
       await testPage.goto(
-        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout`
+        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout`,
       );
       await testPage.getByLabel("Email address").click();
       await testPage
@@ -41,11 +56,11 @@ test.describe("Extension autofills forms when triggered", () => {
 
       // @TODO temporary workaround for the live URL-encoding not matching output of `encodeURI` or `encodeURIComponent`
       const urlEncodedLoginEmail = encodeURI(
-        process?.env?.VAULT_EMAIL || ""
+        process?.env?.VAULT_EMAIL || "",
       ).replace("+", "%2B");
       await testPage.waitForURL(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/login?email=${urlEncodedLoginEmail}`,
-        { waitUntil: "load" }
+        { waitUntil: "load" },
       );
       await testPage
         .getByLabel("Master password")
@@ -55,7 +70,7 @@ test.describe("Extension autofills forms when triggered", () => {
         .click();
       await testPage.waitForURL(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
-        { waitUntil: "load" }
+        { waitUntil: "load" },
       );
       const vaultIsLoaded = testPage.locator("main app-vault-select");
       await vaultIsLoaded.waitFor();
@@ -68,24 +83,26 @@ test.describe("Extension autofills forms when triggered", () => {
         await testPage.goto(url);
         await testPage.waitForURL(url, { waitUntil: "load" });
 
-        backgroundPage.evaluate(() =>
-          chrome.tabs.query(
-            { active: true },
-            (tabs) =>
-              tabs[0] &&
-              chrome.tabs.sendMessage(tabs[0]?.id || 0, {
-                command: "collectPageDetails",
-                tab: tabs[0],
-                sender: "autofill_cmd",
-              })
-          )
-        );
+        doAutofill();
 
-        for (const inputKey of Object.keys(inputs)) {
+        const inputKeys = Object.keys(inputs);
+
+        for (const inputKey of inputKeys) {
           await expect
             // @TODO do not soft expect on local test pages
             .soft(testPage.locator(inputs[inputKey].selector))
             .toHaveValue(inputs[inputKey].value);
+
+          const inputKeyIndex = inputKeys.lastIndexOf(inputKey);
+
+          if (page.postFillSubmit && inputKeyIndex !== inputKeys.length - 1) {
+            testPage.keyboard.press("Enter");
+
+            const nextInputKey = inputKeys[inputKeyIndex + 1];
+            await testPage.locator(inputs[nextInputKey].selector);
+
+            doAutofill();
+          }
         }
       });
     }

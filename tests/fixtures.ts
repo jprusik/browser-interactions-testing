@@ -19,7 +19,7 @@ export const test = base.extend<{
       args: [
         ...(["1", "console"].includes(process.env.PWDEBUG)
           ? []
-          : [`--headless=new`]), // use for headless testing on Chrome
+          : ["--headless=new"]), // use for headless testing on Chrome
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
       ],

@@ -1,10 +1,27 @@
-export const testPages = [
+type TestPage = {
+  url: string;
+  inputs: {
+    username: { value: string; selector: string };
+    password: { value: string; selector: string };
+  };
+  postFillSubmit?: boolean;
+};
+
+export const testPages: TestPage[] = [
   {
     url: "tests/test-pages/basic-form.html",
     inputs: {
       username: { value: "jsmith", selector: "#username" },
       password: { value: "areallygoodpassword", selector: "#password" },
     },
+  },
+  {
+    url: "tests/test-pages/multi-step-form.html",
+    inputs: {
+      username: { value: "ms-smith", selector: "#username" },
+      password: { value: "ms-password", selector: "#password" },
+    },
+    postFillSubmit: true,
   },
   {
     url: "https://fill.dev/form/login-simple",
