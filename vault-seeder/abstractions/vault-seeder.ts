@@ -1,5 +1,7 @@
+import { UriMatchType } from "../../clients/libs/common/src/enums";
+
 type LoginUriTemplate = {
-  match: number;
+  match: UriMatchType;
   uri: string;
 };
 

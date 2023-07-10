@@ -34,53 +34,68 @@ class VaultSeeder {
   }
 
   private async seedVault(testsFolder: FolderItem): Promise<void> {
+    const existingVaultItems: Record<string, ItemTemplate> = {};
     const vaultItems = await this.getAllVaultItems(testsFolder.id);
+    vaultItems.forEach((item) => {
+      existingVaultItems[item.name] = item;
+    });
+
     for (let index = 0; index < testPages.length; index++) {
       await this.sleep(300 * index);
 
       const testPage = testPages[index];
-      const newItemName = `${index} ${testPage.url}`;
-      const existingItem = vaultItems.find((item) => item.name === newItemName);
+      const testPageItemName = `${index} ${testPage.url}`;
 
-      if (existingItem) {
-        return;
+      if (existingVaultItems[testPageItemName]) {
+        continue;
       }
 
       if (testPage.cipherType === CipherType.Login) {
-        await this.createLoginItem({
-          testPage,
-          newItemName,
-          folderId: testsFolder.id,
-        });
+        await this.createVaultItem(testPage, testPageItemName, testsFolder.id);
       }
     }
   }
 
-  private async createLoginItem({
-    testPage,
-    newItemName,
-    folderId,
-  }: {
-    testPage: TestPage;
-    newItemName: string;
-    folderId: string;
-  }): Promise<void> {
-    const { success, message } = await this.queryApi(`/object/item`, "POST", {
+  private async createVaultItem(
+    testPage: TestPage,
+    itemName: string,
+    folderId: string,
+  ): Promise<void> {
+    const itemData: ItemTemplate = {
+      organizationId: null,
+      collectionIds: null,
       folderId,
-      type: CipherType.Login,
-      name: newItemName,
-      login: {
+      type: testPage.cipherType,
+      name: itemName,
+      notes: "",
+      favorite: false,
+      fields: [],
+      login: null,
+      secureNote: null,
+      card: null,
+      identity: null,
+      reprompt: 0,
+    };
+
+    if (testPage.cipherType === CipherType.Login) {
+      itemData.login = {
         uris: [
           {
             match: 0,
             uri: testPage.url,
           },
         ],
-        username: testPage.inputs.username?.value,
-        password: testPage.inputs.password?.value,
-        totp: testPage.inputs.totp?.value,
-      },
-    });
+        username: testPage.inputs.username?.value || "",
+        password: testPage.inputs.password?.value || "",
+        totp: testPage.inputs.totp?.value || "",
+      };
+    }
+
+    const { success, message } = await this.queryApi(
+      `/object/item`,
+      "POST",
+      itemData,
+    );
     if (!success) {
       console.error(
         `ERROR: Unable to create login item for ${testPage.url}, ${message}`,
@@ -96,7 +111,7 @@ class VaultSeeder {
       password: process.env.VAULT_PASSWORD,
     });
     if (!success) {
-      throw new Error(message);
+      throw new Error(`Unable to unlock vault, ${message}`);
     }
 
     console.log("Vault unlocked");
@@ -106,14 +121,14 @@ class VaultSeeder {
   private async lockVault(): Promise<void> {
     const { success, data, message } = await this.queryApi(`/lock`, "POST");
     if (!success) {
-      throw new Error(message);
+      throw new Error(`Unable to lock vault, ${message}`);
     }
   }
 
   private async syncVault(): Promise<void> {
     const { success, message } = await this.queryApi(`/sync`, "POST");
     if (!success) {
-      throw new Error(message);
+      throw new Error(`Unable to sync vault, ${message}`);
     }
   }
 
@@ -169,7 +184,7 @@ class VaultSeeder {
   private async queryApi(
     route: string,
     method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-    body: any = null,
+    body?: any,
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(
@@ -179,7 +194,7 @@ class VaultSeeder {
           headers: {
             "Content-Type": "application/json",
           },
-          body: body ? JSON.stringify(body) : undefined,
+          body: JSON.stringify(body),
         },
       );
 
