@@ -4,7 +4,7 @@ import { test as base, chromium, type BrowserContext } from "@playwright/test";
 
 const pathToExtension = path.join(
   __dirname,
-  "../",
+  "../../",
   process.env.EXTENSION_BUILD_PATH,
 );
 

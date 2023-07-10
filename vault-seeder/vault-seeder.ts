@@ -1,12 +1,22 @@
 import fetch from "cross-fetch";
 import { configDotenv } from "dotenv";
-import { FolderItem, ItemTemplate } from "./abstractions/vault-seeder";
-import { TestPage, testPages } from "../tests/constants";
+import {
+  CardItemTemplate,
+  FolderItem,
+  IdentityItemTemplate,
+  ItemTemplate,
+  LoginItemTemplate,
+  VaultItem,
+} from "./abstractions/vault-seeder";
+import { FillProperties, TestPage, testPages } from "../tests/constants";
 import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
+import { UriMatchType } from "../clients/libs/common/src/enums";
 
 configDotenv();
 
 class VaultSeeder {
+  private readonly apiDebounce = 275;
+
   constructor() {
     this.runSeeder().then(async () => {
       console.log("Seeding complete, locking vault...");
@@ -23,7 +33,7 @@ class VaultSeeder {
     await this.syncVault();
 
     const testsFolder = await this.getPlaywrightCiphersFolder(
-      "PlaywrightTestingItems",
+      "AutofillPlaywrightTestingItems",
     );
     if (!testsFolder) {
       throw new Error("Unable to seed vault, tests folder not found.");
@@ -33,14 +43,23 @@ class VaultSeeder {
   }
 
   private async seedVault(testsFolder: FolderItem): Promise<void> {
-    const existingVaultItems: Record<string, ItemTemplate> = {};
+    const existingVaultItems: Record<string, VaultItem> = {};
     const vaultItems = await this.getAllVaultItems(testsFolder.id);
-    vaultItems.forEach((item) => {
-      existingVaultItems[item.name] = item;
-    });
+    const isRefreshingVault = Boolean(process.env.REFRESH);
+
+    if (isRefreshingVault) {
+      console.log("Refreshing vault, deleting all testing items...");
+      for (let index = 0; index < vaultItems.length; index++) {
+        const vaultItem = vaultItems[index];
+        await this.sleep(this.apiDebounce * index);
+        await this.deleteVaultItem(vaultItem);
+      }
+    } else {
+      vaultItems.forEach((item) => (existingVaultItems[item.name] = item));
+    }
 
     for (let index = 0; index < testPages.length; index++) {
-      await this.sleep(300 * index);
+      await this.sleep(this.apiDebounce * index);
 
       const testPage = testPages[index];
       const testPageItemName = `${index} ${testPage.url}`;
@@ -51,9 +70,7 @@ class VaultSeeder {
         continue;
       }
 
-      if (testPage.cipherType === CipherType.Login) {
-        await this.createVaultItem(testPage, testPageItemName, testsFolder.id);
-      }
+      await this.createVaultItem(testPage, testPageItemName, testsFolder.id);
     }
   }
 
@@ -79,17 +96,15 @@ class VaultSeeder {
     };
 
     if (testPage.cipherType === CipherType.Login) {
-      itemData.login = {
-        uris: [
-          {
-            match: 0,
-            uri: testPage.url,
-          },
-        ],
-        username: testPage.inputs.username?.value || "",
-        password: testPage.inputs.password?.value || "",
-        totp: testPage.inputs.totp?.value || "",
-      };
+      itemData.login = this.generateLoginItemData(testPage);
+    }
+
+    if (testPage.cipherType === CipherType.Card) {
+      itemData.card = this.generateCardItemData(testPage);
+    }
+
+    if (testPage.cipherType === CipherType.Identity) {
+      itemData.identity = this.generateIdentityItemData(testPage);
     }
 
     const { success, message } = await this.queryApi(
@@ -104,30 +119,37 @@ class VaultSeeder {
       return;
     }
 
-    console.log(`Created vault item for ${testPage.url}`);
+    console.log(`Created vault item for ${testPage.url}...`);
   }
 
   private async updateVaultItem(
-    existingItem: any,
+    existingItem: VaultItem,
     testPage: TestPage,
   ): Promise<void> {
-    // TODO: We don't want to update a vault item if it's already up to date.
+    if (!this.isVaultItemModified(existingItem, testPage)) {
+      console.log(`Skipping ${testPage.url}, no changes detected...`);
+      return;
+    }
 
     let itemData: ItemTemplate = existingItem;
     if (testPage.cipherType === CipherType.Login) {
       itemData = {
         ...itemData,
-        login: {
-          uris: [
-            {
-              match: 0,
-              uri: testPage.url,
-            },
-          ],
-          username: testPage.inputs.username?.value || "",
-          password: testPage.inputs.password?.value || "",
-          totp: testPage.inputs.totp?.value || "",
-        },
+        login: this.generateLoginItemData(testPage),
+      };
+    }
+
+    if (testPage.cipherType === CipherType.Card) {
+      itemData = {
+        ...itemData,
+        card: this.generateCardItemData(testPage),
+      };
+    }
+
+    if (testPage.cipherType === CipherType.Identity) {
+      itemData = {
+        ...itemData,
+        identity: this.generateIdentityItemData(testPage),
       };
     }
 
@@ -143,7 +165,158 @@ class VaultSeeder {
       return;
     }
 
-    console.log(`Updated vault item for ${testPage.url}`);
+    console.log(`Updated vault item for ${testPage.url}...`);
+  }
+
+  private async deleteVaultItem(vaultItem: VaultItem): Promise<void> {
+    const { success, message } = await this.queryApi(
+      `/object/item/${vaultItem.id}`,
+      "DELETE",
+    );
+    if (!success) {
+      console.error(
+        `ERROR: Unable to delete login item ${vaultItem.name}, ${message}`,
+      );
+      return;
+    }
+  }
+
+  private isVaultItemModified(
+    vaultItem: ItemTemplate,
+    testPage: TestPage,
+  ): boolean {
+    let comparedValues: [FillProperties | undefined, any][] = [];
+    const isValueModified = (
+      testItem?: FillProperties,
+      vaultValue?: any,
+    ): boolean => {
+      const testValue = testItem?.value;
+      return Boolean(testValue) && testValue !== vaultValue;
+    };
+    const inputData = testPage.inputs;
+    const vaultLogin = vaultItem.login;
+    if (testPage.cipherType === CipherType.Login && vaultLogin) {
+      comparedValues = [
+        [inputData.username, vaultLogin.username],
+        [inputData.password, vaultLogin.password],
+        [inputData.totp, vaultLogin.totp],
+      ];
+    }
+
+    const vaultCard = vaultItem.card;
+    if (testPage.cipherType === CipherType.Card && vaultCard) {
+      comparedValues = [
+        [inputData.cardholderName, vaultCard.cardholderName],
+        [inputData.brand, vaultCard.brand],
+        [inputData.number, vaultCard.number],
+        [inputData.expMonth, vaultCard.expMonth],
+        [inputData.expYear, vaultCard.expYear],
+        [inputData.code, vaultCard.code],
+      ];
+    }
+
+    const vaultIdentity = vaultItem.identity;
+    if (testPage.cipherType === CipherType.Identity && vaultIdentity) {
+      comparedValues = [
+        [inputData.title, vaultIdentity.title],
+        [inputData.firstName, vaultIdentity.firstName],
+        [inputData.middleName, vaultIdentity.middleName],
+        [inputData.lastName, vaultIdentity.lastName],
+        [inputData.address1, vaultIdentity.address1],
+        [inputData.address2, vaultIdentity.address2],
+        [inputData.address3, vaultIdentity.address3],
+        [inputData.city, vaultIdentity.city],
+        [inputData.state, vaultIdentity.state],
+        [inputData.postalCode, vaultIdentity.postalCode],
+        [inputData.country, vaultIdentity.country],
+        [inputData.company, vaultIdentity.company],
+        [inputData.email, vaultIdentity.email],
+        [inputData.phone, vaultIdentity.phone],
+        [inputData.ssn, vaultIdentity.ssn],
+        [inputData.username, vaultIdentity.username],
+        [inputData.passportNumber, vaultIdentity.passportNumber],
+        [inputData.licenseNumber, vaultIdentity.licenseNumber],
+      ];
+    }
+
+    for (const [testItem, vaultValue] of comparedValues) {
+      if (isValueModified(testItem, vaultValue)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private generateLoginItemData(testPage: TestPage): LoginItemTemplate {
+    const { username, password, totp } = testPage.inputs;
+    return {
+      uris: [
+        {
+          match: testPage.uriMatchType || UriMatchType.Domain,
+          uri: testPage.url,
+        },
+      ],
+      username: username?.value || "",
+      password: password?.value || "",
+      totp: totp?.value || "",
+    };
+  }
+
+  private generateCardItemData(testPage: TestPage): CardItemTemplate {
+    const { cardholderName, brand, number, expMonth, expYear, code } =
+      testPage.inputs;
+    return {
+      cardholderName: cardholderName?.value || "",
+      brand: brand?.value || "",
+      number: number?.value || "",
+      expMonth: expMonth?.value || "",
+      expYear: expYear?.value || "",
+      code: code?.value || "",
+    };
+  }
+
+  private generateIdentityItemData(testPage: TestPage): IdentityItemTemplate {
+    const {
+      title,
+      firstName,
+      middleName,
+      lastName,
+      address1,
+      address2,
+      address3,
+      city,
+      state,
+      postalCode,
+      country,
+      company,
+      email,
+      phone,
+      ssn,
+      username,
+      passportNumber,
+      licenseNumber,
+    } = testPage.inputs;
+    return {
+      title: title?.value || "",
+      firstName: firstName?.value || "",
+      middleName: middleName?.value || "",
+      lastName: lastName?.value || "",
+      address1: address1?.value || "",
+      address2: address2?.value || "",
+      address3: address3?.value || "",
+      city: city?.value || "",
+      state: state?.value || "",
+      postalCode: postalCode?.value || "",
+      country: country?.value || "",
+      company: company?.value || "",
+      email: email?.value || "",
+      phone: phone?.value || "",
+      ssn: ssn?.value || "",
+      username: username?.value || "",
+      passportNumber: passportNumber?.value || "",
+      licenseNumber: licenseNumber?.value || "",
+    };
   }
 
   private async unlockVault(): Promise<string> {
@@ -208,7 +381,7 @@ class VaultSeeder {
     return data;
   }
 
-  private async getAllVaultItems(folderId: string): Promise<ItemTemplate[]> {
+  private async getAllVaultItems(folderId: string): Promise<VaultItem[]> {
     const { success, data, message } = await this.queryApi(
       `/list/object/items?folderid=${folderId}`,
     );

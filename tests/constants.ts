@@ -1,9 +1,10 @@
 import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
-
+import { UriMatchType } from "../clients/libs/common/src/enums";
 import { configDotenv } from "dotenv";
+
 configDotenv();
 
-type FillProperties = {
+export type FillProperties = {
   value: string;
   selector: string;
 };
@@ -12,6 +13,7 @@ export type TestPage = {
   cipherType: CipherType;
   url: string;
   postFillSubmit?: boolean;
+  uriMatchType?: UriMatchType;
   inputs: {
     // Login fields
     username?: FillProperties;
@@ -53,6 +55,7 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/basic-form.html`,
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: { value: "jsmith", selector: "#username" },
       password: { value: "areallygoodpassword", selector: "#password" },
@@ -62,6 +65,7 @@ export const testPages: TestPage[] = [
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
     postFillSubmit: true,
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: { value: "ms-smith", selector: "#username" },
       password: { value: "ms-password", selector: "#password" },
@@ -80,6 +84,7 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/many-input-form.html`,
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: { value: "js", selector: "#username" },
       password: { value: "", selector: "#password" },
@@ -99,6 +104,35 @@ export const testPages: TestPage[] = [
     inputs: {
       username: { value: "12345678901111", selector: "#username" },
       password: { value: "098765", selector: "#password" },
+    },
+  },
+  {
+    cipherType: CipherType.Card,
+    url: "https://fill.dev/form/credit-card-simple",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      cardholderName: { value: "John Smith", selector: "#cc-name" },
+      brand: { value: "Visa", selector: "#cc-type" },
+      number: { value: "4111111111111111", selector: "#cc-number" },
+      expMonth: { value: "12", selector: "#cc-exp-month" },
+      expYear: { value: "2025", selector: "#cc-exp-year" },
+      code: { value: "123", selector: "#cc-csc" },
+    },
+  },
+  {
+    cipherType: CipherType.Identity,
+    url: "https://fill.dev/form/identity-simple",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      firstName: { value: "John", selector: "#given-name" },
+      middleName: { value: "M", selector: "#additional-name" },
+      lastName: { value: "Smith", selector: "#family-name" },
+      address1: { value: "123 Main St", selector: "#address-line1" },
+      address2: { value: "Apt 1", selector: "#address-line2" },
+      city: { value: "New York", selector: "city" },
+      state: { value: "NY", selector: "#address-level1" },
+      postalCode: { value: "10001", selector: "#postal-code" },
+      country: { value: "USA", selector: "#country" },
     },
   },
 ];

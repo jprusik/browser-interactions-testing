@@ -68,6 +68,10 @@ type ItemTemplate = {
   reprompt: 0 | 1;
 };
 
+type VaultItem = {
+  id: string;
+} & ItemTemplate;
+
 type FolderItem = {
   object: string;
   id: string;
@@ -83,4 +87,5 @@ export {
   ItemTemplate,
   FolderTemplate,
   FolderItem,
+  VaultItem,
 };
