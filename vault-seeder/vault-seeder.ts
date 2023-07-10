@@ -111,6 +111,8 @@ class VaultSeeder {
     existingItem: any,
     testPage: TestPage,
   ): Promise<void> {
+    // TODO: We don't want to update a vault item if it's already up to date.
+
     let itemData: ItemTemplate = existingItem;
     if (testPage.cipherType === CipherType.Login) {
       itemData = {
