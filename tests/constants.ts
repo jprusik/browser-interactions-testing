@@ -106,6 +106,8 @@ export const testPages: TestPage[] = [
       password: { value: "098765", selector: "#password" },
     },
   },
+
+  // Card and Identity Ciphers currently cannot be autofilled through the same mechanism that Login Ciphers are. This is because of how we handle messaging the background for autofilling login items. The extension will need to be updated to handle these types of Ciphers.
   {
     cipherType: CipherType.Card,
     url: "https://fill.dev/form/credit-card-simple",
