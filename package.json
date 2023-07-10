@@ -15,25 +15,31 @@
   "devDependencies": {
     "@playwright/test": "1.35.1",
     "@types/chrome": "0.0.239",
+    "@types/node": "^20.4.1",
     "cross-env": "7.0.3",
+    "cross-fetch": "^4.0.0",
     "dotenv": "16.3.1",
     "husky": "8.0.3",
     "lint-staged": "13.2.3",
+    "node-fetch": "^2.6.12",
     "prettier": "3.0.0",
     "rimraf": "5.0.1",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.0",
     "typescript": "5.1.6"
   },
   "lint-staged": {
     "*": "prettier --cache --write --ignore-unknown"
   },
   "scripts": {
-    "prepare": "husky install && npm run setup:clients",
+    "prepare": "husky install && npm run setup:clients && npm run setup:vault",
     "pretest": "rimraf tests-out && rimraf screenshots && tsc --incremental -p tests/tsconfig.json",
     "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
     "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch",
     "test:autofill": "npm run pretest && playwright test --reporter=line",
     "test:autofill:debug": "npm run pretest && playwright test --debug",
     "setup:clients": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cp dev-server.local.pem clients/apps/web/dev-server.local.pem && cd clients && npm ci",
+    "setup:vault": "ts-node ./vault-seeder/vault-seeder.ts",
     "build:clients": "cd clients/apps/browser && rimraf build && npm run build",
     "build:clients:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",
     "build:clients:mv3": "cd clients/apps/browser && rimraf build && npm run build:mv3",
