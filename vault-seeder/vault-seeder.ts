@@ -88,24 +88,12 @@ class VaultSeeder {
       notes: "",
       favorite: false,
       fields: [],
-      login: null,
+      login: this.generateLoginItemData(testPage),
       secureNote: null,
-      card: null,
-      identity: null,
+      card: this.generateCardItemData(testPage),
+      identity: this.generateIdentityItemData(testPage),
       reprompt: 0,
     };
-
-    if (testPage.cipherType === CipherType.Login) {
-      itemData.login = this.generateLoginItemData(testPage);
-    }
-
-    if (testPage.cipherType === CipherType.Card) {
-      itemData.card = this.generateCardItemData(testPage);
-    }
-
-    if (testPage.cipherType === CipherType.Identity) {
-      itemData.identity = this.generateIdentityItemData(testPage);
-    }
 
     const { success, message } = await this.queryApi(
       `/object/item`,
@@ -133,24 +121,15 @@ class VaultSeeder {
 
     let itemData: ItemTemplate = existingItem;
     if (testPage.cipherType === CipherType.Login) {
-      itemData = {
-        ...itemData,
-        login: this.generateLoginItemData(testPage),
-      };
+      itemData.login = this.generateLoginItemData(testPage);
     }
 
     if (testPage.cipherType === CipherType.Card) {
-      itemData = {
-        ...itemData,
-        card: this.generateCardItemData(testPage),
-      };
+      itemData.card = this.generateCardItemData(testPage);
     }
 
     if (testPage.cipherType === CipherType.Identity) {
-      itemData = {
-        ...itemData,
-        identity: this.generateIdentityItemData(testPage),
-      };
+      itemData.identity = this.generateIdentityItemData(testPage);
     }
 
     const { success, message } = await this.queryApi(
@@ -248,7 +227,11 @@ class VaultSeeder {
     return false;
   }
 
-  private generateLoginItemData(testPage: TestPage): LoginItemTemplate {
+  private generateLoginItemData(testPage: TestPage): LoginItemTemplate | null {
+    if (testPage.cipherType !== CipherType.Login) {
+      return null;
+    }
+
     const { username, password, totp } = testPage.inputs;
     return {
       uris: [
@@ -263,7 +246,11 @@ class VaultSeeder {
     };
   }
 
-  private generateCardItemData(testPage: TestPage): CardItemTemplate {
+  private generateCardItemData(testPage: TestPage): CardItemTemplate | null {
+    if (testPage.cipherType !== CipherType.Card) {
+      return null;
+    }
+
     const { cardholderName, brand, number, expMonth, expYear, code } =
       testPage.inputs;
     return {
@@ -276,7 +263,13 @@ class VaultSeeder {
     };
   }
 
-  private generateIdentityItemData(testPage: TestPage): IdentityItemTemplate {
+  private generateIdentityItemData(
+    testPage: TestPage,
+  ): IdentityItemTemplate | null {
+    if (testPage.cipherType !== CipherType.Identity) {
+      return null;
+    }
+
     const {
       title,
       firstName,
