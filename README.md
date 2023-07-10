@@ -33,7 +33,7 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   - If you are using a local environment, you should configure the CLI to point to your local vault. This can be done with the following command.
   - `bw config server --api http://localhost:<api-port> --identity http://localhost:<identity-port> --web-vault https://localhost:<web-vault-port> --events http://localhost:<events-port>`
 - Log into the Bitwarden CLI using the credentials for the account you'd like to seed.
-- Run the Vault Management API by running `bw serve --port <api-port> --host <api-host>`
+- In a separate terminal, launch the Vault Management API by running `bw serve --port <api-port> --host <api-host>`
   - Note: running `bw serve` defaults the port to `8087` and the host to `localhost`. This is fine to do as long as you also set the values within your `.env` file (see below).
 - Ensure that the following variables are set in your `.env`
   - `BW_SERVE_API_HOST=<api-host>` (including http://)

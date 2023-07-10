@@ -327,7 +327,7 @@ class VaultSeeder {
       throw new Error(`Unable to unlock vault, ${message}`);
     }
 
-    console.log("Vault unlocked");
+    console.log("Vault unlocked...");
     return data?.raw;
   }
 
