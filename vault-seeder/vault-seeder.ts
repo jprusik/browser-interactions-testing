@@ -17,8 +17,7 @@ class VaultSeeder {
   private async runSeeder() {
     const sessionToken = await this.unlockVault();
     if (!sessionToken) {
-      console.error("ERROR: Unable to seed vault, no session token found.");
-      return;
+      throw new Error("Unable to seed vault, no session token found.");
     }
 
     await this.syncVault();
@@ -45,8 +44,10 @@ class VaultSeeder {
 
       const testPage = testPages[index];
       const testPageItemName = `${index} ${testPage.url}`;
+      const existingItem = existingVaultItems[testPageItemName];
 
-      if (existingVaultItems[testPageItemName]) {
+      if (existingItem) {
+        await this.updateVaultItem(existingItem, testPage);
         continue;
       }
 
@@ -103,7 +104,44 @@ class VaultSeeder {
       return;
     }
 
-    console.log(`Created login item for ${testPage.url}`);
+    console.log(`Created vault item for ${testPage.url}`);
+  }
+
+  private async updateVaultItem(
+    existingItem: any,
+    testPage: TestPage,
+  ): Promise<void> {
+    let itemData: ItemTemplate = existingItem;
+    if (testPage.cipherType === CipherType.Login) {
+      itemData = {
+        ...itemData,
+        login: {
+          uris: [
+            {
+              match: 0,
+              uri: testPage.url,
+            },
+          ],
+          username: testPage.inputs.username?.value || "",
+          password: testPage.inputs.password?.value || "",
+          totp: testPage.inputs.totp?.value || "",
+        },
+      };
+    }
+
+    const { success, message } = await this.queryApi(
+      `/object/item/${existingItem.id}`,
+      "PUT",
+      itemData,
+    );
+    if (!success) {
+      console.error(
+        `ERROR: Unable to update login item for ${testPage.url}, ${message}`,
+      );
+      return;
+    }
+
+    console.log(`Updated vault item for ${testPage.url}`);
   }
 
   private async unlockVault(): Promise<string> {
