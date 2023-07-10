@@ -1,55 +1,59 @@
+import fetch from "cross-fetch";
 import { configDotenv } from "dotenv";
-import { exec } from "child_process";
-import { promisify } from "util";
 import { FolderItem, ItemTemplate } from "./abstractions/vault-seeder";
 import { TestPage, testPages } from "../tests/constants";
-import fetch from "cross-fetch";
+import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
 
 configDotenv();
 
 class VaultSeeder {
-  private execAsync = promisify(exec);
-  private sessionToken?: string;
-  private bwServeApiUrl = `${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}`;
-
   constructor() {
-    this.runSeeder();
+    this.runSeeder().then(async () => {
+      console.log("Seeding complete, locking vault...");
+      await this.lockVault();
+    });
   }
 
   private async runSeeder() {
-    await this.refreshSessionToken();
-    if (!this.sessionToken) {
+    const sessionToken = await this.unlockVault();
+    if (!sessionToken) {
       console.error("ERROR: Unable to seed vault, no session token found.");
       return;
     }
 
     await this.syncVault();
 
-    // Get or Create Folder
     const testsFolder = await this.getPlaywrightCiphersFolder(
       "PlaywrightTestingItems",
     );
     if (!testsFolder) {
-      console.error("ERROR: Unable to seed vault, tests folder not found.");
-      return;
+      throw new Error("Unable to seed vault, tests folder not found.");
     }
 
+    await this.seedVault(testsFolder);
+  }
+
+  private async seedVault(testsFolder: FolderItem): Promise<void> {
     const vaultItems = await this.getAllVaultItems(testsFolder.id);
-    testPages.forEach((testPage, index) => {
-      const newItemName = `${index} ${testPage.itemName}`;
+    for (let index = 0; index < testPages.length; index++) {
+      await this.sleep(300 * index);
+
+      const testPage = testPages[index];
+      const newItemName = `${index} ${testPage.url}`;
       const existingItem = vaultItems.find((item) => item.name === newItemName);
+
       if (existingItem) {
         return;
       }
 
-      if (testPage.cipherType === "login") {
-        return this.createLoginItem({
+      if (testPage.cipherType === CipherType.Login) {
+        await this.createLoginItem({
           testPage,
           newItemName,
           folderId: testsFolder.id,
         });
       }
-    });
+    }
   }
 
   private async createLoginItem({
@@ -61,115 +65,73 @@ class VaultSeeder {
     newItemName: string;
     folderId: string;
   }): Promise<void> {
-    try {
-      // const loginExec = await this.execAsync(
-      //   `bw get template item.login | jq '.username="${testPage.inputs.username?.value}" | .password="${testPage.inputs.password?.value}" | .uris="[{uri: ${testPage.url}, match: null}]"'`,
-      // );
-      // console.warn(loginExec.stdout.replace(/(\r\n|\n|\r)/gm, ""));
-      // const { stdout, stderr } = await this.execAsync(
-      //   `bw get template item | jq ".type = 1 | .name=\"${newItemName}\" | .login=\"${loginExec.stdout.replace(
-      //     /(\r\n|\n|\r)/gm,
-      //     "",
-      //   )}\" | bw encode | bw create item`,
-      // );
-      // if (stderr) {
-      //   console.error(stderr);
-      //   return;
-      // }
-
-      const response = await fetch(`${this.bwServeApiUrl}/object/item`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          folderId,
-          type: 1,
-          name: newItemName,
-          login: {
-            uris: [
-              {
-                match: 0,
-                uri: testPage.url,
-              },
-            ],
-            username: testPage.inputs.username?.value,
-            password: testPage.inputs.password?.value,
-            totp: testPage.inputs.totp?.value,
+    const { success, message } = await this.queryApi(`/object/item`, "POST", {
+      folderId,
+      type: CipherType.Login,
+      name: newItemName,
+      login: {
+        uris: [
+          {
+            match: 0,
+            uri: testPage.url,
           },
-        }),
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  private async refreshSessionToken(): Promise<void> {
-    if (!(await this.isUserLoggedIn())) {
-      throw new Error(
-        "ERROR: Bitwarden CLI user is not logged in, unable to seed the vault.",
+        ],
+        username: testPage.inputs.username?.value,
+        password: testPage.inputs.password?.value,
+        totp: testPage.inputs.totp?.value,
+      },
+    });
+    if (!success) {
+      console.error(
+        `ERROR: Unable to create login item for ${testPage.url}, ${message}`,
       );
+      return;
     }
 
-    await this.unlockVault();
+    console.log(`Created login item for ${testPage.url}`);
   }
 
-  private async isUserLoggedIn(): Promise<boolean> {
-    const userLoggedOutMessage = "You are not logged in.";
-    try {
-      const { stdout } = await this.execAsync("bw unlock --check");
-
-      return stdout !== userLoggedOutMessage;
-    } catch (err) {
-      if (err !== userLoggedOutMessage) {
-        return true;
-      }
-
-      console.error(err);
-      return false;
+  private async unlockVault(): Promise<string> {
+    const { success, data, message } = await this.queryApi(`/unlock`, "POST", {
+      password: process.env.VAULT_PASSWORD,
+    });
+    if (!success) {
+      throw new Error(message);
     }
+
+    console.log("Vault unlocked");
+    return data?.raw;
   }
 
-  private async unlockVault(): Promise<void> {
-    try {
-      const { stdout, stderr } = await this.execAsync(
-        `bw unlock --raw ${process.env.VAULT_PASSWORD}`,
-      );
-      if (stderr) {
-        console.error(stderr);
-        return;
-      }
-
-      this.sessionToken = stdout;
-      process.env.BW_SESSION = this.sessionToken;
-    } catch (err) {
-      console.error(err);
+  private async lockVault(): Promise<void> {
+    const { success, data, message } = await this.queryApi(`/lock`, "POST");
+    if (!success) {
+      throw new Error(message);
     }
   }
 
   private async syncVault(): Promise<void> {
-    try {
-      const { stderr } = await this.execAsync(`bw sync`);
-      if (stderr) {
-        console.error(stderr);
-      }
-    } catch (err) {
-      console.error(err);
+    const { success, message } = await this.queryApi(`/sync`, "POST");
+    if (!success) {
+      throw new Error(message);
     }
   }
 
   private async getPlaywrightCiphersFolder(
     folderName: string,
   ): Promise<FolderItem | undefined> {
-    try {
-      const { stdout } = await this.execAsync(`bw get folder ${folderName}`);
+    const { success, data, message } = await this.queryApi(
+      `/object/folder/${folderName}`,
+    );
 
-      return JSON.parse(stdout);
-    } catch (err) {
+    if (success) {
+      return data;
+    }
+
+    if (message === "Not found.") {
       console.log(
         "Playwright testing items folder not found, creating folder...",
       );
-
       return await this.createPlaywrightCiphersFolder(folderName);
     }
   }
@@ -177,37 +139,60 @@ class VaultSeeder {
   private async createPlaywrightCiphersFolder(
     folderName: string,
   ): Promise<FolderItem | undefined> {
-    try {
-      const { stdout } = await this.execAsync(
-        `bw get template folder | jq '.name="${folderName}"' | bw encode | bw create folder`,
-      );
+    const { success, data, message } = await this.queryApi(
+      `/object/folder`,
+      "POST",
+      { name: folderName },
+    );
 
-      return JSON.parse(stdout);
-    } catch (err) {
-      console.error(err);
+    if (!success) {
+      console.error(`ERROR: Unable to create folder ${folderName}, ${message}`);
+      return;
     }
+
+    return data;
   }
 
   private async getAllVaultItems(folderId: string): Promise<ItemTemplate[]> {
-    let vaultItems = [];
-    try {
-      const { stdout, stderr } = await this.execAsync(
-        `bw list items --folderid ${folderId}`,
+    const { success, data, message } = await this.queryApi(
+      `/list/object/items?folderid=${folderId}`,
+    );
+    if (!success) {
+      throw new Error(
+        `ERROR: Unable to get vault items for folder ${folderId}, ${message}`,
       );
-      if (stderr) {
-        console.error(stderr);
-      }
-
-      vaultItems = JSON.parse(stdout);
-    } catch (err) {
-      console.error(err);
     }
 
-    if (!vaultItems) {
-      return [];
+    return data.data;
+  }
+
+  private async queryApi(
+    route: string,
+    method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+    body: any = null,
+  ): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+      const response = await fetch(
+        `${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
+        {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: body ? JSON.stringify(body) : undefined,
+        },
+      );
+
+      return await response.json();
+    } catch (error) {
+      console.error(error);
     }
 
-    return vaultItems;
+    return { success: false, message: "Error encountered during fetch" };
+  }
+
+  private sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

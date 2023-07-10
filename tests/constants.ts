@@ -1,3 +1,5 @@
+import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
+
 import { configDotenv } from "dotenv";
 configDotenv();
 
@@ -7,8 +9,7 @@ type FillProperties = {
 };
 
 export type TestPage = {
-  cipherType?: "login" | "card" | "identity";
-  itemName: string;
+  cipherType: CipherType;
   url: string;
   postFillSubmit?: boolean;
   inputs: {
@@ -50,8 +51,7 @@ const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`
 
 export const testPages: TestPage[] = [
   {
-    cipherType: "login",
-    itemName: "Basic Form",
+    cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/basic-form.html`,
     inputs: {
       username: { value: "jsmith", selector: "#username" },
@@ -59,8 +59,7 @@ export const testPages: TestPage[] = [
     },
   },
   {
-    cipherType: "login",
-    itemName: "Multi-Step Form",
+    cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
     postFillSubmit: true,
     inputs: {
@@ -69,8 +68,7 @@ export const testPages: TestPage[] = [
     },
   },
   {
-    cipherType: "login",
-    itemName: "Fill.dev Login",
+    cipherType: CipherType.Login,
     url: "https://fill.dev/form/login-simple",
     inputs: {
       username: { value: "simple-test", selector: "#username" },
@@ -80,8 +78,7 @@ export const testPages: TestPage[] = [
 
   // Known failure cases:
   {
-    cipherType: "login",
-    itemName: "Many Input Form",
+    cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/many-input-form.html`,
     inputs: {
       username: { value: "js", selector: "#username" },
@@ -89,8 +86,7 @@ export const testPages: TestPage[] = [
     },
   },
   {
-    cipherType: "login",
-    itemName: "Max.com Login",
+    cipherType: CipherType.Login,
     url: "https://auth.max.com/login",
     inputs: {
       username: { value: "maxcom_user", selector: "#username" },
@@ -98,8 +94,7 @@ export const testPages: TestPage[] = [
     },
   },
   {
-    cipherType: "login",
-    itemName: "Clear.com.br Login",
+    cipherType: CipherType.Login,
     url: "https://login.clear.com.br/",
     inputs: {
       username: { value: "12345678901111", selector: "#username" },
