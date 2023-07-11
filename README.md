@@ -9,12 +9,15 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 ## Requirements
 
 - [git](https://git-scm.com/downloads)
+- [node](https://nodejs.org/en)
+- [Bitwarden CLI](https://bitwarden.com/help/cli/)
 - (optional) [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (otherwise manage your node version to `.nvmrc` manually)
 
 ## Setup
 
 - Create an `.env` file in the root directory with values pointing to the vault you want to test against (use `.env.example` as guidance)
 - Install node (with `nvm install` if `nvm` is installed)
+- Install Bitwarden CLI (with npm: `npm install -g @bitwarden/cli`)
 - If targeting a local environment, [generate an SSL certificate for the Web Vault client](https://contributing.bitwarden.com/getting-started/clients/web-vault/#ssl-certificate) named `dev-server.local.pem` and place it in the project root directory
 - Do a clean-install with `npm ci` (this will also fetch and set up the Bitwarden clients repo)
   - If prompted, run `npx playwright install` as well
@@ -36,11 +39,16 @@ Using Docker compose will set up all the services required by the extension for 
   - You can generate your files quickly with `mkcert` (e.g. `mkcert -cert-file ssl.crt -key-file ssl.key localhost 127.0.0.1 bitwarden.test`)
   - If generating your cert and key with `mkcert`, be sure to first set up your local Certificate Authority with `mkcert --install`
 
-Teardown the Docker containers and volumes with `docker compose down -v`
+Create and start the containers and volumes with `docker compose up -d --build --remove-orphans`, and teardown with `docker compose down -v`
 
 ## Seeding Your Vault
 
-- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed on your machine.
+- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed and configured on your host machine.
+  - If you are using a local environment, you should configure the CLI to point to your local vault. This can be done with the following command.
+  - `bw config server --api http://localhost:<api-port> --identity http://localhost:<identity-port> --web-vault https://localhost:<web-vault-port> --events http://localhost:<events-port>`
+- Log into the Bitwarden CLI using the credentials for the account you'd like to seed.
+- In a separate terminal, launch the Vault Management API by running `bw serve --port <api-port> --host <api-host>`
+  - Note: running `bw serve` defaults the port to `8087` and the host to `localhost`. This is fine to do as long as you also set the values within your `.env` file (see below).
 - Ensure that the following variables are set in your `.env`
   - `VAULT_EMAIL=<your-email>`
   - `VAULT_PASSWORD=<your-password>`

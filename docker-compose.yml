@@ -6,13 +6,12 @@ services:
       - db
     env_file:
       - .env
-    image: bitwarden/self-host:beta
+    image: bitwarden/self-host:beta # https://bitwarden.com/help/install-and-deploy-unified-beta/
     restart: always
     ports:
       - "80:8080"
       - "443:8443"
     volumes:
-      - bitwarden:/etc/bitwarden
       - ./${BW_SSL_CERT}:/etc/bitwarden/${BW_SSL_CERT}
       - ./${BW_SSL_KEY}:/etc/bitwarden/${BW_SSL_KEY}
 
