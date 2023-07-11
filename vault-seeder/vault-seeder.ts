@@ -30,8 +30,6 @@ class VaultSeeder {
       throw new Error("Unable to seed vault, no session token found.");
     }
 
-    await this.syncVault();
-
     const testsFolder = await this.getPlaywrightCiphersFolder(
       "AutofillPlaywrightTestingItems",
     );
@@ -328,13 +326,6 @@ class VaultSeeder {
     const { success, data, message } = await this.queryApi(`/lock`, "POST");
     if (!success) {
       throw new Error(`Unable to lock vault, ${message}`);
-    }
-  }
-
-  private async syncVault(): Promise<void> {
-    const { success, message } = await this.queryApi(`/sync`, "POST");
-    if (!success) {
-      throw new Error(`Unable to sync vault, ${message}`);
     }
   }
 
