@@ -2,14 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# detect if we are in a git repo
-if [ -d .git ]; then
-    # if we are in a git repo, we can use git to find the root of the repo
-    ROOT_DIR=$(git rev-parse --show-toplevel)
-else
-    # if we are not in a git repo, we can use the current script path to find the root of the repo
-    ROOT_DIR=$(dirname "$(realpath "$0")")/..
-fi
+ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # shellcheck source=.env
 source "$ROOT_DIR/.env"
