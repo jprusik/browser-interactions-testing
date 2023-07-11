@@ -6,11 +6,11 @@ services:
     platform: linux/amd64
     image: tangowithfoxtrot/bw-cli:serve-latest
     ports:
-      - "127.0.0.1:${BW_SERVE_API_PORT}:2929"
+      - "${BW_SERVE_API_PORT}:2929"
     volumes:
       - "${PWD}/vault-seeder/tmp:/root/.config/Bitwarden CLI"
     healthcheck:
-      test: curl -f http://127.0.0.1:${BW_SERVE_API_PORT}/status || exit 1
+      test: curl -f http://localhost:${BW_SERVE_API_PORT}/status || exit 1
       interval: 5s
       timeout: 2s
       retries: 3
