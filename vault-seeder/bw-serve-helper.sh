@@ -22,5 +22,5 @@ BW_COMMAND config server $SERVER_HOST_URL || true # no error if already configur
 BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" || true # no error if already logged in
 BW_COMMAND sync || true # no error if already synced
 
-# Start Vault Management API=
+# Start Vault Management API
 BW_COMMAND serve --hostname $BW_SERVE_API_HOST --port $BW_SERVE_API_PORT &
