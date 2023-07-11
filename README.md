@@ -18,14 +18,25 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 - If targeting a local environment, [generate an SSL certificate for the Web Vault client](https://contributing.bitwarden.com/getting-started/clients/web-vault/#ssl-certificate) named `dev-server.local.pem` and place it in the project root directory
 - Do a clean-install with `npm ci` (this will also fetch and set up the Bitwarden clients repo)
   - If prompted, run `npx playwright install` as well
-  - (Optional) Checkout the local `clients` to the branch you want to test the extension with (`master` by default)
-- Build the extension to test against with `npm run build:clients` Other build options:
+  - (Optional) Checkout the local `clients` to the branch with the version of the extension you want to test with (`master` by default)
+- Build the extension to test against with `npm run build:clients`. Other build options:
   - `build:clients:prod`: build the production version of the extension
   - `build:clients:mv3`: build the extension using Manifest v3 (builds otherwise default to v2)
   - `build:clients:autofill`: build the extension with the new (v2) Autofill features
   - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
 - For the targeted environment, configure the vault with the credentials you put in `.env`
 - Login to the vault of the targeted environment, and create items for each of the test credentials (`testPages`) found in `tests/constants.ts`. Note, that the cipher entries for `test-pages` should use exact URI matching.
+
+### Using Docker Compose
+
+Using Docker compose will set up all the services required by the extension for testing. In order to use Docker compose, you'll need to first:
+
+- Copy `.env.example` (in the `docker` folder) to `.env` and populate it with your desired values
+- Include your self-signed SSL cert and key in the `docker` folder as `ssl.crt` and `ssl.key` (or otherwise update the file reference values in your `.env`)
+  - You can generate your files quickly with `mkcert` (e.g. `mkcert -cert-file ssl.crt -key-file ssl.key localhost 127.0.0.1 bitwarden.test`)
+  - If generating your cert and key with `mkcert`, be sure to first set up your local Certificate Authority with `mkcert --install`
+
+Teardown the Docker containers and volumes with `docker compose down -v`
 
 ## Seeding Your Vault
 
@@ -46,7 +57,8 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 ## Running Tests
 
 - If targeting a local environment:
-  - Ensure your targeted `API` and `Identity` services [are configured and running](https://contributing.bitwarden.com/getting-started/server/guide)
-  - Ensure the Web Vault client is running with `npm run test:webserve`
+  - Ensure your targeted `API` and `Identity` services are configured and running (either [locally](https://contributing.bitwarden.com/getting-started/server/guide) or via Docker)
+  - Ensure the Web Vault client is running (either with `npm run test:webserve` locally or via Docker)
+    - If running locally, be sure to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) (`dev-server.local.pem`) in the `clients/apps/web` folder
 - Run headless testing with `npm run test:autofill`
 - Run headed tests in debug mode with `npm run test:autofill:debug`

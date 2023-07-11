@@ -6,6 +6,8 @@ Thumbs.db
 .env
 dev-server.local.pem
 vault-seeder/tmp
+ssl.crt
+ssl.key
 
 # IDEs and editors
 .idea/
