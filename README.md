@@ -40,17 +40,14 @@ Teardown the Docker containers and volumes with `docker compose down -v`
 
 ## Seeding Your Vault
 
-- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed and configured on your machine.
-  - If you are using a local environment, you should configure the CLI to point to your local vault. This can be done with the following command.
-  - `bw config server --api http://localhost:<api-port> --identity http://localhost:<identity-port> --web-vault https://localhost:<web-vault-port> --events http://localhost:<events-port>`
-- Log into the Bitwarden CLI using the credentials for the account you'd like to seed.
-- In a separate terminal, launch the Vault Management API by running `bw serve --port <api-port> --host <api-host>`
-  - Note: running `bw serve` defaults the port to `8087` and the host to `localhost`. This is fine to do as long as you also set the values within your `.env` file (see below).
+- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed on your machine.
 - Ensure that the following variables are set in your `.env`
-  - `BW_SERVE_API_HOST=<api-host>` (including http://)
+  - `VAULT_EMAIL=<your-email>`
+  - `VAULT_PASSWORD=<your-password>`
+  - `BW_SERVE_API_HOST=<api-host>` (do not include http://)
   - `BW_SERVE_API_PORT=<api-port>`
 - Run `npm run seed:vault` to seed the vault with the test credentials found in `tests/constants.ts`
-  - This command will handle seeding the vault with any new test credentials, and updating values that have changed.
+  - This command will handle logging in, setting up the CLI, running the Vault Management Server, seeding the vault with any new test credentials, and updating values that have changed.
   - It will place those test credentials within a folder named `AutofillPlaywrightTestItems` in your vault.
 - If you need to completely delete/refresh any previously loaded test credentials run the command `npm run seed:vault:refresh`
 

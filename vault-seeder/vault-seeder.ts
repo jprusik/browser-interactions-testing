@@ -25,6 +25,8 @@ class VaultSeeder {
   }
 
   private async runSeeder() {
+    console.log("Connected to Vault Management API, unlocking vault...");
+
     const sessionToken = await this.unlockVault();
     if (!sessionToken) {
       throw new Error("Unable to seed vault, no session token found.");
@@ -385,7 +387,7 @@ class VaultSeeder {
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(
-        `${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
+        `http://${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
         {
           method,
           headers: {
