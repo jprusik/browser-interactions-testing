@@ -8,7 +8,8 @@ import {
   LoginItemTemplate,
   VaultItem,
 } from "./abstractions/vault-seeder";
-import { FillProperties, TestPage, testPages } from "../tests/constants";
+import { FillProperties, TestPage } from "../tests/abstractions/constants";
+import { testPages } from "../tests/constants";
 import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../clients/libs/common/src/enums";
 
@@ -25,6 +26,8 @@ class VaultSeeder {
   }
 
   private async runSeeder() {
+    console.log("Connected to Vault Management API, unlocking vault...");
+
     const sessionToken = await this.unlockVault();
     if (!sessionToken) {
       throw new Error("Unable to seed vault, no session token found.");
@@ -385,7 +388,7 @@ class VaultSeeder {
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(
-        `${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
+        `http://${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
         {
           method,
           headers: {

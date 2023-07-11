@@ -8,7 +8,6 @@ export BITWARDENCLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
 mkdir -p "$BITWARDENCLI_APPDATA_DIR"
 
 BW_COMMAND() {
-    # docker run --platform linux/amd64 --rm --network host -it -v "$BITWARDENCLI_APPDATA_DIR:/root/.config/Bitwarden CLI" tangowithfoxtrot/bw-cli:serve-latest bw "$@"
   bw "$@"
 }
 
@@ -23,12 +22,5 @@ BW_COMMAND config server $SERVER_HOST_URL || true # no error if already configur
 BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" || true # no error if already logged in
 BW_COMMAND sync || true # no error if already synced
 
-# Start Vault Management API
-pushd "$ROOT_DIR" >/dev/null || exit 1 # ensure the mount points for docker-compose are correct
-docker-compose --profile bw_api up -d
-popd || exit 0
-
-while ! curl -s "$BW_SERVE_API_HOST:$BW_SERVE_API_PORT/status" > /dev/null; do
-    echo "Waiting for Vault Management API to start..."
-    sleep 1
-done
+# Start Vault Management API=
+BW_COMMAND serve --hostname $BW_SERVE_API_HOST --port $BW_SERVE_API_PORT &
