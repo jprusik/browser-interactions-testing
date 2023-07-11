@@ -8,8 +8,7 @@ import {
   LoginItemTemplate,
   VaultItem,
 } from "./abstractions/vault-seeder";
-import { FillProperties, TestPage } from "../tests/abstractions/constants";
-import { testPages } from "../tests/constants";
+import { FillProperties, TestPage, testPages } from "../tests/constants";
 import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../clients/libs/common/src/enums";
 

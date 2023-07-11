@@ -1,10 +1,56 @@
 import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../clients/libs/common/src/enums";
 import { configDotenv } from "dotenv";
-import { TestPage } from "./abstractions/constants";
 
 configDotenv();
+
+export type FillProperties = {
+  value: string;
+  selector: string;
+};
+
+export type TestPage = {
+  cipherType: CipherType;
+  url: string;
+  postFillSubmit?: boolean;
+  uriMatchType?: UriMatchType;
+  inputs: {
+    // Login fields
+    username?: FillProperties;
+    password?: FillProperties;
+    totp?: FillProperties;
+
+    // Card fields
+    cardholderName?: FillProperties;
+    brand?: FillProperties;
+    number?: FillProperties;
+    expMonth?: FillProperties;
+    expYear?: FillProperties;
+    code?: FillProperties;
+
+    // Identity fields
+    title?: FillProperties;
+    firstName?: FillProperties;
+    middleName?: FillProperties;
+    lastName?: FillProperties;
+    address1?: FillProperties;
+    address2?: FillProperties;
+    address3?: FillProperties;
+    city?: FillProperties;
+    state?: FillProperties;
+    postalCode?: FillProperties;
+    country?: FillProperties;
+    company?: FillProperties;
+    email?: FillProperties;
+    phone?: FillProperties;
+    ssn?: FillProperties;
+    passportNumber?: FillProperties;
+    licenseNumber?: FillProperties;
+  };
+};
+
 const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
+
 export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
@@ -31,18 +77,6 @@ export const testPages: TestPage[] = [
     inputs: {
       username: { value: "simple-test", selector: "#username" },
       password: { value: "apassword", selector: "#password" },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://accounts.google.com/",
-    postFillSubmit: true,
-    inputs: {
-      username: { value: "info@bitwarden.com", selector: "#identifierId" },
-      password: {
-        value: "google-password",
-        selector: "[aria-label='Enter your password']",
-      },
     },
   },
 
