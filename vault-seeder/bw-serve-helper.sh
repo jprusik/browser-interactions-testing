@@ -11,7 +11,7 @@ BW_COMMAND() {
   bw "$@"
 }
 
-if [[ -z "${SERVER_HOST_URL:-}" || "$SERVER_HOST_URL" =~ "localhost" || "$SERVER_HOST_URL" =~ "127" ]]; then
+if [[ -z "${SERVER_HOST_URL:-}" ]]; then
     echo "SERVER_HOST_URL is not set, using local dev values"
     export SERVER_HOST_URL='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
 fi
@@ -23,4 +23,4 @@ BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" || true # no error if already 
 BW_COMMAND sync || true # no error if already synced
 
 # Start Vault Management API
-BW_COMMAND serve --hostname $BW_SERVE_API_HOST --port $BW_SERVE_API_PORT &
+bw serve --hostname $BW_SERVE_API_HOST --port $BW_SERVE_API_PORT &
