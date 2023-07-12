@@ -11,11 +11,12 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 - [git](https://git-scm.com/downloads)
 - [node](https://nodejs.org/en)
 - [Bitwarden CLI](https://bitwarden.com/help/cli/)
+- [OpenSSL](https://www.openssl.org/)
 - (optional) [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (otherwise manage your node version to `.nvmrc` manually)
 
 ## Setup
 
-- Create an `.env` file in the root directory with values pointing to the vault you want to test against (use `.env.example` as guidance)
+- Create an `.env` file in the root directory with values pointing to the vault you want to test against (use `.env.example` as guidance) and populate it with your desired values
 - Install node (with `nvm install` if `nvm` is installed)
 - Install Bitwarden CLI (with npm: `npm install -g @bitwarden/cli`)
 - If targeting a local environment, [generate an SSL certificate for the Web Vault client](https://contributing.bitwarden.com/getting-started/clients/web-vault/#ssl-certificate) named `dev-server.local.pem` and place it in the project root directory
@@ -29,15 +30,28 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
 - For the targeted environment, configure the vault with the credentials you put in `.env`
 - Login to the vault of the targeted environment, and create items for each of the test credentials (`testPages`) found in `tests/constants.ts`. Note, that the cipher entries for `test-pages` should use exact URI matching.
+- (Only once) Generate SSL certificates with `npm run setup:ssl`. These will be used by the web client, Bitwarden CLI, and Docker compose
+  - Alternatively, generate your files with OpenSSL:
+
+  ```shell
+  openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 1826 -nodes \
+  -subj "/CN=localhost/O=Bitwarden Autofill Testing" \
+  -addext "subjectAltName=DNS:localhost,DNS:bitwarden.test,IP:127.0.0.1"
+  ```
+
+- Add the Certificate Authority to your system's secure store:
+
+  **Mac OS**
+
+  ```shell
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
+  ```
+
+- You should have two files in the root project folder: `ssl.crt` and `ssl.key`
 
 ### Using Docker Compose
 
 Using Docker compose will set up all the services required by the extension for testing. In order to use Docker compose, you'll need to first:
-
-- Copy `.env.example` (in the `docker` folder) to `.env` and populate it with your desired values
-- Include your self-signed SSL cert and key in the `docker` folder as `ssl.crt` and `ssl.key` (or otherwise update the file reference values in your `.env`)
-  - You can generate your files quickly with `mkcert` (e.g. `mkcert -cert-file ssl.crt -key-file ssl.key localhost 127.0.0.1 bitwarden.test`)
-  - If generating your cert and key with `mkcert`, be sure to first set up your local Certificate Authority with `mkcert --install`
 
 Create and start the containers and volumes with `docker compose up -d --build --remove-orphans`, and teardown with `docker compose down -v`
 

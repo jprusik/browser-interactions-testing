@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+export NODE_EXTRA_CA_CERTS=ssl.crt
+export NODE_OPTIONS=--use-openssl-ca
+
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # shellcheck source=.env

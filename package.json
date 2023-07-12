@@ -38,6 +38,7 @@
     "test:autofill": "npm run pretest && playwright test --reporter=line",
     "test:autofill:debug": "npm run pretest && playwright test --debug",
     "setup:clients": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
+    "setup:ssl": "./scripts/generate-certs.sh",
     "seed:vault": "./vault-seeder/bw-serve-helper.sh && ts-node ./vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}') > /dev/null",
     "seed:vault:refresh": "./vault-seeder/bw-serve-helper.sh && REFRESH=true ts-node ./vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "build:clients": "cd clients/apps/browser && rimraf build && npm run build",
