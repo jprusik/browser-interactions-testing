@@ -1,53 +1,8 @@
 import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../clients/libs/common/src/enums";
 import { configDotenv } from "dotenv";
-
+import { TestPage } from "./abstractions/constants";
 configDotenv();
-
-export type FillProperties = {
-  value: string;
-  selector: string;
-};
-
-export type TestPage = {
-  cipherType: CipherType;
-  url: string;
-  postFillSubmit?: boolean;
-  uriMatchType?: UriMatchType;
-  inputs: {
-    // Login fields
-    username?: FillProperties;
-    password?: FillProperties;
-    totp?: FillProperties;
-
-    // Card fields
-    cardholderName?: FillProperties;
-    brand?: FillProperties;
-    number?: FillProperties;
-    expMonth?: FillProperties;
-    expYear?: FillProperties;
-    code?: FillProperties;
-
-    // Identity fields
-    title?: FillProperties;
-    firstName?: FillProperties;
-    middleName?: FillProperties;
-    lastName?: FillProperties;
-    address1?: FillProperties;
-    address2?: FillProperties;
-    address3?: FillProperties;
-    city?: FillProperties;
-    state?: FillProperties;
-    postalCode?: FillProperties;
-    country?: FillProperties;
-    company?: FillProperties;
-    email?: FillProperties;
-    phone?: FillProperties;
-    ssn?: FillProperties;
-    passportNumber?: FillProperties;
-    licenseNumber?: FillProperties;
-  };
-};
 
 const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
 
@@ -64,10 +19,13 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
-    postFillSubmit: true,
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      username: { value: "ms-smith", selector: "#username" },
+      username: {
+        value: "ms-smith",
+        selector: "#username",
+        multiStepNextInputKey: "password",
+      },
       password: { value: "ms-password", selector: "#password" },
     },
   },
@@ -79,6 +37,76 @@ export const testPages: TestPage[] = [
       password: { value: "apassword", selector: "#password" },
     },
   },
+
+  /**
+   * Top 100 websites in the US per SEM Rush as of May 2023
+   * @see https://www.semrush.com/blog/most-visited-websites/
+   */
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.google.com/",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "input[type='email']",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "input[type='password']",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.facebook.com/",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#pass",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.reddit.com/",
+    hiddenForm: {
+      triggerSelector: 'header a[role="button"]',
+      formSelector: 'iframe[src^="https://www.reddit.com/login/"]',
+    },
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#loginUsername",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#loginPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.reddit.com/login/",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#loginUsername",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#loginPassword",
+      },
+    },
+  },
+
+  /**
+   * Commenting out known failure cases for now
+   *
 
   // Known failure cases:
   {
@@ -137,4 +165,6 @@ export const testPages: TestPage[] = [
       country: { value: "USA", selector: "#country" },
     },
   },
+
+   **/
 ];

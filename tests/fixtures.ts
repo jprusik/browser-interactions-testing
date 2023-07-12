@@ -22,6 +22,7 @@ export const test = base.extend<{
           : ["--headless=new"]), // use for headless testing on Chrome
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
+        "--disable-dev-shm-usage",
       ],
       ignoreDefaultArgs: [
         "--disable-component-extensions-with-background-pages",

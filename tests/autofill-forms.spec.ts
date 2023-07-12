@@ -18,7 +18,7 @@ test.describe("Extension autofills forms when triggered", () => {
     context,
     extensionId,
   }) => {
-    const [backgroundPage] = await context.backgroundPages();
+    const [backgroundPage] = context.backgroundPages();
 
     function doAutofill() {
       backgroundPage.evaluate(() =>
@@ -41,7 +41,7 @@ test.describe("Extension autofills forms when triggered", () => {
         await context.waitForEvent("page");
       }
 
-      let contextPages = await context.pages();
+      let contextPages = context.pages();
       expect(contextPages.length).toBe(2);
 
       const welcomePage = contextPages[1];
@@ -57,7 +57,7 @@ test.describe("Extension autofills forms when triggered", () => {
       if (serverHostURL) {
         await testPage.goto(
           `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`,
-          { waitUntil: "load" },
+          { waitUntil: "domcontentloaded" },
         );
         await testPage.waitForSelector("input#baseUrl");
 
@@ -77,7 +77,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
       await testPage.goto(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/login?email=${urlEncodedLoginEmail}`,
-        { waitUntil: "load" },
+        { waitUntil: "domcontentloaded" },
       );
 
       await testPage.waitForSelector("input#masterPassword");
@@ -87,7 +87,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
       await testPage.waitForURL(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
-        { waitUntil: "load" },
+        { waitUntil: "domcontentloaded" },
       );
       await testPage.waitForSelector("main app-vault-select");
     });
@@ -96,18 +96,33 @@ test.describe("Extension autofills forms when triggered", () => {
       const { url, inputs } = page;
 
       await test.step(`Autofill the form on page ${url}`, async () => {
+        const navigationPromise = testPage.waitForNavigation({
+          waitUntil: "domcontentloaded",
+        });
+        await testPage.setDefaultNavigationTimeout(0);
         await testPage.goto(url);
-        await testPage.waitForURL(url, { waitUntil: "load" });
+        await navigationPromise;
+
+        if (page.hiddenForm) {
+          // @TODO  Need to think through how to handle iframed forms
+          await testPage.click(page.hiddenForm.triggerSelector);
+          await testPage.waitForSelector(page.hiddenForm.formSelector, {
+            state: "visible",
+          });
+
+          await testPage.pause();
+        }
 
         doAutofill();
 
         const inputKeys = Object.keys(inputs);
 
         for (const inputKey of inputKeys) {
+          const currentInput = inputs[inputKey];
           await expect
             // @TODO do not soft expect on local test pages
-            .soft(testPage.locator(inputs[inputKey].selector))
-            .toHaveValue(inputs[inputKey].value);
+            .soft(testPage.locator(currentInput.selector))
+            .toHaveValue(currentInput.value);
 
           await testPage.screenshot({
             path: path.join(
@@ -116,13 +131,15 @@ test.describe("Extension autofills forms when triggered", () => {
             ),
           });
 
-          const inputKeyIndex = inputKeys.lastIndexOf(inputKey);
+          const nextInputKey = currentInput.multiStepNextInputKey;
+          if (nextInputKey && inputs[nextInputKey]) {
+            await testPage.keyboard.press("Enter");
 
-          if (page.postFillSubmit && inputKeyIndex !== inputKeys.length - 1) {
-            testPage.keyboard.press("Enter");
-
-            const nextInputKey = inputKeys[inputKeyIndex + 1];
-            await testPage.locator(inputs[nextInputKey].selector);
+            const nextInputSelector = inputs[nextInputKey].selector;
+            await testPage.waitForSelector(nextInputSelector, {
+              state: "visible",
+            });
+            await testPage.locator(nextInputSelector);
 
             doAutofill();
           }
