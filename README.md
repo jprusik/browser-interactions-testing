@@ -12,7 +12,8 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 - [node](https://nodejs.org/en)
 - [Bitwarden CLI](https://bitwarden.com/help/cli/)
 - [OpenSSL](https://www.openssl.org/)
-- (optional) [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (otherwise manage your node version to `.nvmrc` manually)
+- [jq](https://github.com/jqlang/jq/wiki/Installation) (optional if not using the account creation script)
+- [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (optional if not using nvm; manually manage your node version to `.nvmrc`)
 
 ## Setup
 
@@ -47,7 +48,9 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
   ```
 
-- You should have two files in the root project folder: `ssl.crt` and `ssl.key`
+  - You should have two files in the root project folder: `ssl.crt` and `ssl.key`
+- Update the values of the environment variables in `scripts/create-account.sh` using the vault credentials in your `.env`
+- Seed the vault with the test account and ciphers with `npm run setup:vault`
 
 ### Using Docker Compose
 
