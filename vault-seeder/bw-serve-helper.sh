@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
-export NODE_EXTRA_CA_CERTS=ssl.crt
-export NODE_OPTIONS=--use-openssl-ca
-
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # shellcheck source=.env
-eval "$(grep -v '^#' "$ROOT_DIR/.env" | xargs)"
+set -o allexport
+source $ROOT_DIR/.env
+set +o allexport
+
+export NODE_EXTRA_CA_CERTS=$BW_SSL_CERT
+export NODE_OPTIONS=--use-openssl-ca
+
 export BITWARDENCLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
 mkdir -p "$BITWARDENCLI_APPDATA_DIR"
 
