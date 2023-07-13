@@ -2,6 +2,13 @@
 .DS_Store
 Thumbs.db
 
+# Secrets
+.env
+dev-server.local.pem
+*/vault-seeder/tmp
+ssl.crt
+ssl.key
+
 # IDEs and editors
 .idea/
 .project
@@ -22,8 +29,14 @@ Thumbs.db
 # Node
 node_modules
 npm-debug.log
+bitwarden-clients-0.0.0.tgz
+clients
+server
 
 # Playwright
-/test-results/
-/playwright-report/
+tests-out
+test-results
+playwright-report
+--cache-strategy
 /playwright/.cache/
+screenshots
