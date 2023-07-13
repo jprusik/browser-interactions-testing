@@ -387,7 +387,7 @@ class VaultSeeder {
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(
-        `http://${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
+        `http://${process.env.CLI_SERVE_HOST}:${process.env.CLI_SERVE_PORT}${route}`,
         {
           method,
           headers: {

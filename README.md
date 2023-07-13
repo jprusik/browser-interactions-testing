@@ -20,7 +20,6 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
 - Create an `.env` file in the root directory with values pointing to the vault you want to test against (use `.env.example` as guidance) and populate it with your desired values
 - Install node (with `nvm install` if `nvm` is installed)
 - Install Bitwarden CLI (with npm: `npm install -g @bitwarden/cli`)
-- If targeting a local environment, [generate an SSL certificate for the Web Vault client](https://contributing.bitwarden.com/getting-started/clients/web-vault/#ssl-certificate) named `dev-server.local.pem` and place it in the project root directory
 - Do a clean-install with `npm ci` (this will also fetch and set up the Bitwarden clients repo)
   - If prompted, run `npx playwright install` as well
   - (Optional) Checkout the local `clients` to the branch with the version of the extension you want to test with (`master` by default)
@@ -30,51 +29,46 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   - `build:clients:autofill`: build the extension with the new (v2) Autofill features
   - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
 - For the targeted environment, configure the vault with the credentials you put in `.env`
-- Login to the vault of the targeted environment, and create items for each of the test credentials (`testPages`) found in `tests/constants.ts`. Note, that the cipher entries for `test-pages` should use exact URI matching.
 - (Only once) Generate SSL certificates with `npm run setup:ssl`. These will be used by the web client, Bitwarden CLI, and Docker compose
   - Alternatively, generate your files with OpenSSL:
 
-  ```shell
-  openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 1826 -nodes \
-  -subj "/CN=localhost/O=Bitwarden Autofill Testing" \
-  -addext "subjectAltName=DNS:localhost,DNS:bitwarden.test,IP:127.0.0.1"
-  ```
+    ```shell
+    openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 1826 -nodes \
+    -subj "/CN=localhost/O=Bitwarden Autofill Testing" \
+    -addext "subjectAltName=DNS:localhost,DNS:bitwarden.test,IP:127.0.0.1"
+    ```
 
-- Add the Certificate Authority to your system's secure store:
+  - Add the Certificate Authority to your system's secure store:
 
-  **Mac OS**
+    **Mac OS**
 
-  ```shell
-  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
-  ```
+    ```shell
+    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
+    ```
+
+    **Linux**
+
+    ```shell
+    sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+    ```
 
   - You should have two files in the root project folder: `ssl.crt` and `ssl.key`
-- Update the values of the environment variables in `scripts/create-account.sh` using the vault credentials in your `.env`
-- Seed the vault with the test account and ciphers with `npm run setup:vault`
+
+### Seeding Your Vault
+
+> If using docker compose to host the server environment (as described in the later section), you may need to wait for the services within the `bitwarden` container to enter a running state before running any seeding scripts.
+
+- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed and configured on your host machine.
+  - Use `npm run setup:vault` to set up your running, targeted vault (e.g. docker container)
+    - This command will handle creating a test account, logging in, setting up the CLI, running the Vault Management Server, seeding the vault with any new test credentials, and updating values that have changed. It will place those test credentials within a folder named `AutofillPlaywrightTestItems` in your vault.
+  - If you have already created the test account in the vault, use `npm run seed:vault:ciphers` to only seed the vault with the test credentials.
+  - If you need to completely delete/refresh any previously loaded test credentials run the command `npm run seed:vault:refresh`
 
 ### Using Docker Compose
 
 Using Docker compose will set up all the services required by the extension for testing. In order to use Docker compose, you'll need to first:
 
 Create and start the containers and volumes with `docker compose up -d --build --remove-orphans`, and teardown with `docker compose down -v`
-
-## Seeding Your Vault
-
-- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed and configured on your host machine.
-  - If you are using a local environment, you should configure the CLI to point to your local vault. This can be done with the following command.
-  - `bw config server --api http://localhost:<api-port> --identity http://localhost:<identity-port> --web-vault https://localhost:<web-vault-port> --events http://localhost:<events-port>`
-- Log into the Bitwarden CLI using the credentials for the account you'd like to seed.
-- In a separate terminal, launch the Vault Management API by running `bw serve --port <api-port> --host <api-host>`
-  - Note: running `bw serve` defaults the port to `8087` and the host to `localhost`. This is fine to do as long as you also set the values within your `.env` file (see below).
-- Ensure that the following variables are set in your `.env`
-  - `VAULT_EMAIL=<your-email>`
-  - `VAULT_PASSWORD=<your-password>`
-  - `BW_SERVE_API_HOST=<api-host>` (do not include http://)
-  - `BW_SERVE_API_PORT=<api-port>`
-- Run `npm run seed:vault` to seed the vault with the test credentials found in `tests/constants.ts`
-  - This command will handle logging in, setting up the CLI, running the Vault Management Server, seeding the vault with any new test credentials, and updating values that have changed.
-  - It will place those test credentials within a folder named `AutofillPlaywrightTestItems` in your vault.
-- If you need to completely delete/refresh any previously loaded test credentials run the command `npm run seed:vault:refresh`
 
 ## Running Tests
 

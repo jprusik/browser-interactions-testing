@@ -41,7 +41,7 @@
     "setup:ssl": "./scripts/generate-certs.sh",
     "setup:vault": "npm run seed:vault:account && npm run seed:vault:ciphers",
     "seed:vault:account": "./scripts/create-account.sh",
-    "seed:vault:ciphers": "./vault-seeder/bw-serve-helper.sh && ts-node ./vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}') > /dev/null",
+    "seed:vault:ciphers": "./vault-seeder/bw-serve-helper.sh && REFRESH=true ts-node ./vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "seed:vault:ciphers:refresh": "./vault-seeder/bw-serve-helper.sh && REFRESH=true ts-node ./vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "build:clients": "cd clients/apps/browser && rimraf build && npm run build",
     "build:clients:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",

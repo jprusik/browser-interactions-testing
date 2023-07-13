@@ -7,26 +7,26 @@ set -o allexport
 source $ROOT_DIR/.env
 set +o allexport
 
-export NODE_EXTRA_CA_CERTS=$BW_SSL_CERT
-export NODE_OPTIONS=--use-openssl-ca
+export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
 
-export BITWARDENCLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
-mkdir -p "$BITWARDENCLI_APPDATA_DIR"
+export CLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
+mkdir -p "$CLI_APPDATA_DIR"
 
 BW_COMMAND() {
   bw "$@"
 }
 
-if [[ -z "${SERVER_HOST_URL:-}" ]]; then
-    echo "SERVER_HOST_URL is not set, using local dev values"
-    export SERVER_HOST_URL='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
+if [[ -z "${CLI_SERVE_HOST:-}" ]]; then
+    echo "CLI_SERVE_HOST is not set, using local dev values"
+    export CLI_SERVE_HOST='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
 fi
 
 # Login to the vault
 # shellcheck disable=SC2086 # we want to pass the server host url as a single argument
-BW_COMMAND config server $SERVER_HOST_URL || true # no error if already configured
-BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" || true # no error if already logged in
+BW_COMMAND logout --quiet # In case there's an active outdated session (e.g. docker container was rebuilt)
+BW_COMMAND config server $CLI_SERVE_HOST || true # no error if already configured
+BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" --nointeraction || true # no error if already logged in
 BW_COMMAND sync || true # no error if already synced
 
 # Start Vault Management API
-bw serve --hostname $BW_SERVE_API_HOST --port $BW_SERVE_API_PORT &
+BW_COMMAND serve --hostname $CLI_SERVE_HOST --port $CLI_SERVE_PORT &
