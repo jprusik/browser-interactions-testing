@@ -89,7 +89,7 @@ test.describe("Extension autofills forms when triggered", () => {
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
         { waitUntil: "load" },
       );
-      await testPage.waitForSelector("main app-vault-select");
+      await testPage.waitForSelector("app-vault-filter main .box.list");
     });
 
     for (const page of testPages) {
