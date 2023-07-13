@@ -30,29 +30,20 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
 - For the targeted environment, configure the vault with the credentials you put in `.env`
 - (Only once) Generate SSL certificates with `npm run setup:ssl`. These will be used by the web client, Bitwarden CLI, and Docker compose
-  - Alternatively, generate your files with OpenSSL:
-
-    ```shell
-    openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 1826 -nodes \
-    -subj "/CN=localhost/O=Bitwarden Autofill Testing" \
-    -addext "subjectAltName=DNS:localhost,DNS:bitwarden.test,IP:127.0.0.1"
-    ```
-
-  - Add the Certificate Authority to your system's secure store:
-
-    **Mac OS**
-
-    ```shell
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
-    ```
-
-    **Linux**
-
-    ```shell
-    sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
-    ```
-
   - You should have two files in the root project folder: `ssl.crt` and `ssl.key`
+- Add the Certificate Authority to your system's secure store:
+
+  **Mac OS**
+
+  ```shell
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
+  ```
+
+  **Linux**
+
+  ```shell
+  sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+  ```
 
 ### Seeding Your Vault
 
@@ -75,6 +66,6 @@ Create and start the containers and volumes with `docker compose up -d --build -
 - If targeting a local environment:
   - Ensure your targeted `API` and `Identity` services are configured and running (either [locally](https://contributing.bitwarden.com/getting-started/server/guide) or via Docker)
   - Ensure the Web Vault client is running (either with `npm run test:webserve` locally or via Docker)
-    - If running locally, be sure to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) (`dev-server.local.pem`) in the `clients/apps/web` folder
+    - Don't forget to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) in the `clients/apps/web` folder
 - Run headless testing with `npm run test:autofill`
 - Run headed tests in debug mode with `npm run test:autofill:debug`

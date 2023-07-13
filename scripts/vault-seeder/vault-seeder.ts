@@ -8,9 +8,9 @@ import {
   LoginItemTemplate,
   VaultItem,
 } from "./abstractions/vault-seeder";
-import { FillProperties, TestPage, testPages } from "../tests/constants";
-import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
-import { UriMatchType } from "../clients/libs/common/src/enums";
+import { FillProperties, TestPage, testPages } from "../../tests/constants";
+import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
+import { UriMatchType } from "../../clients/libs/common/src/enums";
 
 configDotenv();
 
