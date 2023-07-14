@@ -7,70 +7,70 @@ configDotenv();
 const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
 
 export const testPages: TestPage[] = [
-  // {
-  //   cipherType: CipherType.Login,
-  //   url: `${localPagesUri}/tests/test-pages/basic-form.html`,
-  //   uriMatchType: UriMatchType.Exact,
-  //   inputs: {
-  //     username: { value: "jsmith", selector: "#username" },
-  //     password: { value: "areallygoodpassword", selector: "#password" },
-  //   },
-  // },
-  // {
-  //   cipherType: CipherType.Login,
-  //   url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
-  //   uriMatchType: UriMatchType.Exact,
-  //   inputs: {
-  //     username: {
-  //       value: "ms-smith",
-  //       selector: "#username",
-  //       multiStepNextInputKey: "password",
-  //     },
-  //     password: { value: "ms-password", selector: "#password" },
-  //   },
-  // },
-  // {
-  //   cipherType: CipherType.Login,
-  //   url: "https://fill.dev/form/login-simple",
-  //   inputs: {
-  //     username: { value: "simple-test", selector: "#username" },
-  //     password: { value: "apassword", selector: "#password" },
-  //   },
-  // },
+  {
+    cipherType: CipherType.Login,
+    url: `${localPagesUri}/tests/test-pages/basic-form.html`,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: { value: "jsmith", selector: "#username" },
+      password: { value: "areallygoodpassword", selector: "#password" },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        value: "ms-smith",
+        selector: "#username",
+        multiStepNextInputKey: "password",
+      },
+      password: { value: "ms-password", selector: "#password" },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://fill.dev/form/login-simple",
+    inputs: {
+      username: { value: "simple-test", selector: "#username" },
+      password: { value: "apassword", selector: "#password" },
+    },
+  },
 
   /**
    * Top 100 websites in the US per SEM Rush as of May 2023
    * @see https://www.semrush.com/blog/most-visited-websites/
    */
-  // {
-  //   cipherType: CipherType.Login,
-  //   url: "https://accounts.google.com/",
-  //   inputs: {
-  //     username: {
-  //       value: "bwplaywright@gmail.com",
-  //       selector: "input[type='email']",
-  //       multiStepNextInputKey: "password",
-  //     },
-  //     password: {
-  //       value: "fakePassword",
-  //       selector: "input[type='password']",
-  //     },
-  //   },
-  // },
-  // {
-  //   cipherType: CipherType.Login,
-  //   url: "https://www.facebook.com/",
-  //   inputs: {
-  //     username: {
-  //       value: "bwplaywright@gmail.com",
-  //       selector: "#email",
-  //     },
-  //     password: {
-  //       value: "fakePassword",
-  //       selector: "#pass",
-  //     },
-  //   },
-  // },
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.google.com/",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "input[type='email']",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "input[type='password']",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.facebook.com/",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#pass",
+      },
+    },
+  },
   {
     cipherType: CipherType.Login,
     url: "https://www.reddit.com/",
@@ -89,20 +89,20 @@ export const testPages: TestPage[] = [
       },
     },
   },
-  // {
-  //   cipherType: CipherType.Login,
-  //   url: "https://www.reddit.com/login/",
-  //   inputs: {
-  //     username: {
-  //       value: "bwplaywright@gmail.com",
-  //       selector: "#loginUsername",
-  //     },
-  //     password: {
-  //       value: "fakePassword",
-  //       selector: "#loginPassword",
-  //     },
-  //   },
-  // },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.reddit.com/login/",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#loginUsername",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#loginPassword",
+      },
+    },
+  },
 
   /**
    * Commenting out known failure cases for now

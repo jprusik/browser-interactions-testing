@@ -46,7 +46,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
       const welcomePage = contextPages[1];
       if (welcomePage) {
-        welcomePage.close();
+        await welcomePage.close();
       }
 
       testPage = contextPages[0];
@@ -103,10 +103,11 @@ test.describe("Extension autofills forms when triggered", () => {
         await testPage.goto(url);
         await navigationPromise;
 
-        const hiddenFormSelector = page.hiddenForm.iframeSource
-          ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
-          : page.hiddenForm.formSelector;
-        if (page.hiddenForm && hiddenFormSelector) {
+        let hiddenFormSelector;
+        if (page.hiddenForm) {
+          hiddenFormSelector = page.hiddenForm.iframeSource
+            ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
+            : page.hiddenForm.formSelector;
           await testPage.click(page.hiddenForm.triggerSelector);
           await testPage.waitForSelector(hiddenFormSelector, {
             state: "visible",
