@@ -13,7 +13,8 @@ type TestPage = {
   uriMatchType?: UriMatchType;
   hiddenForm?: {
     triggerSelector: string;
-    formSelector: string;
+    formSelector?: string;
+    iframeSource?: string;
   };
   inputs: {
     // Login fields

@@ -103,25 +103,38 @@ test.describe("Extension autofills forms when triggered", () => {
         await testPage.goto(url);
         await navigationPromise;
 
-        if (page.hiddenForm) {
-          // @TODO  Need to think through how to handle iframed forms
+        const hiddenFormSelector = page.hiddenForm.iframeSource
+          ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
+          : page.hiddenForm.formSelector;
+        if (page.hiddenForm && hiddenFormSelector) {
           await testPage.click(page.hiddenForm.triggerSelector);
-          await testPage.waitForSelector(page.hiddenForm.formSelector, {
+          await testPage.waitForSelector(hiddenFormSelector, {
             state: "visible",
           });
 
-          await testPage.pause();
+          if (page.hiddenForm.iframeSource) {
+            const iframeElement = await testPage
+              .locator(hiddenFormSelector)
+              .elementHandle();
+            const frame = await iframeElement.contentFrame();
+            await frame.waitForURL(
+              new RegExp(`.*${page.hiddenForm.iframeSource}.*`, "i"),
+            );
+          }
         }
 
         doAutofill();
 
         const inputKeys = Object.keys(inputs);
+        const testedFrame = Boolean(hiddenFormSelector)
+          ? testPage.frameLocator(hiddenFormSelector)
+          : testPage;
 
         for (const inputKey of inputKeys) {
           const currentInput = inputs[inputKey];
           await expect
             // @TODO do not soft expect on local test pages
-            .soft(testPage.locator(currentInput.selector))
+            .soft(testedFrame.locator(currentInput.selector))
             .toHaveValue(currentInput.value);
 
           await testPage.screenshot({
