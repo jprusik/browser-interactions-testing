@@ -8,10 +8,10 @@ import {
   LoginItemTemplate,
   VaultItem,
 } from "./abstractions/vault-seeder";
-import { FillProperties, TestPage } from "../tests/abstractions/constants";
-import { testPages } from "../tests/constants";
-import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
-import { UriMatchType } from "../clients/libs/common/src/enums";
+import { FillProperties, TestPage } from "../../tests/abstractions/constants";
+import { testPages } from "../../tests/constants";
+import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
+import { UriMatchType } from "../../clients/libs/common/src/enums";
 
 configDotenv();
 
@@ -20,9 +20,7 @@ class VaultSeeder {
 
   constructor() {
     this.runSeeder().then(async () => {
-      console.log(
-        "Seeding complete, locking vault and terminating vault management api process...",
-      );
+      console.log("Seeding complete, locking vault...");
       await this.lockVault();
     });
   }
@@ -390,7 +388,7 @@ class VaultSeeder {
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(
-        `http://${process.env.BW_SERVE_API_HOST}:${process.env.BW_SERVE_API_PORT}${route}`,
+        `http://${process.env.CLI_SERVE_HOST}:${process.env.CLI_SERVE_PORT}${route}`,
         {
           method,
           headers: {

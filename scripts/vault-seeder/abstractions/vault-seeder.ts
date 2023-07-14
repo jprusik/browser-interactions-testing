@@ -1,4 +1,4 @@
-import { UriMatchType } from "../../clients/libs/common/src/enums";
+import { UriMatchType } from "../../../clients/libs/common/src/enums";
 
 type LoginUriTemplate = {
   match: UriMatchType;
