@@ -1,5 +1,9 @@
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
-import { UriMatchType } from "../../clients/libs/common/src/enums";
+import {
+  FieldType,
+  LinkedIdType,
+  UriMatchType,
+} from "../../clients/libs/common/src/enums";
 
 type FillProperties = {
   value: string;
@@ -11,11 +15,13 @@ type TestPage = {
   cipherType: CipherType;
   url: string;
   uriMatchType?: UriMatchType;
+  waitForInitialInputKey?: string;
   hiddenForm?: {
-    triggerSelector: string;
+    triggerSelector?: string;
     formSelector?: string;
     iframeSource?: string;
   };
+  formSetupClickSelectors?: string[];
   inputs: {
     // Login fields
     username?: FillProperties;

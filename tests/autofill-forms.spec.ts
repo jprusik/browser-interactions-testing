@@ -103,12 +103,21 @@ test.describe("Extension autofills forms when triggered", () => {
         await testPage.goto(url);
         await navigationPromise;
 
+        if (page.waitForInitialInputKey) {
+          await testPage.waitForSelector(
+            inputs[page.waitForInitialInputKey].selector,
+            { state: "visible" },
+          );
+        }
+
         let hiddenFormSelector;
         if (page.hiddenForm) {
           hiddenFormSelector = page.hiddenForm.iframeSource
             ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
             : page.hiddenForm.formSelector;
-          await testPage.click(page.hiddenForm.triggerSelector);
+          if (page.hiddenForm.triggerSelector) {
+            await testPage.click(page.hiddenForm.triggerSelector);
+          }
           await testPage.waitForSelector(hiddenFormSelector, {
             state: "visible",
           });
@@ -124,10 +133,16 @@ test.describe("Extension autofills forms when triggered", () => {
           }
         }
 
+        if (page.formSetupClickSelectors) {
+          for (const selector of page.formSetupClickSelectors) {
+            await testPage.click(selector);
+          }
+        }
+
         doAutofill();
 
         const inputKeys = Object.keys(inputs);
-        const testedFrame = Boolean(hiddenFormSelector)
+        const testedFrame = Boolean(page.hiddenForm?.iframeSource)
           ? testPage.frameLocator(hiddenFormSelector)
           : testPage;
 
