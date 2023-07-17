@@ -80,18 +80,23 @@ test.describe("Extension autofills forms when triggered", () => {
           path: path.join(screenshotsOutput, `environment_configured.png`),
         });
 
+        const serverConfigContent = await testPage.locator("#baseUrlHelp");
         await testPage.click("button[type='submit']");
+        await serverConfigContent.waitFor({
+          ...defaultWaitForOptions,
+          state: "detached",
+        });
       }
     });
 
     await test.step("Log in to the extension vault", async () => {
-      // @TODO temporary workaround for the live URL-encoding not matching output of `encodeURI` or `encodeURIComponent`
-      const urlEncodedLoginEmail = encodeURI(vaultEmail).replace("+", "%2B");
-
-      await testPage.goto(
-        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/login?email=${urlEncodedLoginEmail}`,
-        defaultGotoOptions,
-      );
+      const emailInput = await testPage.getByLabel("Email address");
+      await emailInput.waitFor(defaultWaitForOptions);
+      await emailInput.fill(vaultEmail);
+      const emailSubmitInput = await testPage.getByRole("button", {
+        name: "Continue",
+      });
+      await emailSubmitInput.click();
 
       const masterPasswordInput = await testPage.locator(
         "input#masterPassword",
@@ -99,7 +104,9 @@ test.describe("Extension autofills forms when triggered", () => {
       await masterPasswordInput.waitFor(defaultWaitForOptions);
       await masterPasswordInput.fill(vaultPassword);
 
-      const loginButton = await testPage.locator("form button[type='submit']");
+      const loginButton = await testPage.getByRole("button", {
+        name: "Log in with master password",
+      });
       await loginButton.waitFor(defaultWaitForOptions);
       await loginButton.click();
 
@@ -117,10 +124,10 @@ test.describe("Extension autofills forms when triggered", () => {
       const { url, inputs } = page;
 
       await test.step(`Autofill the form on page ${url}`, async () => {
+        testPage.setDefaultNavigationTimeout(60000);
         const navigationPromise =
           testPage.waitForNavigation(defaultGotoOptions);
-        await testPage.setDefaultNavigationTimeout(0);
-        await testPage.goto(url);
+        await testPage.goto(url, { timeout: 60000 });
         await navigationPromise;
 
         let hiddenFormSelector;
@@ -132,7 +139,7 @@ test.describe("Extension autofills forms when triggered", () => {
             for (const selector of page.hiddenForm.triggerSelectors) {
               const triggerElement = await testPage.locator(selector).first();
               await triggerElement.waitFor(defaultWaitForOptions);
-              await triggerElement.click();
+              await triggerElement.click({ timeout: 10000 });
             }
           }
           const hiddenForm = await testPage.locator(hiddenFormSelector).first();
@@ -141,17 +148,18 @@ test.describe("Extension autofills forms when triggered", () => {
           if (page.hiddenForm.iframeSource) {
             const iframeElement = await testPage
               .locator(hiddenFormSelector)
-              .elementHandle();
+              .elementHandle({ timeout: 20000 });
             const frame = await iframeElement.contentFrame();
             await frame.waitForURL(
               new RegExp(`.*${page.hiddenForm.iframeSource}.*`, "i"),
+              { timeout: 60000 },
             );
           }
         }
 
         if (page.formSetupClickSelectors) {
           for (const selector of page.formSetupClickSelectors) {
-            await testPage.click(selector);
+            await testPage.click(selector, { timeout: 10000 });
           }
         }
 
@@ -177,7 +185,7 @@ test.describe("Extension autofills forms when triggered", () => {
           await expect
             // @TODO do not soft expect on local test pages
             .soft(currentInputElement)
-            .toHaveValue(currentInput.value);
+            .toHaveValue(currentInput.value, { timeout: 10000 });
 
           await testPage.screenshot({
             path: path.join(
@@ -188,12 +196,14 @@ test.describe("Extension autofills forms when triggered", () => {
 
           const nextInputKey = currentInput.multiStepNextInputKey;
           if (nextInputKey && inputs[nextInputKey]) {
-            await currentInputElement.press("Enter");
+            await currentInputElement.press("Enter", { timeout: 10000 });
 
             const nextInputSelector = inputs[nextInputKey].selector;
 
             const iframeElement = Boolean(page.hiddenForm?.iframeSource)
-              ? await testPage.locator(hiddenFormSelector).elementHandle()
+              ? await testPage
+                  .locator(hiddenFormSelector)
+                  .elementHandle({ timeout: 10000 })
               : null;
             const testedFrame = iframeElement
               ? await iframeElement.contentFrame()

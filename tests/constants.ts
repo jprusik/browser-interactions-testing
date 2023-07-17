@@ -372,7 +372,6 @@ export const testPages: TestPage[] = [
       },
     },
   },
-
   {
     cipherType: CipherType.Login,
     url: "https://myaccount.nytimes.com/auth/login",
