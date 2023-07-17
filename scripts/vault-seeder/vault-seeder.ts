@@ -234,15 +234,23 @@ class VaultSeeder {
     if (testPage.cipherType !== CipherType.Login) {
       return null;
     }
+    let uris = [
+      {
+        match: testPage.uriMatchType || UriMatchType.Domain,
+        uri: testPage.url,
+      },
+    ];
+    testPage.additionalLoginUrls?.forEach((url) =>
+      uris.push({
+        match: testPage.uriMatchType || UriMatchType.Domain,
+        uri: url,
+      }),
+    );
 
     const { username, password, totp } = testPage.inputs;
+
     return {
-      uris: [
-        {
-          match: testPage.uriMatchType || UriMatchType.Domain,
-          uri: testPage.url,
-        },
-      ],
+      uris,
       username: username?.value || "",
       password: password?.value || "",
       totp: totp?.value || "",

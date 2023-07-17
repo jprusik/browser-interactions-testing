@@ -14,10 +14,11 @@ type FillProperties = {
 type TestPage = {
   cipherType: CipherType;
   url: string;
+  additionalLoginUrls?: string[];
   uriMatchType?: UriMatchType;
   waitForInitialInputKey?: string;
   hiddenForm?: {
-    triggerSelector?: string;
+    triggerSelectors?: string[];
     formSelector?: string;
     iframeSource?: string;
   };
