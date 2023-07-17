@@ -300,6 +300,7 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.twitch.tv/",
+    waitForInitialInputKey: "username",
     hiddenForm: {
       triggerSelectors: ["button[data-a-target='login-button']"],
       formSelector: "div[data-a-target='passport-modal']",

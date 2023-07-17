@@ -32,8 +32,8 @@ test.describe("Extension autofills forms when triggered", () => {
   }) => {
     const [backgroundPage] = context.backgroundPages();
 
-    function doAutofill() {
-      backgroundPage.evaluate(() =>
+    async function doAutofill() {
+      await backgroundPage.evaluate(() =>
         chrome.tabs.query(
           { active: true },
           (tabs) =>
@@ -162,7 +162,7 @@ test.describe("Extension autofills forms when triggered", () => {
           await initialInputElement.waitFor(defaultWaitForOptions);
         }
 
-        doAutofill();
+        await doAutofill();
 
         const inputKeys = Object.keys(inputs);
         const testedFrame = Boolean(page.hiddenForm?.iframeSource)
@@ -204,13 +204,10 @@ test.describe("Extension autofills forms when triggered", () => {
               .first();
             await nextInputElement.waitFor(defaultWaitForOptions);
 
-            doAutofill();
+            await doAutofill();
           }
         }
       });
     }
-
-    // Hold the window open (don't close out)
-    // await testPage.pause(); // @TODO remove when finished debugging
   });
 });
