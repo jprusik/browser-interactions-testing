@@ -16,7 +16,6 @@ type TestPage = {
   url: string;
   additionalLoginUrls?: string[];
   uriMatchType?: UriMatchType;
-  waitForInitialInputKey?: string;
   hiddenForm?: {
     triggerSelectors?: string[];
     formSelector?: string;

@@ -49,13 +49,12 @@ class VaultSeeder {
     const isRefreshingVault = Boolean(process.env.REFRESH);
 
     if (isRefreshingVault) {
-      console.log(
-        "Refreshing vault and deleting all testing items. This may take some time to complete...",
-      );
+      console.log("Refreshing vault and deleting all testing items...");
       for (let index = 0; index < vaultItems.length; index++) {
         const vaultItem = vaultItems[index];
         await this.sleep(this.apiDebounce * index);
         await this.deleteVaultItem(vaultItem);
+        console.log(`${index + 1} / ${vaultItems.length} items deleted...`);
       }
     } else {
       vaultItems.forEach((item) => (existingVaultItems[item.name] = item));

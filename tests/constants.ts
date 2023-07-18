@@ -122,7 +122,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://twitter.com/login?lang=en",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -159,7 +158,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.instagram.com/accounts/login/",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright",
@@ -202,7 +200,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://login.live.com/",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -219,7 +216,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://login.microsoftonline.com/",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -300,7 +296,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.twitch.tv/",
-    waitForInitialInputKey: "username",
     hiddenForm: {
       triggerSelectors: ["button[data-a-target='login-button']"],
       formSelector: "div[data-a-target='passport-modal']",
@@ -319,7 +314,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.linkedin.com/",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -390,7 +384,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://my.foxnews.com/",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -432,7 +425,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://reg.usps.com/entreg/LoginAction_input",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -447,7 +439,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.imdb.com/registration/signin?ref_=signup_cm_nc_ca_btn&u=%2F",
-    waitForInitialInputKey: "username",
     formSetupClickSelectors: ["a[href^='https://www.imdb.com/ap/signin']"],
     inputs: {
       username: {
@@ -502,7 +493,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://discord.com/login",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -517,7 +507,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.netflix.com/login",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -538,7 +527,6 @@ export const testPages: TestPage[] = [
       ],
       formSelector: 'section[role="dialog"]',
     },
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -557,7 +545,6 @@ export const testPages: TestPage[] = [
       triggerSelectors: ["button.signin-header-action"],
       formSelector: "#join-neu-overlay > .wt-overlay__modal",
     },
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -576,7 +563,6 @@ export const testPages: TestPage[] = [
       triggerSelectors: ['div[data-test-id="simple-login-button"]'],
       formSelector: 'div[data-test-id="login-modal-default"]',
     },
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -591,7 +577,6 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.pinterest.com/login/",
-    waitForInitialInputKey: "username",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
@@ -617,6 +602,59 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.homedepot.com/auth/view/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://github.com/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#login_field",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://nypost.com/account/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://wwwl.accuweather.com/premium_login.php",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  //
   //
   //
   //

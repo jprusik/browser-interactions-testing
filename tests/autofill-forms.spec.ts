@@ -164,19 +164,18 @@ test.describe("Extension autofills forms when triggered", () => {
           }
         }
 
-        if (page.waitForInitialInputKey) {
-          const initialInputElement = await testPage
-            .locator(inputs[page.waitForInitialInputKey].selector)
-            .first();
-          await initialInputElement.waitFor(defaultWaitForOptions);
-        }
-
-        await doAutofill();
-
-        const inputKeys = Object.keys(inputs);
         const testedFrame = Boolean(page.hiddenForm?.iframeSource)
           ? testPage.frameLocator(hiddenFormSelector)
           : testPage;
+
+        const inputKeys = Object.keys(inputs);
+        const firstInputKey = inputKeys[0];
+        const initialInputElement = await testedFrame
+          .locator(inputs[firstInputKey]?.selector)
+          .first();
+        await initialInputElement.waitFor(defaultWaitForOptions);
+
+        await doAutofill();
 
         for (const inputKey of inputKeys) {
           const currentInput = inputs[inputKey];

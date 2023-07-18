@@ -13,6 +13,7 @@ These websites often times are using a dynamically generated key to validate aut
 These websites have some form of bot detection that prevents automated testing, but can be partially tested. We can test the username autofill but not the password in most cases.
 
 -   https://walmart.com
--   https://indeed.com (This site has a cloudflare captcha that is not solvable by Playwright's automation. It is possible to solve it manually and then run the test during a debug run.)
+-   https://indeed.com - This site has a cloudflare captcha that is not solvable by Playwright's automation. It is possible to solve it manually and then run the test during a debug run.
 -   https://twitter.com
 -   https://yahoo.com
+    https://www.homedepot.com - The flow for login on this is a bit strange. It requires an intermediary step that is a bit of a struggle to work around currently.
