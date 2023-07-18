@@ -16,8 +16,14 @@ const vaultEmail = process?.env?.VAULT_EMAIL || "";
 const vaultPassword = process?.env?.VAULT_PASSWORD || "";
 const serverHostURL = process?.env?.SERVER_HOST_URL;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
-const defaultGotoOptions: PageGoToOptions = { waitUntil: "domcontentloaded" };
-const defaultWaitForOptions: LocatorWaitForOptions = { state: "visible" };
+const defaultGotoOptions: PageGoToOptions = {
+  waitUntil: "domcontentloaded",
+  timeout: 60000,
+};
+const defaultWaitForOptions: LocatorWaitForOptions = {
+  state: "visible",
+  timeout: 10000,
+};
 
 test.describe("Extension autofills forms when triggered", () => {
   test("Log in to the vault, open pages, and autofill forms", async ({

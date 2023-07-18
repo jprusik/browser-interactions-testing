@@ -470,6 +470,153 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.paypal.com/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://zoom.us/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://discord.com/login",
+    waitForInitialInputKey: "username",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "input[aria-label='Email or Phone Number']",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "input[aria-label='Password']",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.netflix.com/login",
+    waitForInitialInputKey: "username",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#id_userLoginId",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#id_password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.zillow.com/",
+    hiddenForm: {
+      triggerSelectors: [
+        'header nav > div:nth-child(2) a[href^="/user/acct/login/?cid=pf"]',
+      ],
+      formSelector: 'section[role="dialog"]',
+    },
+    waitForInitialInputKey: "username",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#reg-login-email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#inputs-password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.etsy.com/",
+    hiddenForm: {
+      triggerSelectors: ["button.signin-header-action"],
+      formSelector: "#join-neu-overlay > .wt-overlay__modal",
+    },
+    waitForInitialInputKey: "username",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#join_neu_email_field",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#join_neu_password_field",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.pinterest.com/",
+    hiddenForm: {
+      triggerSelectors: ['div[data-test-id="simple-login-button"]'],
+      formSelector: 'div[data-test-id="login-modal-default"]',
+    },
+    waitForInitialInputKey: "username",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.pinterest.com/login/",
+    waitForInitialInputKey: "username",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.dailymail.co.uk/registration/login.html",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#reg-lbx-email-page",
+      },
+      password: {
+        value: "fakePassword",
+        selector: "#reg-lbx-password-page",
+      },
+    },
+  },
   //
   //
   //
