@@ -3,6 +3,10 @@ import path from "path";
 
 import { testPages } from "./constants";
 import { test, expect } from "./fixtures";
+import {
+  LocatorWaitForOptions,
+  PageGoToOptions,
+} from "./abstractions/test-pages";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -12,16 +16,26 @@ const vaultEmail = process?.env?.VAULT_EMAIL || "";
 const vaultPassword = process?.env?.VAULT_PASSWORD || "";
 const serverHostURL = process?.env?.SERVER_HOST_URL;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
+const defaultGotoOptions: PageGoToOptions = {
+  waitUntil: "domcontentloaded",
+  timeout: 60000,
+};
+const defaultWaitForOptions: LocatorWaitForOptions = {
+  state: "visible",
+  timeout: 10000,
+};
 
 test.describe("Extension autofills forms when triggered", () => {
   test("Log in to the vault, open pages, and autofill forms", async ({
     context,
     extensionId,
   }) => {
-    const [backgroundPage] = await context.backgroundPages();
+    context.setDefaultTimeout(10000);
+    context.setDefaultNavigationTimeout(60000);
 
-    function doAutofill() {
-      backgroundPage.evaluate(() =>
+    const [backgroundPage] = context.backgroundPages();
+    async function doAutofill() {
+      await backgroundPage.evaluate(() =>
         chrome.tabs.query(
           { active: true },
           (tabs) =>
@@ -41,12 +55,12 @@ test.describe("Extension autofills forms when triggered", () => {
         await context.waitForEvent("page");
       }
 
-      let contextPages = await context.pages();
+      let contextPages = context.pages();
       expect(contextPages.length).toBe(2);
 
       const welcomePage = contextPages[1];
       if (welcomePage) {
-        welcomePage.close();
+        await welcomePage.close();
       }
 
       testPage = contextPages[0];
@@ -57,9 +71,10 @@ test.describe("Extension autofills forms when triggered", () => {
       if (serverHostURL) {
         await testPage.goto(
           `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`,
-          { waitUntil: "load" },
+          defaultGotoOptions,
         );
-        await testPage.waitForSelector("input#baseUrl");
+        const baseUrlInput = await testPage.locator("input#baseUrl");
+        await baseUrlInput.waitFor(defaultWaitForOptions);
 
         await testPage.fill("input#baseUrl", serverHostURL);
 
@@ -67,47 +82,110 @@ test.describe("Extension autofills forms when triggered", () => {
           path: path.join(screenshotsOutput, `environment_configured.png`),
         });
 
+        const serverConfigContent = await testPage.locator("#baseUrlHelp");
         await testPage.click("button[type='submit']");
+        await serverConfigContent.waitFor({
+          ...defaultWaitForOptions,
+          state: "detached",
+        });
       }
     });
 
     await test.step("Log in to the extension vault", async () => {
-      // @TODO temporary workaround for the live URL-encoding not matching output of `encodeURI` or `encodeURIComponent`
-      const urlEncodedLoginEmail = encodeURI(vaultEmail).replace("+", "%2B");
+      const emailInput = await testPage.getByLabel("Email address");
+      await emailInput.waitFor(defaultWaitForOptions);
+      await emailInput.fill(vaultEmail);
+      const emailSubmitInput = await testPage.getByRole("button", {
+        name: "Continue",
+      });
+      await emailSubmitInput.click();
 
-      await testPage.goto(
-        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/login?email=${urlEncodedLoginEmail}`,
-        { waitUntil: "load" },
+      const masterPasswordInput = await testPage.locator(
+        "input#masterPassword",
       );
+      await masterPasswordInput.waitFor(defaultWaitForOptions);
+      await masterPasswordInput.fill(vaultPassword);
 
-      await testPage.waitForSelector("input#masterPassword");
-      await testPage.fill("input#masterPassword", vaultPassword);
-      await testPage.waitForSelector("form button[type='submit']");
-      await testPage.click("form button[type='submit']");
+      const loginButton = await testPage.getByRole("button", {
+        name: "Log in with master password",
+      });
+      await loginButton.waitFor(defaultWaitForOptions);
+      await loginButton.click();
 
       await testPage.waitForURL(
         `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
-        { waitUntil: "load" },
+        defaultGotoOptions,
       );
-      await testPage.waitForSelector("app-vault-filter main .box.list");
+      const vaultFilterBox = await testPage
+        .locator("app-vault-filter main .box.list")
+        .first();
+      await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
     for (const page of testPages) {
       const { url, inputs } = page;
 
       await test.step(`Autofill the form on page ${url}`, async () => {
+        testPage.setDefaultNavigationTimeout(60000);
+        const navigationPromise =
+          testPage.waitForNavigation(defaultGotoOptions);
         await testPage.goto(url);
-        await testPage.waitForURL(url, { waitUntil: "load" });
+        await navigationPromise;
 
-        doAutofill();
+        let hiddenFormSelector;
+        if (page.hiddenForm) {
+          hiddenFormSelector = page.hiddenForm.iframeSource
+            ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
+            : page.hiddenForm.formSelector;
+          if (page.hiddenForm.triggerSelectors?.length) {
+            for (const selector of page.hiddenForm.triggerSelectors) {
+              const triggerElement = await testPage.locator(selector).first();
+              await triggerElement.waitFor(defaultWaitForOptions);
+              await triggerElement.click();
+            }
+          }
+          const hiddenForm = await testPage.locator(hiddenFormSelector).first();
+          await hiddenForm.waitFor(defaultWaitForOptions);
+
+          if (page.hiddenForm.iframeSource) {
+            const iframeElement = await testPage
+              .locator(hiddenFormSelector)
+              .elementHandle();
+            const frame = await iframeElement.contentFrame();
+            await frame.waitForURL(
+              new RegExp(`.*${page.hiddenForm.iframeSource}.*`, "i"),
+            );
+          }
+        }
+
+        if (page.formSetupClickSelectors) {
+          for (const selector of page.formSetupClickSelectors) {
+            await testPage.click(selector);
+          }
+        }
+
+        const testedFrame = Boolean(page.hiddenForm?.iframeSource)
+          ? testPage.frameLocator(hiddenFormSelector)
+          : testPage;
 
         const inputKeys = Object.keys(inputs);
+        const firstInputKey = inputKeys[0];
+        const initialInputElement = await testedFrame
+          .locator(inputs[firstInputKey]?.selector)
+          .first();
+        await initialInputElement.waitFor(defaultWaitForOptions);
+
+        await doAutofill();
 
         for (const inputKey of inputKeys) {
+          const currentInput = inputs[inputKey];
+          const currentInputElement = testedFrame.locator(
+            currentInput.selector,
+          );
           await expect
             // @TODO do not soft expect on local test pages
-            .soft(testPage.locator(inputs[inputKey].selector))
-            .toHaveValue(inputs[inputKey].value);
+            .soft(currentInputElement)
+            .toHaveValue(currentInput.value);
 
           await testPage.screenshot({
             path: path.join(
@@ -116,21 +194,28 @@ test.describe("Extension autofills forms when triggered", () => {
             ),
           });
 
-          const inputKeyIndex = inputKeys.lastIndexOf(inputKey);
+          const nextInputKey = currentInput.multiStepNextInputKey;
+          if (nextInputKey && inputs[nextInputKey]) {
+            await currentInputElement.press("Enter");
 
-          if (page.postFillSubmit && inputKeyIndex !== inputKeys.length - 1) {
-            testPage.keyboard.press("Enter");
+            const nextInputSelector = inputs[nextInputKey].selector;
 
-            const nextInputKey = inputKeys[inputKeyIndex + 1];
-            await testPage.locator(inputs[nextInputKey].selector);
+            const iframeElement = Boolean(page.hiddenForm?.iframeSource)
+              ? await testPage.locator(hiddenFormSelector).elementHandle()
+              : null;
+            const testedFrame = iframeElement
+              ? await iframeElement.contentFrame()
+              : testPage;
 
-            doAutofill();
+            const nextInputElement = testedFrame
+              .locator(nextInputSelector)
+              .first();
+            await nextInputElement.waitFor(defaultWaitForOptions);
+
+            await doAutofill();
           }
         }
       });
     }
-
-    // Hold the window open (don't close out)
-    // await testPage.pause(); // @TODO remove when finished debugging
   });
 });

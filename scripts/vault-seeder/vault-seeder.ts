@@ -8,7 +8,8 @@ import {
   LoginItemTemplate,
   VaultItem,
 } from "./abstractions/vault-seeder";
-import { FillProperties, TestPage, testPages } from "../../tests/constants";
+import { FillProperties, TestPage } from "../../tests/abstractions/constants";
+import { testPages } from "../../tests/constants";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../../clients/libs/common/src/enums";
 
@@ -48,11 +49,12 @@ class VaultSeeder {
     const isRefreshingVault = Boolean(process.env.REFRESH);
 
     if (isRefreshingVault) {
-      console.log("Refreshing vault, deleting all testing items...");
+      console.log("Refreshing vault and deleting all testing items...");
       for (let index = 0; index < vaultItems.length; index++) {
         const vaultItem = vaultItems[index];
         await this.sleep(this.apiDebounce * index);
         await this.deleteVaultItem(vaultItem);
+        console.log(`${index + 1} / ${vaultItems.length} items deleted...`);
       }
     } else {
       vaultItems.forEach((item) => (existingVaultItems[item.name] = item));
@@ -231,15 +233,23 @@ class VaultSeeder {
     if (testPage.cipherType !== CipherType.Login) {
       return null;
     }
+    let uris = [
+      {
+        match: testPage.uriMatchType || UriMatchType.Domain,
+        uri: testPage.url,
+      },
+    ];
+    testPage.additionalLoginUrls?.forEach((url) =>
+      uris.push({
+        match: testPage.uriMatchType || UriMatchType.Domain,
+        uri: url,
+      }),
+    );
 
     const { username, password, totp } = testPage.inputs;
+
     return {
-      uris: [
-        {
-          match: testPage.uriMatchType || UriMatchType.Domain,
-          uri: testPage.url,
-        },
-      ],
+      uris,
       username: username?.value || "",
       password: password?.value || "",
       totp: totp?.value || "",
