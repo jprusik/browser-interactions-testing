@@ -9,8 +9,8 @@ set +o allexport
 
 export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
 
-export CLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
-mkdir -p "$CLI_APPDATA_DIR"
+export BITWARDENCLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
+mkdir -p "$BITWARDENCLI_APPDATA_DIR"
 
 BW_COMMAND() {
   bw "$@"
