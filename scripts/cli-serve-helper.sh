@@ -18,15 +18,15 @@ BW_COMMAND() {
   bw "$@"
 }
 
-if [[ -z "${CLI_SERVER_CONFIG:-}" ]]; then
+if [[ -z "${CLI_SERVE_HOST:-}" ]]; then
     echo "CLI_SERVE_HOST is not set, using local dev values"
-    export CLI_SERVER_CONFIG='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
+    export CLI_SERVE_HOST='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
 fi
 
 # Login to the vault
 # shellcheck disable=SC2086 # we want to pass the server host url as a single argument
 BW_COMMAND logout --quiet # In case there's an active outdated session (e.g. docker container was rebuilt)
-BW_COMMAND config server $CLI_SERVER_CONFIG || true # no error if already configured
+BW_COMMAND config server $CLI_SERVE_HOST || true # no error if already configured
 BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" --nointeraction || true # no error if already logged in
 BW_COMMAND sync || true # no error if already synced
 
