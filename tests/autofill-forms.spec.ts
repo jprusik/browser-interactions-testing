@@ -12,9 +12,9 @@ export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
 let testPage: Page;
 
-const vaultEmail = process?.env?.VAULT_EMAIL || "";
-const vaultPassword = process?.env?.VAULT_PASSWORD || "";
-const serverHostURL = process?.env?.SERVER_HOST_URL;
+const vaultEmail = process.env.VAULT_EMAIL || "";
+const vaultPassword = process.env.VAULT_PASSWORD || "";
+const serverHostURL = process.env.SERVER_HOST_URL;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
