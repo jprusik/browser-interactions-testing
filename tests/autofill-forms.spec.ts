@@ -122,7 +122,13 @@ test.describe("Extension autofills forms when triggered", () => {
       await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
-    for (const page of testPages) {
+    let pagesToTest = testPages;
+
+    if (debugIsActive) {
+      pagesToTest = pagesToTest.filter(({ onlyTest }) => onlyTest);
+    }
+
+    for (const page of pagesToTest) {
       const { url, inputs } = page;
 
       await test.step(`Autofill the form on page ${url}`, async () => {
@@ -214,8 +220,17 @@ test.describe("Extension autofills forms when triggered", () => {
 
             await doAutofill();
           }
+
+          if (debugIsActive) {
+            await testPage.pause();
+          }
         }
       });
+    }
+
+    // Hold the window open (don't automatically close out) when debugging
+    if (debugIsActive) {
+      await testPage.pause();
     }
   });
 });

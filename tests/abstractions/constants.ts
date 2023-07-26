@@ -21,6 +21,7 @@ type TestPage = {
     formSelector?: string;
     iframeSource?: string;
   };
+  onlyTest?: boolean;
   formSetupClickSelectors?: string[];
   inputs: {
     // Login fields
