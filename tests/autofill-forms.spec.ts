@@ -126,6 +126,10 @@ test.describe("Extension autofills forms when triggered", () => {
 
     if (debugIsActive) {
       pagesToTest = pagesToTest.filter(({ onlyTest }) => onlyTest);
+
+      if (!pagesToTest.length) {
+        pagesToTest = testPages;
+      }
     }
 
     for (const page of pagesToTest) {
@@ -217,6 +221,10 @@ test.describe("Extension autofills forms when triggered", () => {
               .locator(nextInputSelector)
               .first();
             await nextInputElement.waitFor(defaultWaitForOptions);
+
+            if (inputs[nextInputKey].preFill) {
+              inputs[nextInputKey].preFill();
+            }
 
             await doAutofill();
           }

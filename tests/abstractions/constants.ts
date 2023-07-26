@@ -9,6 +9,7 @@ type FillProperties = {
   value: string;
   selector: string;
   multiStepNextInputKey?: string;
+  preFill?: () => void;
 };
 
 type TestPage = {
