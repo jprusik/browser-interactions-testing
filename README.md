@@ -67,5 +67,5 @@ Create and start the containers and volumes with `docker compose up -d --build -
   - Ensure your targeted `API` and `Identity` services are configured and running (either [locally](https://contributing.bitwarden.com/getting-started/server/guide) or via Docker)
   - Ensure the Web Vault client is running (either with `npm run test:webserve` locally or via Docker)
     - Don't forget to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) in the `clients/apps/web` folder
-- Run headless testing with `npm run test:autofill`
+- Run headless testing with `npm run test:autofill:headless`
 - Run headed tests in debug mode with `npm run test:autofill:debug`

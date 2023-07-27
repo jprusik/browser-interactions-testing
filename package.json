@@ -46,6 +46,7 @@
     "setup:vault": "npm run seed:vault:account && npm run seed:vault:ciphers",
     "test:autofill": "npm run pretest && playwright test --reporter=line",
     "test:autofill:debug": "npm run pretest && playwright test --debug",
+    "test:autofill:headless": "npm run pretest && HEADLESS=true playwright test --reporter=line",
     "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
     "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch"
   }

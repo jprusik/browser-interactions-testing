@@ -17,9 +17,9 @@ export const test = base.extend<{
     const context = await chromium.launchPersistentContext("", {
       headless: false, // should always be `false`, even when testing headless Chrome
       args: [
-        ...(["1", "console"].includes(process.env.PWDEBUG)
-          ? []
-          : ["--headless=new"]), // use for headless testing on Chrome
+        ...(process.env.HEADLESS === "true"
+          ? ["--headless=new"] // use for headless testing on Chrome
+          : []),
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
         "--disable-dev-shm-usage",
