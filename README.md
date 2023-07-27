@@ -53,7 +53,7 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
   - Use `npm run setup:vault` to set up your running, targeted vault (e.g. docker container)
     - This command will handle creating a test account, logging in, setting up the CLI, running the Vault Management Server, seeding the vault with any new test credentials, and updating values that have changed. It will place those test credentials within a folder named `AutofillPlaywrightTestItems` in your vault.
   - If you have already created the test account in the vault, use `npm run seed:vault:ciphers` to only seed the vault with the test credentials.
-  - If you need to completely delete/refresh any previously loaded test credentials run the command `npm run seed:vault:refresh`
+  - If you need to completely delete/refresh any previously loaded test credentials run the command `npm run seed:vault:ciphers:refresh`
 
 ### Using Docker Compose
 

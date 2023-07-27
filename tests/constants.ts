@@ -105,6 +105,7 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  // Amazon sometimes adds an intermediate captcha step, skip testing password fill
   {
     cipherType: CipherType.Login,
     url: "https://www.amazon.com/gp/sign-in.html",
@@ -112,12 +113,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "#ap_email",
-        multiStepNextInputKey: "password",
+        // multiStepNextInputKey: "password",
       },
-      password: {
-        value: "fakePassword",
-        selector: "#ap_password",
-      },
+      // password: {
+      //   value: "fakePassword",
+      //   selector: "#ap_password",
+      // },
     },
   },
   {
