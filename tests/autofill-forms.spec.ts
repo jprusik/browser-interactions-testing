@@ -12,9 +12,9 @@ export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
 let testPage: Page;
 
-const vaultEmail = process?.env?.VAULT_EMAIL || "";
-const vaultPassword = process?.env?.VAULT_PASSWORD || "";
-const serverHostURL = process?.env?.SERVER_HOST_URL;
+const vaultEmail = process.env.VAULT_EMAIL || "";
+const vaultPassword = process.env.VAULT_PASSWORD || "";
+const serverHostURL = process.env.SERVER_HOST_URL;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
@@ -122,7 +122,17 @@ test.describe("Extension autofills forms when triggered", () => {
       await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
-    for (const page of testPages) {
+    let pagesToTest = testPages;
+
+    if (debugIsActive) {
+      pagesToTest = pagesToTest.filter(({ onlyTest }) => onlyTest);
+
+      if (!pagesToTest.length) {
+        pagesToTest = testPages;
+      }
+    }
+
+    for (const page of pagesToTest) {
       const { url, inputs } = page;
 
       await test.step(`Autofill the form on page ${url}`, async () => {
@@ -212,10 +222,23 @@ test.describe("Extension autofills forms when triggered", () => {
               .first();
             await nextInputElement.waitFor(defaultWaitForOptions);
 
+            if (inputs[nextInputKey].preFill) {
+              inputs[nextInputKey].preFill();
+            }
+
             await doAutofill();
+          }
+
+          if (debugIsActive) {
+            await testPage.pause();
           }
         }
       });
+    }
+
+    // Hold the window open (don't automatically close out) when debugging
+    if (debugIsActive) {
+      await testPage.pause();
     }
   });
 });

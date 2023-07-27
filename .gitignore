@@ -5,7 +5,8 @@ Thumbs.db
 # Secrets
 .env
 dev-server.local.pem
-*/vault-seeder/tmp
+vault-seeder
+!vault-seeder/abstractions
 ssl.crt
 ssl.key
 
@@ -40,3 +41,6 @@ playwright-report
 --cache-strategy
 /playwright/.cache/
 screenshots
+/test-results/
+/playwright-report/
+/playwright/.cache/

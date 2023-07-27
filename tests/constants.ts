@@ -43,6 +43,7 @@ export const testPages: TestPage[] = [
    * Top 100 websites in the US per SEM Rush as of May 2023
    * @see https://www.semrush.com/blog/most-visited-websites/
    */
+  // Google currently complains about insecurity and refuses to show the password input on the subsequent screen
   {
     cipherType: CipherType.Login,
     url: "https://accounts.google.com/",
@@ -50,12 +51,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "input[type='email']",
-        multiStepNextInputKey: "password",
+        // multiStepNextInputKey: "password",
       },
-      password: {
-        value: "fakePassword",
-        selector: "input[type='password']",
-      },
+      // password: {
+      //   value: "fakePassword",
+      //   selector: "input[type='password']",
+      // },
     },
   },
   {
@@ -104,6 +105,7 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  // Amazon sometimes adds an intermediate captcha step, skip testing password fill
   {
     cipherType: CipherType.Login,
     url: "https://www.amazon.com/gp/sign-in.html",
@@ -111,12 +113,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "#ap_email",
-        multiStepNextInputKey: "password",
+        // multiStepNextInputKey: "password",
       },
-      password: {
-        value: "fakePassword",
-        selector: "#ap_password",
-      },
+      // password: {
+      //   value: "fakePassword",
+      //   selector: "#ap_password",
+      // },
     },
   },
   {
@@ -128,6 +130,10 @@ export const testPages: TestPage[] = [
         selector: "input[autocomplete='username']",
         multiStepNextInputKey: "password",
       },
+      password: {
+        value: "areallygoodpassword",
+        selector: "input[name='password']",
+      },
     },
   },
   {
@@ -138,6 +144,10 @@ export const testPages: TestPage[] = [
         value: "bwplaywright",
         selector: "#login-username",
         multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "ayahoopassword",
+        selector: "input#login-passwd",
       },
     },
   },
@@ -349,7 +359,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: 'input[name="Email Address"]',
+        // multiStepNextInputKey: "password",
       },
+      // password: {
+      //   value: "aWalmartPassword",
+      //   selector: "input[name='password']"
+      // },
     },
   },
   {
@@ -438,7 +453,7 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.imdb.com/registration/signin?ref_=signup_cm_nc_ca_btn&u=%2F",
+    url: "https://www.imdb.com/registration/signin",
     formSetupClickSelectors: ["a[href^='https://www.imdb.com/ap/signin']"],
     inputs: {
       username: {
@@ -451,6 +466,7 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  // Indeed is sometimes failing to make it to the second (password) screen
   {
     cipherType: CipherType.Login,
     url: "https://secure.indeed.com/auth",
@@ -458,7 +474,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "input[type='email']",
+        // multiStepNextInputKey: "password",
       },
+      // password: {
+      //   value: "anIndeedPassword",
+      //   selector: "input[name='__password']"
+      // },
     },
   },
   {
@@ -588,20 +609,24 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  // dailymail sometimes stalls waiting for the page load event
+  // Note: dailymail also fires a notification permissions request. If you accept, it automatically downloads an executable called `MailOnlineSetup.exe`.
   {
     cipherType: CipherType.Login,
     url: "https://www.dailymail.co.uk/registration/login.html",
     inputs: {
       username: {
         value: "bwplaywright@gmail.com",
-        selector: "#reg-lbx-email-page",
+        selector: "input[name='j_username']",
       },
       password: {
         value: "fakePassword",
-        selector: "#reg-lbx-password-page",
+        selector: "input[name='j_password']",
       },
     },
   },
+  // Home Depot's login requires an intermediate step of selecting a login with password option after entering an email
+  // Additionally, the email login sometimes fails on the first step (presumably due to automation detection)
   {
     cipherType: CipherType.Login,
     url: "https://www.homedepot.com/auth/view/signin",
@@ -609,7 +634,17 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "#username",
+        // multiStepNextInputKey: "password",
       },
+      // password: {
+      //   preFill: () => {
+      //     const buttons = document.querySelectorAll('button.u__default-link');
+      //     const dismissButton = (Array.from(buttons) as HTMLButtonElement[]).find(({innerText}) => innerText === "No Thanks")
+      //     dismissButton && dismissButton.click();
+      //   },
+      //   value: "aHomeDepotPassword",
+      //   selector: "input#password-input-field"
+      // },
     },
   },
   {

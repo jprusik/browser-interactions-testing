@@ -13,6 +13,8 @@ import { testPages } from "../../tests/constants";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../../clients/libs/common/src/enums";
 
+const PLAYWRIGHT_CIPHERS_FOLDER = "AutofillPlaywrightTestingItems";
+
 configDotenv();
 
 class VaultSeeder {
@@ -33,9 +35,8 @@ class VaultSeeder {
       throw new Error("Unable to seed vault, no session token found.");
     }
 
-    const testsFolder = await this.getPlaywrightCiphersFolder(
-      "AutofillPlaywrightTestingItems",
-    );
+    const testsFolder = await this.getPlaywrightCiphersFolder(PLAYWRIGHT_CIPHERS_FOLDER);
+
     if (!testsFolder) {
       throw new Error("Unable to seed vault, tests folder not found.");
     }
@@ -52,7 +53,6 @@ class VaultSeeder {
       console.log("Refreshing vault and deleting all testing items...");
       for (let index = 0; index < vaultItems.length; index++) {
         const vaultItem = vaultItems[index];
-        await this.sleep(this.apiDebounce * index);
         await this.deleteVaultItem(vaultItem);
         console.log(`${index + 1} / ${vaultItems.length} items deleted...`);
       }
@@ -61,8 +61,6 @@ class VaultSeeder {
     }
 
     for (let index = 0; index < testPages.length; index++) {
-      await this.sleep(this.apiDebounce * index);
-
       const testPage = testPages[index];
       const testPageItemName = `${index} ${testPage.url}`;
       const existingItem = existingVaultItems[testPageItemName];
