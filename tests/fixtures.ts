@@ -23,10 +23,15 @@ export const test = base.extend<{
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
         "--disable-dev-shm-usage",
+        "--disable-blink-features=AutomationControlled", // navigator.webdriver = false
       ],
       ignoreDefaultArgs: [
         "--disable-component-extensions-with-background-pages",
+        "--enable-automation",
       ],
+      // Help mitigate automation detection with a known-good userAgent
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
       viewport: {
         width: 1000,
         height: 1000,
