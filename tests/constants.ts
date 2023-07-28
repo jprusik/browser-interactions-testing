@@ -694,11 +694,358 @@ export const testPages: TestPage[] = [
       },
     },
   },
-  //
-  //
-  //
-  //
-  //
+  {
+    cipherType: CipherType.Login,
+    url: "https://character.ai",
+    additionalLoginUrls: ["https://character-ai.us.auth0.com"],
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Close the pop-up prompting you to use the mobile app
+          await page.locator("#mobile-app-modal-close").click();
+          // Accept the cookie policy
+          await page
+            .locator("button")
+            .filter({ hasText: "Accept" })
+            .first()
+            .click();
+          // Go to the login page (cannot go directly to the login page)
+          await page
+            .locator("button")
+            .filter({ hasText: "Log In" })
+            .first()
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+      },
+      password: {
+        value: "fakeCharacterAIPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://platform.openai.com/login?launch",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeOpenAIPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.ups.com/lasso/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeUPSPassword",
+        selector: "#pwd",
+      },
+    },
+  },
+  // Patreon will sometimes send login links to the email
+  // Patreon prequalify the email and start account creation workflow if it isn't recognized as an existing account
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.patreon.com/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "input[name='email']",
+        multiStepNextInputKey: "password",
+      },
+      // @TODO create Patreon account with test email in order to test password auto-fill
+      // password: {
+      //   value: "fakePatreonPassword",
+      //   selector: "input[placeholder='Your name']",
+      // },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://imgur.com/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+      },
+      password: {
+        value: "fakeImgurPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://ign.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open user account menu
+          await page.locator("button.login-avatar").click();
+          // Open login modal
+          await page
+            .locator("button")
+            .filter({ hasText: "Login" })
+            .first()
+            .click();
+          // Open the login form
+          await page
+            .locator("button")
+            .filter({ hasText: "Log in with an email or username" })
+            .first()
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakeIGNPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://aws.amazon.com",
+    additionalLoginUrls: ["https://signin.aws.amazon.com"],
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the login link to get redirected to the login domain/page
+          await page
+            .locator("#aws-page-header a")
+            .filter({ hasText: "Sign In" })
+            .first()
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "input#resolving_input[type='email']",
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create Amazon AWS account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.roblox.com/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#login-username",
+      },
+      password: {
+        value: "fakeRobloxPassword",
+        selector: "#login-password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.spotify.com/en/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#login-username",
+      },
+      password: {
+        value: "fakeSpotifyPassword",
+        selector: "#login-password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.instructure.com/canvas/login/free-for-teacher",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#edit-email",
+      },
+      password: {
+        value: "fakeInstructurePassword",
+        selector: "#edit-password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://badgr.com/auth/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+      },
+      password: {
+        value: "fakeBadgrPassword",
+        selector: "#enter-password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://portfolium.com/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#pf-simple-sign-in--field--identity",
+      },
+      password: {
+        value: "fakePortfoliumPassword",
+        selector: "#pf-simple-sign-in--field--password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://app.masteryconnect.com/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#login",
+      },
+      password: {
+        value: "fakeMasteryPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://identity.us2.kimonocloud.com/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeElevateDSPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://app.learnplatform.com/users/sign_in",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#email",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeLearnPlatformPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.target.com/account",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+      },
+      password: {
+        value: "fakeTargetPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.craigslist.org/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#inputEmailHandle",
+      },
+      password: {
+        value: "fakeCraigsListPassword",
+        selector: "#inputPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.capitalone.com/",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "input.login-username",
+      },
+      password: {
+        value: "fakeCapitalOneWidgetPassword",
+        selector: "input.login-password[type='password']",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://verified.capitalone.com/auth/signin",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "input[aria-describedby='label-username-input']",
+      },
+      password: {
+        value: "fakeCapitalOnePassword",
+        selector: "input[aria-describedby='label-password-input']",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.fedex.com/secure-login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#userId",
+      },
+      password: {
+        value: "fakeFedExPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.tumblr.com/",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the login button to bring up the account modal
+          await page.locator("a").filter({ hasText: "Log In" }).first().click();
+          // Click the "Continue with email" button
+          await page
+            .locator('button[aria-label="Continue with email"]')
+            .first()
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "input[name='email']",
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create tumblr account with test email in order to test password auto-fill
+    },
+  },
+
   /**
    * Commenting out known failure cases for now
    *
