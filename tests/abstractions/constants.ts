@@ -1,3 +1,4 @@
+import { Page } from "@playwright/test";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import {
   FieldType,
@@ -9,7 +10,7 @@ type FillProperties = {
   value: string;
   selector: string;
   multiStepNextInputKey?: string;
-  preFill?: () => void;
+  preFillActions?: (page: Page) => void;
 };
 
 type TestPage = {

@@ -51,12 +51,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "input[type='email']",
-        // multiStepNextInputKey: "password",
+        multiStepNextInputKey: "password",
       },
-      // password: {
-      //   value: "fakePassword",
-      //   selector: "input[type='password']",
-      // },
+      password: {
+        value: "fakePassword",
+        selector: "input[type='password']",
+      },
     },
   },
   {
@@ -121,6 +121,7 @@ export const testPages: TestPage[] = [
       // },
     },
   },
+  // When Twitter sees "unusual login activity", it requests the username or phone number in an intermediate step
   {
     cipherType: CipherType.Login,
     url: "https://twitter.com/login?lang=en",
@@ -128,12 +129,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "input[autocomplete='username']",
-        multiStepNextInputKey: "password",
+        // multiStepNextInputKey: "password",
       },
-      password: {
-        value: "areallygoodpassword",
-        selector: "input[name='password']",
-      },
+      // password: {
+      //   value: "areallygoodpassword",
+      //   selector: "input[name='password']",
+      // },
     },
   },
   {
@@ -359,12 +360,12 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: 'input[name="Email Address"]',
-        // multiStepNextInputKey: "password",
+        multiStepNextInputKey: "password",
       },
-      // password: {
-      //   value: "aWalmartPassword",
-      //   selector: "input[name='password']"
-      // },
+      password: {
+        value: "aWalmartPassword",
+        selector: "input[name='password']",
+      },
     },
   },
   {
@@ -466,7 +467,7 @@ export const testPages: TestPage[] = [
       },
     },
   },
-  // Indeed is sometimes failing to make it to the second (password) screen
+  // Indeed is sometimes requiring a captcha to make it to the second (password) screen
   {
     cipherType: CipherType.Login,
     url: "https://secure.indeed.com/auth",
@@ -474,12 +475,14 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "input[type='email']",
-        // multiStepNextInputKey: "password",
+        multiStepNextInputKey: "password",
       },
-      // password: {
-      //   value: "anIndeedPassword",
-      //   selector: "input[name='__password']"
-      // },
+      password: {
+        preFillActions: async (page) =>
+          await page.locator("#auth-page-google-password-fallback").click(),
+        value: "anIndeedPassword",
+        selector: "input[name='__password']",
+      },
     },
   },
   {
@@ -539,6 +542,7 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  // Zillow has a bot/detection "press & hold" test that pariodically triggers
   {
     cipherType: CipherType.Login,
     url: "https://www.zillow.com/",
@@ -634,17 +638,18 @@ export const testPages: TestPage[] = [
       username: {
         value: "bwplaywright@gmail.com",
         selector: "#username",
-        // multiStepNextInputKey: "password",
+        multiStepNextInputKey: "password",
       },
-      // password: {
-      //   preFill: () => {
-      //     const buttons = document.querySelectorAll('button.u__default-link');
-      //     const dismissButton = (Array.from(buttons) as HTMLButtonElement[]).find(({innerText}) => innerText === "No Thanks")
-      //     dismissButton && dismissButton.click();
-      //   },
-      //   value: "aHomeDepotPassword",
-      //   selector: "input#password-input-field"
-      // },
+      password: {
+        preFillActions: async (page) => {
+          const dismissButton = await page
+            .locator("button.u__default-link")
+            .filter({ hasText: "No Thanks" });
+          dismissButton?.click();
+        },
+        value: "aHomeDepotPassword",
+        selector: "input#password-input-field",
+      },
     },
   },
   {

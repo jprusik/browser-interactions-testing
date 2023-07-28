@@ -7,6 +7,7 @@ import {
   LocatorWaitForOptions,
   PageGoToOptions,
 } from "./abstractions/test-pages";
+import { FillProperties } from "./abstractions/constants";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -64,6 +65,12 @@ test.describe("Extension autofills forms when triggered", () => {
       }
 
       testPage = contextPages[0];
+
+      if (debugIsActive) {
+        console.log(
+          (await testPage.evaluate(() => navigator.userAgent)) + "\n",
+        );
+      }
     });
 
     await test.step("Configure the environment", async () => {
@@ -137,10 +144,23 @@ test.describe("Extension autofills forms when triggered", () => {
 
       await test.step(`Autofill the form on page ${url}`, async () => {
         testPage.setDefaultNavigationTimeout(60000);
-        const navigationPromise =
-          testPage.waitForNavigation(defaultGotoOptions);
-        await testPage.goto(url);
-        await navigationPromise;
+
+        await testPage.goto(url, defaultGotoOptions);
+
+        const inputKeys = Object.keys(inputs);
+        const firstInput = inputs[inputKeys[0]];
+        const firstInputPreFill = firstInput.preFillActions;
+        if (firstInputPreFill) {
+          try {
+            firstInputPreFill(testPage);
+          } catch (error) {
+            console.log("There was a prefill error:", error);
+
+            if (debugIsActive) {
+              await testPage.pause();
+            }
+          }
+        }
 
         let hiddenFormSelector;
         if (page.hiddenForm) {
@@ -178,17 +198,15 @@ test.describe("Extension autofills forms when triggered", () => {
           ? testPage.frameLocator(hiddenFormSelector)
           : testPage;
 
-        const inputKeys = Object.keys(inputs);
-        const firstInputKey = inputKeys[0];
         const initialInputElement = await testedFrame
-          .locator(inputs[firstInputKey]?.selector)
+          .locator(firstInput?.selector)
           .first();
         await initialInputElement.waitFor(defaultWaitForOptions);
 
         await doAutofill();
 
         for (const inputKey of inputKeys) {
-          const currentInput = inputs[inputKey];
+          const currentInput: FillProperties = inputs[inputKey];
           const currentInputElement = testedFrame.locator(
             currentInput.selector,
           );
@@ -204,11 +222,25 @@ test.describe("Extension autofills forms when triggered", () => {
             ),
           });
 
-          const nextInputKey = currentInput.multiStepNextInputKey;
-          if (nextInputKey && inputs[nextInputKey]) {
+          const nextInput: FillProperties | undefined =
+            currentInput.multiStepNextInputKey &&
+            inputs[currentInput.multiStepNextInputKey];
+
+          if (nextInput) {
             await currentInputElement.press("Enter");
 
-            const nextInputSelector = inputs[nextInputKey].selector;
+            const nextInputPreFill = nextInput.preFillActions;
+            if (nextInputPreFill) {
+              try {
+                nextInputPreFill(testPage);
+              } catch (error) {
+                console.log("There was a prefill error:", error);
+
+                if (debugIsActive) {
+                  await testPage.pause();
+                }
+              }
+            }
 
             const iframeElement = Boolean(page.hiddenForm?.iframeSource)
               ? await testPage.locator(hiddenFormSelector).elementHandle()
@@ -217,14 +249,11 @@ test.describe("Extension autofills forms when triggered", () => {
               ? await iframeElement.contentFrame()
               : testPage;
 
+            const nextInputSelector = nextInput.selector;
             const nextInputElement = testedFrame
               .locator(nextInputSelector)
               .first();
             await nextInputElement.waitFor(defaultWaitForOptions);
-
-            if (inputs[nextInputKey].preFill) {
-              inputs[nextInputKey].preFill();
-            }
 
             await doAutofill();
           }
