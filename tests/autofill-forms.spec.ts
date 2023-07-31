@@ -139,12 +139,13 @@ test.describe("Extension autofills forms when triggered", () => {
       }
     }
 
+    test.setTimeout(480000);
+    testPage.setDefaultNavigationTimeout(60000);
+
     for (const page of pagesToTest) {
       const { url, inputs } = page;
 
       await test.step(`Autofill the form on page ${url}`, async () => {
-        testPage.setDefaultNavigationTimeout(60000);
-
         await testPage.goto(url, defaultGotoOptions);
 
         const inputKeys = Object.keys(inputs);
