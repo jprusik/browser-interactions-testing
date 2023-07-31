@@ -9,7 +9,7 @@ import {
   VaultItem,
 } from "./abstractions/vault-seeder";
 import { FillProperties, TestPage } from "../../tests/abstractions/constants";
-import { testPages } from "../../tests/constants";
+import { testPages, knownFailureCases } from "../../tests/constants";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../../clients/libs/common/src/enums";
 
@@ -60,8 +60,11 @@ class VaultSeeder {
       vaultItems.forEach((item) => (existingVaultItems[item.name] = item));
     }
 
-    for (let index = 0; index < testPages.length; index++) {
-      const testPage = testPages[index];
+    // Include known failure cases in vault seeding for test debugging
+    const allTestCases = [...testPages, ...knownFailureCases];
+
+    for (let index = 0; index < allTestCases.length; index++) {
+      const testPage = allTestCases[index];
       const testPageItemName = `${index} ${testPage.url}`;
       const existingItem = existingVaultItems[testPageItemName];
 

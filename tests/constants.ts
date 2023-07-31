@@ -1475,8 +1475,8 @@ export const testPages: TestPage[] = [
   },
 ];
 
-export const knownFailureCases = [
-  // Known failure cases:
+// Known failure cases; expected to fail
+export const knownFailureCases: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/many-input-form.html`,
@@ -1526,6 +1526,7 @@ export const knownFailureCases = [
     cipherType: CipherType.Login,
     url: "https://login.clear.com.br",
     inputs: {
+      // Clear expects numerically-formatted values
       username: { selector: "#username", value: "12345678901111" },
       password: { selector: "#password", value: "098765" },
     },
