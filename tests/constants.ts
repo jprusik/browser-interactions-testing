@@ -7,14 +7,22 @@ configDotenv();
 
 const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
 
+const testUserName = "bwplaywright";
+/*
+Some websites "prequalify" an entered email to see if they have an associated account.
+If they don't, they may disallow password entry or force account create workflow, so it is
+important that `testUserEmail` is a real address with organizational control.
+*/
+const testUserEmail = "bwplaywright@gmail.com";
+
 export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/basic-form.html`,
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      username: { value: "jsmith", selector: "#username" },
-      password: { value: "areallygoodpassword", selector: "#password" },
+      username: { selector: "#username", value: testUserName },
+      password: { selector: "#password", value: "fakeBasicFormPassword" },
     },
   },
   {
@@ -23,39 +31,38 @@ export const testPages: TestPage[] = [
     uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "ms-smith",
-        selector: "#username",
         multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserName,
       },
-      password: { value: "ms-password", selector: "#password" },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://fill.dev/form/login-simple",
-    inputs: {
-      username: { value: "simple-test", selector: "#username" },
-      password: { value: "apassword", selector: "#password" },
+      password: { selector: "#password", value: "fakeMultiStepPassword" },
     },
   },
 
   /**
-   * Top 100 websites in the US per SEM Rush as of May 2023
-   * @see https://www.semrush.com/blog/most-visited-websites/
+   * Live websites
    */
+  {
+    cipherType: CipherType.Login,
+    url: "https://fill.dev/form/login-simple",
+    inputs: {
+      username: { selector: "#username", value: testUserName },
+      password: { selector: "#password", value: "fakeSimpleLoginPassword" },
+    },
+  },
   // Google currently complains about insecurity and refuses to show the password input on the subsequent screen
   {
     cipherType: CipherType.Login,
     url: "https://accounts.google.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
         multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "input[type='password']",
+        value: "fakeGooglePassword",
       },
     },
   },
@@ -64,12 +71,12 @@ export const testPages: TestPage[] = [
     url: "https://www.facebook.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#pass",
+        value: "fakeFacebookPassword",
       },
     },
   },
@@ -82,12 +89,12 @@ export const testPages: TestPage[] = [
     },
     inputs: {
       username: {
-        value: "bwplaywright",
         selector: "#loginUsername",
+        value: testUserName,
       },
       password: {
-        value: "fakePassword",
         selector: "#loginPassword",
+        value: "fakeRedditPassword",
       },
     },
   },
@@ -96,12 +103,12 @@ export const testPages: TestPage[] = [
     url: "https://www.reddit.com/login",
     inputs: {
       username: {
-        value: "bwplaywright",
         selector: "#loginUsername",
+        value: testUserName,
       },
       password: {
-        value: "fakePassword",
         selector: "#loginPassword",
+        value: "fakeRedditIframePassword",
       },
     },
   },
@@ -111,13 +118,13 @@ export const testPages: TestPage[] = [
     url: "https://www.amazon.com/gp/sign-in.html",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#ap_email",
         // multiStepNextInputKey: "password",
+        selector: "#ap_email",
+        value: testUserEmail,
       },
       // password: {
-      //   value: "fakePassword",
       //   selector: "#ap_password",
+      //   value: "fakeAmazonPassword",
       // },
     },
   },
@@ -127,13 +134,13 @@ export const testPages: TestPage[] = [
     url: "https://twitter.com/login?lang=en",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[autocomplete='username']",
         // multiStepNextInputKey: "password",
+        selector: "input[autocomplete='username']",
+        value: testUserEmail,
       },
       // password: {
-      //   value: "areallygoodpassword",
       //   selector: "input[name='password']",
+      //   value: "fakeTwitterPassword",
       // },
     },
   },
@@ -142,13 +149,13 @@ export const testPages: TestPage[] = [
     url: "https://login.yahoo.com",
     inputs: {
       username: {
-        value: "bwplaywright",
-        selector: "#login-username",
         multiStepNextInputKey: "password",
+        selector: "#login-username",
+        value: testUserName,
       },
       password: {
-        value: "ayahoopassword",
         selector: "input#login-passwd",
+        value: "fakeYahooPassword",
       },
     },
   },
@@ -157,12 +164,12 @@ export const testPages: TestPage[] = [
     url: "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page",
     inputs: {
       username: {
-        value: "bwplaywright",
         selector: "#wpName1",
+        value: testUserName,
       },
       password: {
-        value: "fakePassword",
         selector: "#wpPassword1",
+        value: "fakeWikipediaPassword",
       },
     },
   },
@@ -171,12 +178,12 @@ export const testPages: TestPage[] = [
     url: "https://www.instagram.com/accounts/login",
     inputs: {
       username: {
-        value: "bwplaywright",
         selector: "input[name='username']",
+        value: testUserName,
       },
       password: {
-        value: "fakePassword",
         selector: "input[name='password']",
+        value: "fakeInstagramPassword",
       },
     },
   },
@@ -185,12 +192,12 @@ export const testPages: TestPage[] = [
     url: "https://auth.fandom.com/signin",
     inputs: {
       username: {
-        value: "Bwplaywright",
         selector: "input[data-test='signin-username-field']",
+        value: testUserName,
       },
       password: {
-        value: "fakePassword",
         selector: "input[data-test='signin-password-field']",
+        value: "fakeFandomPassword",
       },
     },
   },
@@ -199,12 +206,12 @@ export const testPages: TestPage[] = [
     url: "https://weather.com/login",
     inputs: {
       username: {
-        value: "bwplaywright",
         selector: "#loginEmail",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#loginPassword",
+        value: "fakeWeatherPassword",
       },
     },
   },
@@ -213,14 +220,14 @@ export const testPages: TestPage[] = [
     url: "https://login.live.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
         multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector:
           "input[aria-label='Enter the password for bwplaywright@gmail.com']",
+        value: "fakeLivePassword",
       },
     },
   },
@@ -229,14 +236,14 @@ export const testPages: TestPage[] = [
     url: "https://login.microsoftonline.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
         multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector:
           "input[aria-label='Enter the password for bwplaywright@gmail.com']",
+        value: "fakeMicrosoftOnlinePassword",
       },
     },
   },
@@ -252,12 +259,12 @@ export const testPages: TestPage[] = [
     ],
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "input[placeholder='Email or username']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "input[placeholder='Password']",
+        value: "fakeTikTokPassword",
       },
     },
   },
@@ -266,12 +273,12 @@ export const testPages: TestPage[] = [
     url: "https://authentication.taboola.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#j_username[placeholder='Type Email...']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#j_password[placeholder='Type Password...']",
+        value: "fakeTaboolaPassword",
       },
     },
   },
@@ -280,12 +287,12 @@ export const testPages: TestPage[] = [
     url: "https://www.cnn.com/account/log-in",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login-email-input",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#login-password-input",
+        value: "fakeCNNPassword",
       },
     },
   },
@@ -294,13 +301,13 @@ export const testPages: TestPage[] = [
     url: "https://signin.ebay.com/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#userid",
         multiStepNextInputKey: "password",
+        selector: "#userid",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#pass",
+        value: "fakeEbayPassword",
       },
     },
   },
@@ -313,12 +320,12 @@ export const testPages: TestPage[] = [
     },
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login-username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password-input",
+        value: "fakeTwitchPassword",
       },
     },
   },
@@ -327,12 +334,12 @@ export const testPages: TestPage[] = [
     url: "https://www.linkedin.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#session_key",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#session_password",
+        value: "fakeLinkedInPassword",
       },
     },
   },
@@ -341,12 +348,12 @@ export const testPages: TestPage[] = [
     url: "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeLinkedIn2Password",
       },
     },
   },
@@ -358,13 +365,13 @@ export const testPages: TestPage[] = [
     url: "https://www.walmart.com/account/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: 'input[name="Email Address"]',
         multiStepNextInputKey: "password",
+        selector: 'input[name="Email Address"]',
+        value: testUserEmail,
       },
       password: {
-        value: "aWalmartPassword",
         selector: "input[name='password']",
+        value: "fakeWalmartPassword",
       },
     },
   },
@@ -373,12 +380,12 @@ export const testPages: TestPage[] = [
     url: "https://www.quora.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeQuoraPassword",
       },
     },
   },
@@ -387,13 +394,13 @@ export const testPages: TestPage[] = [
     url: "https://myaccount.nytimes.com/auth/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
         multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeNYTimesPassword",
       },
     },
   },
@@ -402,13 +409,13 @@ export const testPages: TestPage[] = [
     url: "https://my.foxnews.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
         multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "input[type='password']",
+        value: "fakeFoxNewsPassword",
       },
     },
   },
@@ -428,13 +435,13 @@ export const testPages: TestPage[] = [
     },
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "[data-testid='InputIdentityFlowValue']",
         multiStepNextInputKey: "password",
+        selector: "[data-testid='InputIdentityFlowValue']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#InputPassword",
+        value: "fakeESPNPassword",
       },
     },
   },
@@ -443,12 +450,12 @@ export const testPages: TestPage[] = [
     url: "https://reg.usps.com/entreg/LoginAction_input",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeUSPSPassword",
       },
     },
   },
@@ -458,12 +465,12 @@ export const testPages: TestPage[] = [
     formSetupClickSelectors: ["a[href^='https://www.imdb.com/ap/signin']"],
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#ap_email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#ap_password",
+        value: "fakeIMDBPassword",
       },
     },
   },
@@ -473,15 +480,15 @@ export const testPages: TestPage[] = [
     url: "https://secure.indeed.com/auth",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
         multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
       },
       password: {
         preFillActions: async (page) =>
           await page.locator("#auth-page-google-password-fallback").click(),
-        value: "anIndeedPassword",
         selector: "input[name='__password']",
+        value: "fakeIndeedPassword",
       },
     },
   },
@@ -490,13 +497,13 @@ export const testPages: TestPage[] = [
     url: "https://www.paypal.com/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
         multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakePaypalPassword",
       },
     },
   },
@@ -505,12 +512,12 @@ export const testPages: TestPage[] = [
     url: "https://zoom.us/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeZoomPassword",
       },
     },
   },
@@ -519,12 +526,12 @@ export const testPages: TestPage[] = [
     url: "https://discord.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "input[aria-label='Email or Phone Number']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "input[aria-label='Password']",
+        value: "fakeDiscordPassword",
       },
     },
   },
@@ -533,12 +540,12 @@ export const testPages: TestPage[] = [
     url: "https://www.netflix.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#id_userLoginId",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#id_password",
+        value: "fakeNetflixPassword",
       },
     },
   },
@@ -554,12 +561,12 @@ export const testPages: TestPage[] = [
     },
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#reg-login-email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#inputs-password",
+        value: "fakeZillowPassword",
       },
     },
   },
@@ -572,12 +579,12 @@ export const testPages: TestPage[] = [
     },
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#join_neu_email_field",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#join_neu_password_field",
+        value: "fakeEtsyPassword",
       },
     },
   },
@@ -590,12 +597,12 @@ export const testPages: TestPage[] = [
     },
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakePinterestPassword",
       },
     },
   },
@@ -604,12 +611,12 @@ export const testPages: TestPage[] = [
     url: "https://www.pinterest.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakePinterestPassword",
       },
     },
   },
@@ -620,12 +627,12 @@ export const testPages: TestPage[] = [
     url: "https://www.dailymail.co.uk/registration/login.html",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "input[name='j_username']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "input[name='j_password']",
+        value: "fakeDailyMailPassword",
       },
     },
   },
@@ -636,9 +643,9 @@ export const testPages: TestPage[] = [
     url: "https://www.homedepot.com/auth/view/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#username",
         multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
       },
       password: {
         preFillActions: async (page) => {
@@ -647,8 +654,8 @@ export const testPages: TestPage[] = [
             .filter({ hasText: "No Thanks" });
           dismissButton?.click();
         },
-        value: "aHomeDepotPassword",
         selector: "input#password-input-field",
+        value: "fakeHomeDepotPassword",
       },
     },
   },
@@ -657,12 +664,12 @@ export const testPages: TestPage[] = [
     url: "https://github.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login_field",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeGithubPassword",
       },
     },
   },
@@ -671,12 +678,12 @@ export const testPages: TestPage[] = [
     url: "https://nypost.com/account/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeNYPostPassword",
       },
     },
   },
@@ -685,12 +692,12 @@ export const testPages: TestPage[] = [
     url: "https://wwwl.accuweather.com/premium_login.php",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeAccuweatherPassword",
       },
     },
   },
@@ -717,12 +724,12 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeCharacterAIPassword",
         selector: "#password",
+        value: "fakeCharacterAIPassword",
       },
     },
   },
@@ -731,13 +738,13 @@ export const testPages: TestPage[] = [
     url: "https://platform.openai.com/login?launch",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#username",
         multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeOpenAIPassword",
         selector: "#password",
+        value: "fakeOpenAIPassword",
       },
     },
   },
@@ -746,7 +753,7 @@ export const testPages: TestPage[] = [
     url: "https://www.ups.com/lasso/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
+        value: testUserEmail,
         selector: "#email",
         multiStepNextInputKey: "password",
       },
@@ -763,14 +770,14 @@ export const testPages: TestPage[] = [
     url: "https://www.patreon.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[name='email']",
         multiStepNextInputKey: "password",
+        selector: "input[name='email']",
+        value: testUserEmail,
       },
       // @TODO create Patreon account with test email in order to test password auto-fill
       // password: {
-      //   value: "fakePatreonPassword",
       //   selector: "input[placeholder='Your name']",
+      //   value: "fakePatreonPassword",
       // },
     },
   },
@@ -779,12 +786,12 @@ export const testPages: TestPage[] = [
     url: "https://imgur.com/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeImgurPassword",
         selector: "#password",
+        value: "fakeImgurPassword",
       },
     },
   },
@@ -809,12 +816,12 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeIGNPassword",
         selector: "#password",
+        value: "fakeIGNPassword",
       },
     },
   },
@@ -832,8 +839,8 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "input#resolving_input[type='email']",
+        value: testUserEmail,
         // multiStepNextInputKey: "password",
       },
       // @TODO create Amazon AWS account with test email in order to test password auto-fill
@@ -844,12 +851,12 @@ export const testPages: TestPage[] = [
     url: "https://www.roblox.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login-username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeRobloxPassword",
         selector: "#login-password",
+        value: "fakeRobloxPassword",
       },
     },
   },
@@ -858,12 +865,12 @@ export const testPages: TestPage[] = [
     url: "https://accounts.spotify.com/en/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login-username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeSpotifyPassword",
         selector: "#login-password",
+        value: "fakeSpotifyPassword",
       },
     },
   },
@@ -872,12 +879,12 @@ export const testPages: TestPage[] = [
     url: "https://www.instructure.com/canvas/login/free-for-teacher",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#edit-email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeInstructurePassword",
         selector: "#edit-password",
+        value: "fakeInstructurePassword",
       },
     },
   },
@@ -886,12 +893,12 @@ export const testPages: TestPage[] = [
     url: "https://badgr.com/auth/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeBadgrPassword",
         selector: "#enter-password",
+        value: "fakeBadgrPassword",
       },
     },
   },
@@ -900,12 +907,12 @@ export const testPages: TestPage[] = [
     url: "https://portfolium.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#pf-simple-sign-in--field--identity",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePortfoliumPassword",
         selector: "#pf-simple-sign-in--field--password",
+        value: "fakePortfoliumPassword",
       },
     },
   },
@@ -914,12 +921,12 @@ export const testPages: TestPage[] = [
     url: "https://app.masteryconnect.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeMasteryPassword",
         selector: "#password",
+        value: "fakeMasteryPassword",
       },
     },
   },
@@ -928,13 +935,13 @@ export const testPages: TestPage[] = [
     url: "https://identity.us2.kimonocloud.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
         multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeElevateDSPassword",
         selector: "#password",
+        value: "fakeElevateDSPassword",
       },
     },
   },
@@ -943,13 +950,13 @@ export const testPages: TestPage[] = [
     url: "https://app.learnplatform.com/users/sign_in",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
         multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeLearnPlatformPassword",
         selector: "#password",
+        value: "fakeLearnPlatformPassword",
       },
     },
   },
@@ -958,12 +965,12 @@ export const testPages: TestPage[] = [
     url: "https://www.target.com/account",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeTargetPassword",
         selector: "#password",
+        value: "fakeTargetPassword",
       },
     },
   },
@@ -972,12 +979,12 @@ export const testPages: TestPage[] = [
     url: "https://accounts.craigslist.org/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#inputEmailHandle",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeCraigsListPassword",
         selector: "#inputPassword",
+        value: "fakeCraigsListPassword",
       },
     },
   },
@@ -987,12 +994,12 @@ export const testPages: TestPage[] = [
     uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "input.login-username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeCapitalOneWidgetPassword",
         selector: "input.login-password[type='password']",
+        value: "fakeCapitalOneWidgetPassword",
       },
     },
   },
@@ -1002,12 +1009,12 @@ export const testPages: TestPage[] = [
     uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "input[aria-describedby='label-username-input']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeCapitalOnePassword",
         selector: "input[aria-describedby='label-password-input']",
+        value: "fakeCapitalOnePassword",
       },
     },
   },
@@ -1016,12 +1023,12 @@ export const testPages: TestPage[] = [
     url: "https://www.fedex.com/secure-login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#userId",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeFedExPassword",
         selector: "#password",
+        value: "fakeFedExPassword",
       },
     },
   },
@@ -1030,6 +1037,7 @@ export const testPages: TestPage[] = [
     url: "https://www.tumblr.com",
     inputs: {
       username: {
+        // multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the login button to bring up the account modal
           await page.locator("a").filter({ hasText: "Log In" }).first().click();
@@ -1039,9 +1047,8 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "input[name='email']",
-        // multiStepNextInputKey: "password",
+        value: testUserEmail,
       },
       // @TODO create tumblr account with test email in order to test password auto-fill
     },
@@ -1052,9 +1059,9 @@ export const testPages: TestPage[] = [
     url: "https://account.samsung.com/membership/auth/sign-in",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#iptLgnPlnID",
         // multiStepNextInputKey: "password",
+        selector: "#iptLgnPlnID",
+        value: testUserEmail,
       },
     },
   },
@@ -1063,8 +1070,8 @@ export const testPages: TestPage[] = [
     url: "https://seguro.marca.com/registro/v3/?view=login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#inputEmailLogin",
+        value: testUserEmail,
       },
       // @TODO create marca account with test email in order to test password auto-fill
     },
@@ -1074,12 +1081,12 @@ export const testPages: TestPage[] = [
     url: "https://www.bestbuy.com/identity/global/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#fld-e",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeBestBuyPassword",
         selector: "#fld-p1",
+        value: "fakeBestBuyPassword",
       },
     },
   },
@@ -1096,8 +1103,8 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#EmailPage-EmailField",
+        value: testUserEmail,
         // multiStepNextInputKey: "password",
       },
       // @TODO create an adobe account with test email in order to test password auto-fill
@@ -1108,12 +1115,12 @@ export const testPages: TestPage[] = [
     url: "https://auth.hulu.com/web/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "input[data-automationid='email-field']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeHuluPassword",
         selector: "input[data-automationid='password-field']",
+        value: "fakeHuluPassword",
       },
     },
   },
@@ -1122,12 +1129,12 @@ export const testPages: TestPage[] = [
     url: "https://account.bbc.com/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#user-identifier-input",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeBBCPassword",
         selector: "#password-input",
+        value: "fakeBBCPassword",
       },
     },
   },
@@ -1137,13 +1144,13 @@ export const testPages: TestPage[] = [
     uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector:
           "form div:has-text('Sign in with account name') input[type='text']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeSteamCommunityPassword",
         selector: "form input[type='password']",
+        value: "fakeSteamCommunityPassword",
       },
     },
   },
@@ -1153,13 +1160,13 @@ export const testPages: TestPage[] = [
     uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector:
           "form div:has-text('Sign in with account name') input[type='text']",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeSteamStorePassword",
         selector: "form input[type='password']",
+        value: "fakeSteamStorePassword",
       },
     },
   },
@@ -1168,12 +1175,12 @@ export const testPages: TestPage[] = [
     url: "https://www.lowes.com/u/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeLowesPassword",
         selector: "#user-password",
+        value: "fakeLowesPassword",
       },
     },
   },
@@ -1182,9 +1189,9 @@ export const testPages: TestPage[] = [
     url: "https://login.xfinity.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#user",
         // multiStepNextInputKey: "password",
+        selector: "#user",
+        value: testUserEmail,
       },
       // @TODO create an xfinity account with test email in order to test password auto-fill
     },
@@ -1194,12 +1201,12 @@ export const testPages: TestPage[] = [
     url: "https://www.bezzypsa.com/signin/SIGNIN",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#signin-email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeBezzyPassword",
         selector: "#signin-password",
+        value: "fakeBezzyPassword",
       },
     },
   },
@@ -1208,12 +1215,12 @@ export const testPages: TestPage[] = [
     url: "https://www.yelp.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: ".login form #email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeYelpPassword",
         selector: ".login form #password",
+        value: "fakeYelpPassword",
       },
     },
   },
@@ -1222,9 +1229,9 @@ export const testPages: TestPage[] = [
     url: "https://wordpress.com/log-in",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#usernameOrEmail",
         // multiStepNextInputKey: "password",
+        selector: "#usernameOrEmail",
+        value: testUserEmail,
       },
       // @TODO create a Wordpress account with test email in order to test password auto-fill
     },
@@ -1234,12 +1241,12 @@ export const testPages: TestPage[] = [
     url: "https://nextdoor.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#id_email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeNextdoorPassword",
         selector: "#id_password",
+        value: "fakeNextdoorPassword",
       },
     },
   },
@@ -1248,12 +1255,12 @@ export const testPages: TestPage[] = [
     url: "https://linktr.ee/login",
     inputs: {
       username: {
-        value: "bwplaywright",
         selector: "input[name='username']",
+        value: testUserName,
       },
       password: {
-        value: "fakeLinktreePassword",
         selector: "input[name='password']",
+        value: "fakeLinktreePassword",
       },
     },
   },
@@ -1266,12 +1273,12 @@ export const testPages: TestPage[] = [
           // Click the log in button to trigger the login modal
           await page.locator("button").filter({ hasText: "Log in" }).click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeQuizletPassword",
         selector: "#password",
+        value: "fakeQuizletPassword",
       },
     },
   },
@@ -1280,6 +1287,7 @@ export const testPages: TestPage[] = [
     url: "https://realtor.com",
     inputs: {
       username: {
+        multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the log in button to trigger the login modal
           await page
@@ -1287,13 +1295,12 @@ export const testPages: TestPage[] = [
             .filter({ hasText: "Log in" })
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#raas_email",
-        multiStepNextInputKey: "password",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeRealtorPassword",
         selector: "#raas_password",
+        value: "fakeRealtorPassword",
       },
     },
   },
@@ -1303,6 +1310,7 @@ export const testPages: TestPage[] = [
     url: "https://www.canva.com",
     inputs: {
       username: {
+        // multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the log in button to trigger the login modal
           await page
@@ -1316,9 +1324,8 @@ export const testPages: TestPage[] = [
             .filter({ hasText: "Continue with email" })
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "input[name='email']",
-        // multiStepNextInputKey: "password",
+        value: testUserEmail,
       },
       // @TODO create a Canva account with test email in order to test password auto-fill
     },
@@ -1328,30 +1335,30 @@ export const testPages: TestPage[] = [
     url: "https://www.att.com/acctmgmt/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#userID",
         multiStepNextInputKey: "password",
+        selector: "#userID",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeATTPassword",
         selector: "#password",
+        value: "fakeATTPassword",
       },
     },
   },
   {
     cipherType: CipherType.Login,
     url: "https://auth0.com/api/auth/login",
-    additionalLoginUrls: ["https://auth0.auth0.com/"],
+    additionalLoginUrls: ["https://auth0.auth0.com"],
     uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#username",
         multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeAuth0Password",
         selector: "#password",
+        value: "fakeAuth0Password",
       },
     },
   },
@@ -1360,9 +1367,9 @@ export const testPages: TestPage[] = [
     url: "https://www.washingtonpost.com/subscribe/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#username",
         // multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
       },
       // @TODO create a Washington Post account with test email in order to test password auto-fill
     },
@@ -1373,9 +1380,9 @@ export const testPages: TestPage[] = [
     url: "https://login.aol.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#login-username",
         // multiStepNextInputKey: "password",
+        selector: "#login-username",
+        value: testUserEmail,
       },
       // @TODO create a Washington Post account with test email in order to test password auto-fill
     },
@@ -1385,6 +1392,7 @@ export const testPages: TestPage[] = [
     url: "https://www.t-mobile.com",
     inputs: {
       username: {
+        // multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the reject button on the interaction analysis modal
           await page.locator("#onetrust-reject-all-handler").click();
@@ -1400,9 +1408,8 @@ export const testPages: TestPage[] = [
             .filter({ hasText: "Log in" })
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#usernameTextBox",
-        // multiStepNextInputKey: "password",
+        value: testUserEmail,
       },
       // @TODO create a t-mobile account with test email in order to test password auto-fill
     },
@@ -1412,12 +1419,12 @@ export const testPages: TestPage[] = [
     url: "https://login.okta.com/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#okta-signin-username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeOktaSupportPassword",
         selector: "#okta-signin-password",
+        value: "fakeOktaSupportPassword",
       },
     },
   },
@@ -1433,12 +1440,12 @@ export const testPages: TestPage[] = [
             .filter({ hasText: "Log In / Sign Up" })
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#username-input",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeBethesdaPassword",
         selector: "#password-input",
+        value: "fakeBethesdaPassword",
       },
     },
   },
@@ -1452,24 +1459,26 @@ export const testPages: TestPage[] = [
     url: `${localPagesUri}/tests/test-pages/many-input-form.html`,
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      username: { value: "js", selector: "#username" },
-      password: { value: "", selector: "#password" },
+      username: { selector: "#username", value: "js" },
+      password: { selector: "#password", value: "" },
     },
   },
+  // The Max sign in inputs are nested two-deep within shadow roots
   {
     cipherType: CipherType.Login,
     url: "https://auth.max.com/login",
     inputs: {
-      username: { value: "maxcom_user", selector: "#username" },
-      password: { value: "maxcom_password", selector: "#password" },
+      username: { selector: "#username", value: "maxcom_user" },
+      password: { selector: "#password", value: "maxcom_password" },
     },
   },
+  // Each Clear login input is nested within a shadow root
   {
     cipherType: CipherType.Login,
     url: "https://login.clear.com.br",
     inputs: {
-      username: { value: "12345678901111", selector: "#username" },
-      password: { value: "098765", selector: "#password" },
+      username: { selector: "#username", value: "12345678901111" },
+      password: { selector: "#password", value: "098765" },
     },
   },
   // Auto-fill is targeting the registration form (on the same page) over the login form which appears after
@@ -1478,12 +1487,12 @@ export const testPages: TestPage[] = [
     url: "https://www.gamespot.com/login-signup",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#form__username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeGamespotPassword",
         selector: "#form__password",
+        value: "fakeGamespotPassword",
       },
     },
   },
@@ -1493,8 +1502,8 @@ export const testPages: TestPage[] = [
     url: "https://temu.com",
     inputs: {
       username: {
+        multiStepNextInputKey: "password",
         preFillActions: async (page) => {
-
           // Await and dismiss promo modals
           await page.locator('div[role="dialog"]');
           await page.locator('div[role="dialog"] img[alt="close icon"]').click();
@@ -1505,13 +1514,12 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        value: "bwplaywright@gmail.com",
         selector: "#user-account",
-        multiStepNextInputKey: "password",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeTemuPassword",
         selector: "#pwdInputInLoginDialog",
+        value: "fakeTemuPassword",
       },
     },
   },
@@ -1520,22 +1528,23 @@ export const testPages: TestPage[] = [
     url: "https://www.temu.com/login.html",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#user-account",
         multiStepNextInputKey: "password",
+        selector: "#user-account",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeTemuLoginPagePassword",
         selector: "#pwdInputInLoginDialog",
+        value: "fakeTemuLoginPagePassword",
       },
     },
   },
   // Apple sign in form is within an iframe
   {
     cipherType: CipherType.Login,
-    url: "https://www.apple.com/",
+    url: "https://www.apple.com",
     inputs: {
       username: {
+        multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the store button to get the dropdown menu which includes the link to the login page
           await page.locator('a#globalnav-menubutton-link-bag').click();
@@ -1545,13 +1554,12 @@ export const testPages: TestPage[] = [
             .first()
             .click();
         },
-        multiStepNextInputKey: "password",
-        value: "bwplaywright@gmail.com",
         selector: "#account_name_text_field",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeApplePassword",
         selector: "#password_text_field",
+        value: "fakeApplePassword",
       },
     },
   },
@@ -1562,13 +1570,13 @@ export const testPages: TestPage[] = [
     url: "https://www.marvel.com/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#InputIdentityFlowValue",
         multiStepNextInputKey: "password",
+        selector: "#InputIdentityFlowValue",
+        value: testUserEmail,
       },
       password: {
-        value: "fakeMarvelPassword",
         selector: "#InputPassword",
+        value: "fakeMarvelPassword",
       },
     },
   },
@@ -1579,12 +1587,12 @@ export const testPages: TestPage[] = [
     url: "https://fill.dev/form/credit-card-simple",
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      cardholderName: { value: "John Smith", selector: "#cc-name" },
-      brand: { value: "Visa", selector: "#cc-type" },
-      number: { value: "4111111111111111", selector: "#cc-number" },
-      expMonth: { value: "12", selector: "#cc-exp-month" },
-      expYear: { value: "2025", selector: "#cc-exp-year" },
-      code: { value: "123", selector: "#cc-csc" },
+      cardholderName: { selector: "#cc-name", value: "John Smith" },
+      brand: { selector: "#cc-type", value: "Visa" },
+      number: { selector: "#cc-number", value: "4111111111111111" },
+      expMonth: { selector: "#cc-exp-month", value: "12" },
+      expYear: { selector: "#cc-exp-year", value: "2025" },
+      code: { selector: "#cc-csc", value: "123" },
     },
   },
   {
@@ -1592,17 +1600,17 @@ export const testPages: TestPage[] = [
     url: "https://fill.dev/form/identity-simple",
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      firstName: { value: "John", selector: "#given-name" },
-      middleName: { value: "M", selector: "#additional-name" },
-      lastName: { value: "Smith", selector: "#family-name" },
-      address1: { value: "123 Main St", selector: "#address-line1" },
-      address2: { value: "Apt 1", selector: "#address-line2" },
-      city: { value: "New York", selector: "city" },
-      state: { value: "NY", selector: "#address-level1" },
-      postalCode: { value: "10001", selector: "#postal-code" },
-      country: { value: "USA", selector: "#country" },
+      firstName: { selector: "#given-name", value: "John" },
+      middleName: { selector: "#additional-name", value: "M" },
+      lastName: { selector: "#family-name", value: "Smith" },
+      address1: { selector: "#address-line1", value: "123 Main St" },
+      address2: { selector: "#address-line2", value: "Apt 1" },
+      city: { selector: "city", value: "New York" },
+      state: { selector: "#address-level1", value: "NY" },
+      postalCode: { selector: "#postal-code", value: "10001" },
+      country: { selector: "#country", value: "USA" },
     },
   },
 
-   **/
+  **/
 ];
