@@ -16,6 +16,9 @@ important that `testUserEmail` is a real address with organizational control.
 const testUserEmail = "bwplaywright@gmail.com";
 
 export const testPages: TestPage[] = [
+  /**
+   * Local webpages
+   */
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/basic-form.html`,
@@ -82,24 +85,6 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.reddit.com",
-    hiddenForm: {
-      triggerSelectors: ['header a[role="button"]'],
-      iframeSource: "https://www.reddit.com/login",
-    },
-    inputs: {
-      username: {
-        selector: "#loginUsername",
-        value: testUserName,
-      },
-      password: {
-        selector: "#loginPassword",
-        value: "fakeRedditPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
     url: "https://www.reddit.com/login",
     inputs: {
       username: {
@@ -108,7 +93,7 @@ export const testPages: TestPage[] = [
       },
       password: {
         selector: "#loginPassword",
-        value: "fakeRedditIframePassword",
+        value: "fakeRedditLoginPagePassword",
       },
     },
   },
@@ -193,7 +178,8 @@ export const testPages: TestPage[] = [
     inputs: {
       username: {
         selector: "input[data-test='signin-username-field']",
-        value: testUserName,
+        // Fandom's ui auto-capitalizes any user input on the usernamefield
+        value: testUserName[0].toUpperCase() + testUserName.slice(1),
       },
       password: {
         selector: "input[data-test='signin-password-field']",
@@ -249,14 +235,36 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.tiktok.com/en",
-    hiddenForm: {
-      formSelector: "#login-modal",
+    url: "https://www.tiktok.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open the login options popup
+          await page.locator("#header-login-button").click();
+          // Select login with phone / email / username
+          const phoneEmailUsernameButton = await page.locator(
+            "#login-modal #loginContainer a[href^='/login/phone-or-email']",
+          );
+          phoneEmailUsernameButton.click();
+          // Select login with email or username
+          await page
+            .locator(
+              "#login-modal #loginContainer a[href^='/login/phone-or-email/email']",
+            )
+            .click();
+        },
+        selector: "input[placeholder='Email or username']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[placeholder='Password']",
+        value: "fakeTikTokPassword",
+      },
     },
-    formSetupClickSelectors: [
-      "a[href^='/login/phone-or-email']",
-      "a[href^='/login/phone-or-email/email']",
-    ],
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.tiktok.com/login/phone-or-email/email",
     inputs: {
       username: {
         selector: "input[placeholder='Email or username']",
@@ -332,6 +340,7 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.linkedin.com",
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector: "#session_key",
@@ -339,13 +348,14 @@ export const testPages: TestPage[] = [
       },
       password: {
         selector: "#session_password",
-        value: "fakeLinkedInPassword",
+        value: "fakeLinkedInHomepageLoginPassword",
       },
     },
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin",
+    url: "https://www.linkedin.com/login",
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector: "#username",
@@ -353,13 +363,10 @@ export const testPages: TestPage[] = [
       },
       password: {
         selector: "#password",
-        value: "fakeLinkedIn2Password",
+        value: "fakeLinkedInPassword",
       },
     },
   },
-  /**
-   * Note: walmart.com has some pretty aggressive bot detection,
-   * so we're only testing the username autofill for now. */
   {
     cipherType: CipherType.Login,
     url: "https://www.walmart.com/account/login",
@@ -370,7 +377,7 @@ export const testPages: TestPage[] = [
         value: testUserEmail,
       },
       password: {
-        selector: "input[name='password']",
+        selector: "input[name='password'][type='password']",
         value: "fakeWalmartPassword",
       },
     },
@@ -409,7 +416,6 @@ export const testPages: TestPage[] = [
     url: "https://my.foxnews.com",
     inputs: {
       username: {
-        multiStepNextInputKey: "password",
         selector: "input[type='email']",
         value: testUserEmail,
       },
@@ -553,14 +559,16 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.zillow.com",
-    hiddenForm: {
-      triggerSelectors: [
-        'header nav > div:nth-child(2) a[href^="/user/acct/login/?cid=pf"]',
-      ],
-      formSelector: 'section[role="dialog"]',
-    },
     inputs: {
       username: {
+        preFillActions: async (page) => {
+          // Open the login options modal
+          await page
+            .locator(
+              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']",
+            )
+            .click();
+        },
         selector: "#reg-login-email",
         value: testUserEmail,
       },
@@ -709,20 +717,37 @@ export const testPages: TestPage[] = [
     inputs: {
       username: {
         preFillActions: async (page) => {
-          // Close the pop-up prompting you to use the mobile app
-          await page.locator("#mobile-app-modal-close").click();
-          // Accept the cookie policy
-          await page
-            .locator("button")
-            .filter({ hasText: "Accept" })
-            .first()
-            .click();
-          // Go to the login page (cannot go directly to the login page)
-          await page
-            .locator("button")
-            .filter({ hasText: "Log In" })
-            .first()
-            .click();
+          // If there is a queue to access the site, use an alternate path to get to the login page
+          const siteQueue = await page
+            .locator("main .content-container")
+            .filter({ hasText: "You are now in line." });
+          const siteIsQueuing = await siteQueue.isVisible();
+
+          if (siteIsQueuing) {
+            await page
+              .locator("a div")
+              .filter({ hasText: "Click here to skip the line!" })
+              .click();
+            await page
+              .locator("button")
+              .filter({ hasText: "Login to Subscribe!" })
+              .click();
+          } else {
+            // Close the pop-up prompting you to use the mobile app
+            await page.locator("#mobile-app-modal-close").click();
+            // Accept the cookie policy
+            await page
+              .locator("button")
+              .filter({ hasText: "Accept" })
+              .first()
+              .click();
+            // Go to the login page (cannot go directly to the login page)
+            await page
+              .locator("button")
+              .filter({ hasText: "Log In" })
+              .first()
+              .click();
+          }
         },
         selector: "#username",
         value: testUserEmail,
@@ -950,7 +975,6 @@ export const testPages: TestPage[] = [
     url: "https://app.learnplatform.com/users/sign_in",
     inputs: {
       username: {
-        multiStepNextInputKey: "password",
         selector: "#email",
         value: testUserEmail,
       },
@@ -991,7 +1015,7 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.capitalone.com",
-    uriMatchType: UriMatchType.Exact,
+    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         selector: "input.login-username",
@@ -1006,7 +1030,7 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://verified.capitalone.com/auth/signin",
-    uriMatchType: UriMatchType.Exact,
+    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         selector: "input[aria-describedby='label-username-input']",
@@ -1290,10 +1314,10 @@ export const testPages: TestPage[] = [
         multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the log in button to trigger the login modal
-          await page
-            .locator(".user-profile_header-login")
-            .filter({ hasText: "Log in" })
-            .click();
+          const loginButton = await page.locator(
+            "a.user-profile_header-login[href='/myaccount']",
+          );
+          loginButton.click();
         },
         selector: "#raas_email",
         value: testUserEmail,
@@ -1449,10 +1473,9 @@ export const testPages: TestPage[] = [
       },
     },
   },
+];
 
-  /**
-   * Commenting out known failure cases for now
-   *
+export const knownFailureCases = [
   // Known failure cases:
   {
     cipherType: CipherType.Login,
@@ -1461,6 +1484,32 @@ export const testPages: TestPage[] = [
     inputs: {
       username: { selector: "#username", value: "js" },
       password: { selector: "#password", value: "" },
+    },
+  },
+  // The Reddit modal sign in inputs are nested under several levels of shadow roots
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.reddit.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open login modal
+          await page
+            .locator('header a[href^="https://www.reddit.com/login"]')
+            .click();
+          // Select login option from registration form
+          const loadedLoginModal = await page.locator(
+            'form div.login a[href^="/account/login"]',
+          );
+          loadedLoginModal.click();
+        },
+        selector: "#loginUsername",
+        value: testUserName,
+      },
+      password: {
+        selector: "#loginPassword",
+        value: "fakeRedditInlineLoginPassword",
+      },
     },
   },
   // The Max sign in inputs are nested two-deep within shadow roots
@@ -1506,7 +1555,9 @@ export const testPages: TestPage[] = [
         preFillActions: async (page) => {
           // Await and dismiss promo modals
           await page.locator('div[role="dialog"]');
-          await page.locator('div[role="dialog"] img[alt="close icon"]').click();
+          await page
+            .locator('div[role="dialog"] img[alt="close icon"]')
+            .click();
           // Click the login/account button to trigger the login modal
           await page
             .locator('#mainHeader .mainContent div[role="button"]')
@@ -1547,12 +1598,9 @@ export const testPages: TestPage[] = [
         multiStepNextInputKey: "password",
         preFillActions: async (page) => {
           // Click the store button to get the dropdown menu which includes the link to the login page
-          await page.locator('a#globalnav-menubutton-link-bag').click();
+          await page.locator("a#globalnav-menubutton-link-bag").click();
           // Click the log in link to be redirected to the login page
-          await page
-            .locator('a[data-autom="sign-in"]')
-            .first()
-            .click();
+          await page.locator('a[data-autom="sign-in"]').first().click();
         },
         selector: "#account_name_text_field",
         value: testUserEmail,
@@ -1611,6 +1659,4 @@ export const testPages: TestPage[] = [
       country: { selector: "#country", value: "USA" },
     },
   },
-
-  **/
 ];
