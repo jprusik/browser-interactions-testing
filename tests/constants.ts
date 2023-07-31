@@ -698,6 +698,7 @@ export const testPages: TestPage[] = [
     cipherType: CipherType.Login,
     url: "https://character.ai",
     additionalLoginUrls: ["https://character-ai.us.auth0.com"],
+    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         preFillActions: async (page) => {
@@ -756,7 +757,7 @@ export const testPages: TestPage[] = [
     },
   },
   // Patreon will sometimes send login links to the email
-  // Patreon prequalify the email and start account creation workflow if it isn't recognized as an existing account
+  // Patreon prequalifies the email and starts account creation workflow if it isn't recognized as an existing account
   {
     cipherType: CipherType.Login,
     url: "https://www.patreon.com/login",
@@ -1256,6 +1257,192 @@ export const testPages: TestPage[] = [
       },
     },
   },
+  {
+    cipherType: CipherType.Login,
+    url: "https://quizlet.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the log in button to trigger the login modal
+          await page.locator("button").filter({ hasText: "Log in" }).click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+      },
+      password: {
+        value: "fakeQuizletPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://realtor.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the log in button to trigger the login modal
+          await page
+            .locator(".user-profile_header-login")
+            .filter({ hasText: "Log in" })
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#raas_email",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeRealtorPassword",
+        selector: "#raas_password",
+      },
+    },
+  },
+  // Canva prequalifies the email and starts account creation workflow if it isn't recognized as an existing account
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.canva.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the log in button to trigger the login modal
+          await page
+            .locator("header button span")
+            .filter({ hasText: "Log in" })
+            .first()
+            .click();
+          // Select Continue with email option
+          await page
+            .locator("button")
+            .filter({ hasText: "Continue with email" })
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "input[name='email']",
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create a Canva account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.att.com/acctmgmt/login",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#userID",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeATTPassword",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://auth0.com/api/auth/login",
+    additionalLoginUrls: ["https://auth0.auth0.com/"],
+    uriMatchType: UriMatchType.Host,
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeAuth0Password",
+        selector: "#password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.washingtonpost.com/subscribe/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#username",
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create a Washington Post account with test email in order to test password auto-fill
+    },
+  },
+  // AOL uses a captcha between username entry and password entry
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.aol.com",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#login-username",
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create a Washington Post account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.t-mobile.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the reject button on the interaction analysis modal
+          await page.locator("#onetrust-reject-all-handler").click();
+          // Click the log in button to trigger the login modal
+          await page
+            .locator("button")
+            .filter({ hasText: "Log in" })
+            .first()
+            .click();
+          // Select Continue with email option
+          await page
+            .locator(".unav-account__dropdown a")
+            .filter({ hasText: "Log in" })
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#usernameTextBox",
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create a t-mobile account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.okta.com/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#okta-signin-username",
+      },
+      password: {
+        value: "fakeOktaSupportPassword",
+        selector: "#okta-signin-password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://bethesda.net",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the LOG IN / SIGN UP button to bring up the login modal
+          await page
+            .locator("button span")
+            .filter({ hasText: "Log In / Sign Up" })
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#username-input",
+      },
+      password: {
+        value: "fakeBethesdaPassword",
+        selector: "#password-input",
+      },
+    },
+  },
+
   /**
    * Commenting out known failure cases for now
    *
@@ -1297,6 +1484,91 @@ export const testPages: TestPage[] = [
       password: {
         value: "fakeGamespotPassword",
         selector: "#form__password",
+      },
+    },
+  },
+  // Temu sometimes has a captcha challenge before showing the password field.
+  {
+    cipherType: CipherType.Login,
+    url: "https://temu.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+
+          // Await and dismiss promo modals
+          await page.locator('div[role="dialog"]');
+          await page.locator('div[role="dialog"] img[alt="close icon"]').click();
+          // Click the login/account button to trigger the login modal
+          await page
+            .locator('#mainHeader .mainContent div[role="button"]')
+            .filter({ hasText: "Sign in / Register" })
+            .first()
+            .click();
+        },
+        value: "bwplaywright@gmail.com",
+        selector: "#user-account",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeTemuPassword",
+        selector: "#pwdInputInLoginDialog",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.temu.com/login.html",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#user-account",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeTemuLoginPagePassword",
+        selector: "#pwdInputInLoginDialog",
+      },
+    },
+  },
+  // Apple sign in form is within an iframe
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.apple.com/",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the store button to get the dropdown menu which includes the link to the login page
+          await page.locator('a#globalnav-menubutton-link-bag').click();
+          // Click the log in link to be redirected to the login page
+          await page
+            .locator('a[data-autom="sign-in"]')
+            .first()
+            .click();
+        },
+        multiStepNextInputKey: "password",
+        value: "bwplaywright@gmail.com",
+        selector: "#account_name_text_field",
+      },
+      password: {
+        value: "fakeApplePassword",
+        selector: "#password_text_field",
+      },
+    },
+  },
+  // Marvel sign in form is within an iframe
+  // Note; marvel.com has it's own login but checks against the existence of a Disney account before allowing password entry
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.marvel.com/signin",
+    inputs: {
+      username: {
+        value: "bwplaywright@gmail.com",
+        selector: "#InputIdentityFlowValue",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeMarvelPassword",
+        selector: "#InputPassword",
       },
     },
   },
