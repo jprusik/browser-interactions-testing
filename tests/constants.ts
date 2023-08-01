@@ -5,7 +5,7 @@ import { TestPage } from "./abstractions/constants";
 
 configDotenv();
 
-const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
+export const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
 
 const testUserName = "bwplaywright";
 /*

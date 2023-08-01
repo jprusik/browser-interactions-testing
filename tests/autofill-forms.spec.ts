@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 import path from "path";
 
-import { testPages } from "./constants";
+import { localPagesUri, testPages } from "./constants";
 import { test, expect } from "./fixtures";
 import {
   LocatorWaitForOptions,
@@ -154,6 +154,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
     for (const page of pagesToTest) {
       const { url, inputs } = page;
+      const isLocalPage = url.startsWith(localPagesUri);
 
       await test.step(`Autofill the form on page ${url}`, async () => {
         await testPage.goto(url, defaultGotoOptions);
@@ -183,10 +184,15 @@ test.describe("Extension autofills forms when triggered", () => {
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
           const currentInputElement = testPage.locator(currentInput.selector);
-          await expect
-            // @TODO do not soft expect on local test pages
-            .soft(currentInputElement)
-            .toHaveValue(currentInput.value);
+
+          // Do not soft expect on local test pages; we want to stop the tests before hitting live pages
+          if (isLocalPage) {
+            await expect(currentInputElement).toHaveValue(currentInput.value);
+          } else {
+            await expect
+              .soft(currentInputElement)
+              .toHaveValue(currentInput.value);
+          }
 
           await testPage.screenshot({
             path: path.join(
@@ -195,14 +201,14 @@ test.describe("Extension autofills forms when triggered", () => {
             ),
           });
 
-          const nextInput: FillProperties | undefined =
+          const nextStepInput: FillProperties | undefined =
             currentInput.multiStepNextInputKey &&
             inputs[currentInput.multiStepNextInputKey];
 
-          if (nextInput) {
+          if (nextStepInput) {
             await currentInputElement.press("Enter");
 
-            const nextInputPreFill = nextInput.preFillActions;
+            const nextInputPreFill = nextStepInput.preFillActions;
             if (nextInputPreFill) {
               try {
                 nextInputPreFill(testPage);
@@ -215,10 +221,8 @@ test.describe("Extension autofills forms when triggered", () => {
               }
             }
 
-            const testedFrame = testPage;
-
-            const nextInputSelector = nextInput.selector;
-            const nextInputElement = testedFrame
+            const nextInputSelector = nextStepInput.selector;
+            const nextInputElement = testPage
               .locator(nextInputSelector)
               .first();
             await nextInputElement.waitFor(defaultWaitForOptions);
