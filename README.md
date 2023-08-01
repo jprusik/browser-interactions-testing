@@ -4,6 +4,7 @@
 This project leverages [Playwright](https://playwright.dev/) to run automated form-fill tests against real builds of the Bitwarden browser extension.
 
 - [Autofill Playwright Tests](#autofill-playwright-tests)
+  - [Goals and Intent](#goals-and-intent)
   - [Limitations](#limitations)
   - [Requirements](#requirements)
   - [Setup](#setup)
@@ -16,9 +17,21 @@ This project leverages [Playwright](https://playwright.dev/) to run automated fo
     - [Execute only selected page tests](#execute-only-selected-page-tests)
     - [Start tests from a specific point](#start-tests-from-a-specific-point)
 
+## Goals and Intent
+
+The aim of this project is to track and anticipate the compatibility of the Bitwarden extension autofill feature in controlled, static test scenarios as well as popular live scenarios. To that end, this project should:
+
+- incur requests against live sites as little as possible (no signing in, traversing deeply in the site, etc.)
+- use the same login portals and experiences that users would
+- test the span of likely login experiences
+- enable regular reporting and early notification on site breakages and code regressions with the Bitwarden extension
+- as a secondary concern, enable testing of other extension experiences related to the autofill feature
+
 ## Limitations
 
-- Extension builds can only be tested with Chromium clients at present
+- Extension builds can only be tested with Chromium clients at present.
+- Some sites can be inconsistently flaky due to factors such as live experiments changing the received experience, external dependencies taking too long to load, ads/trackers, and general network instability.
+- Some site prequalify emails/usernames before allowing password entry and/or use captchas in multi-step login flows. In these cases we're typically only testing that the username/email was filled out properly.
 
 ## Requirements
 
