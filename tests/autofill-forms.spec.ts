@@ -16,6 +16,7 @@ let testPage: Page;
 const vaultEmail = process.env.VAULT_EMAIL || "";
 const vaultPassword = process.env.VAULT_PASSWORD || "";
 const serverHostURL = process.env.SERVER_HOST_URL;
+const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
@@ -139,6 +140,15 @@ test.describe("Extension autofills forms when triggered", () => {
       }
     }
 
+    if (startFromTestUrl) {
+      const startTestIndex = pagesToTest.findIndex(
+        ({ url }) => url === startFromTestUrl,
+      );
+
+      pagesToTest =
+        startTestIndex > 0 ? pagesToTest.slice(startTestIndex) : pagesToTest;
+    }
+
     test.setTimeout(480000);
     testPage.setDefaultNavigationTimeout(60000);
 
@@ -153,7 +163,7 @@ test.describe("Extension autofills forms when triggered", () => {
         const firstInputPreFill = firstInput.preFillActions;
         if (firstInputPreFill) {
           try {
-            firstInputPreFill(testPage);
+            await firstInputPreFill(testPage);
           } catch (error) {
             console.log("There was a prefill error:", error);
 
@@ -163,43 +173,7 @@ test.describe("Extension autofills forms when triggered", () => {
           }
         }
 
-        let hiddenFormSelector;
-        if (page.hiddenForm) {
-          hiddenFormSelector = page.hiddenForm.iframeSource
-            ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
-            : page.hiddenForm.formSelector;
-          if (page.hiddenForm.triggerSelectors?.length) {
-            for (const selector of page.hiddenForm.triggerSelectors) {
-              const triggerElement = await testPage.locator(selector).first();
-              await triggerElement.waitFor(defaultWaitForOptions);
-              await triggerElement.click();
-            }
-          }
-          const hiddenForm = await testPage.locator(hiddenFormSelector).first();
-          await hiddenForm.waitFor(defaultWaitForOptions);
-
-          if (page.hiddenForm.iframeSource) {
-            const iframeElement = await testPage
-              .locator(hiddenFormSelector)
-              .elementHandle();
-            const frame = await iframeElement.contentFrame();
-            await frame.waitForURL(
-              new RegExp(`.*${page.hiddenForm.iframeSource}.*`, "i"),
-            );
-          }
-        }
-
-        if (page.formSetupClickSelectors) {
-          for (const selector of page.formSetupClickSelectors) {
-            await testPage.click(selector);
-          }
-        }
-
-        const testedFrame = Boolean(page.hiddenForm?.iframeSource)
-          ? testPage.frameLocator(hiddenFormSelector)
-          : testPage;
-
-        const initialInputElement = await testedFrame
+        const initialInputElement = await testPage
           .locator(firstInput?.selector)
           .first();
         await initialInputElement.waitFor(defaultWaitForOptions);
@@ -208,9 +182,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
-          const currentInputElement = testedFrame.locator(
-            currentInput.selector,
-          );
+          const currentInputElement = testPage.locator(currentInput.selector);
           await expect
             // @TODO do not soft expect on local test pages
             .soft(currentInputElement)
@@ -243,12 +215,7 @@ test.describe("Extension autofills forms when triggered", () => {
               }
             }
 
-            const iframeElement = Boolean(page.hiddenForm?.iframeSource)
-              ? await testPage.locator(hiddenFormSelector).elementHandle()
-              : null;
-            const testedFrame = iframeElement
-              ? await iframeElement.contentFrame()
-              : testPage;
+            const testedFrame = testPage;
 
             const nextInputSelector = nextInput.selector;
             const nextInputElement = testedFrame

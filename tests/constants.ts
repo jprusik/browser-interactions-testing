@@ -322,12 +322,12 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.twitch.tv",
-    hiddenForm: {
-      triggerSelectors: ["button[data-a-target='login-button']"],
-      formSelector: "div[data-a-target='passport-modal']",
-    },
     inputs: {
       username: {
+        preFillActions: async (page) => {
+          // Open the login modal
+          await page.locator("button[data-a-target='login-button']").click();
+        },
         selector: "#login-username",
         value: testUserEmail,
       },
@@ -427,32 +427,6 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.espn.com",
-    additionalLoginUrls: [
-      "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB",
-    ],
-    hiddenForm: {
-      triggerSelectors: [
-        "#global-user-trigger",
-        '#global-viewport > .global-user a[tref="/members/v3_1/login"]',
-      ],
-      iframeSource:
-        "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB",
-    },
-    inputs: {
-      username: {
-        multiStepNextInputKey: "password",
-        selector: "[data-testid='InputIdentityFlowValue']",
-        value: testUserEmail,
-      },
-      password: {
-        selector: "#InputPassword",
-        value: "fakeESPNPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
     url: "https://reg.usps.com/entreg/LoginAction_input",
     inputs: {
       username: {
@@ -468,9 +442,15 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.imdb.com/registration/signin",
-    formSetupClickSelectors: ["a[href^='https://www.imdb.com/ap/signin']"],
     inputs: {
       username: {
+        preFillActions: async (page) => {
+          // Click the login with IMDB button to be redirected to the login page
+          await page
+            .locator("a[href^='https://www.imdb.com/ap/signin']")
+            .filter({ hasText: "Sign in with IMDb" })
+            .click();
+        },
         selector: "#ap_email",
         value: testUserEmail,
       },
@@ -581,12 +561,12 @@ export const testPages: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: "https://www.etsy.com",
-    hiddenForm: {
-      triggerSelectors: ["button.signin-header-action"],
-      formSelector: "#join-neu-overlay > .wt-overlay__modal",
-    },
     inputs: {
       username: {
+        preFillActions: async (page) => {
+          // Open the sign in modal
+          await page.locator("button.signin-header-action").click();
+        },
         selector: "#join_neu_email_field",
         value: testUserEmail,
       },
@@ -598,13 +578,17 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.pinterest.com",
-    hiddenForm: {
-      triggerSelectors: ['div[data-test-id="simple-login-button"]'],
-      formSelector: 'div[data-test-id="login-modal-default"]',
-    },
+    url: "https://www.pinterest.com/",
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
+        preFillActions: async (page) => {
+          // Open the log in modal
+          await page
+            .locator('div[data-test-id="simple-login-button"]')
+            .first()
+            .click();
+        },
         selector: "#email",
         value: testUserEmail,
       },
@@ -616,7 +600,8 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.pinterest.com/login",
+    url: "https://www.pinterest.com/login/",
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector: "#email",
@@ -1626,6 +1611,34 @@ export const knownFailureCases: TestPage[] = [
       password: {
         selector: "#InputPassword",
         value: "fakeMarvelPassword",
+      },
+    },
+  },
+  // ESPN sign in form is within an iframe; autofill will only work if the iframe domain is added to `additionalLoginUrls`
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.espn.com",
+    // additionalLoginUrls: [
+    //   "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB",
+    // ],
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Open the account sidebar/menu
+          await page.locator("#global-user-trigger").click();
+          await page
+            .locator(
+              '#global-viewport > .global-user a[tref="/members/v3_1/login"]',
+            )
+            .click();
+        },
+        selector: "input[data-testid='InputIdentityFlowValue']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#InputPassword",
+        value: "fakeESPNPassword",
       },
     },
   },

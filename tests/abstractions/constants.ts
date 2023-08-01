@@ -18,13 +18,7 @@ type TestPage = {
   url: string;
   additionalLoginUrls?: string[];
   uriMatchType?: UriMatchType;
-  hiddenForm?: {
-    triggerSelectors?: string[];
-    formSelector?: string;
-    iframeSource?: string;
-  };
   onlyTest?: boolean;
-  formSetupClickSelectors?: string[];
   inputs: {
     // Login fields
     username?: FillProperties;
