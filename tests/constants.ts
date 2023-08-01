@@ -53,6 +53,8 @@ export const testPages: TestPage[] = [
       password: { selector: "#password", value: "fakeSimpleLoginPassword" },
     },
   },
+  // @TODO In non-debug mode, LinkedIn is often hanging on page load
+  // LinkedIn periodically redirects to https://www.linkedin.com/authwall...
   {
     cipherType: CipherType.Login,
     url: "https://www.linkedin.com/",
@@ -97,7 +99,68 @@ export const testPages: TestPage[] = [
       },
     },
   },
-  // Google currently complains about insecurity and refuses to show the password input on the subsequent screen
+  // Zillow has a bot/detection "press & hold" test that pariodically triggers
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.zillow.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open the login options modal
+          await page
+            .locator(
+              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']"
+            )
+            .click();
+        },
+        selector: "#reg-login-email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#inputs-password",
+        value: "fakeZillowPassword",
+      },
+    },
+  },
+  // Home Depot's login requires an intermediate step of selecting a login with password option after entering an email
+  // Additionally, the email login sometimes fails on the first step (presumably due to automation detection)
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.homedepot.com/auth/view/signin",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        preFillActions: async (page) => {
+          const dismissButton = await page
+            .locator("button.u__default-link")
+            .filter({ hasText: "No Thanks" });
+          await dismissButton?.click();
+        },
+        selector: "input#password-input-field",
+        value: "fakeHomeDepotPassword",
+      },
+    },
+  },
+  // dailymail sometimes stalls waiting for the page load event
+  // Note: dailymail also fires a notification permissions request. If you accept, it automatically downloads an executable called `MailOnlineSetup.exe`.
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.dailymail.co.uk/registration/login.html",
+    inputs: {
+      username: {
+        selector: "input[name='j_username']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[name='j_password']",
+        value: "fakeDailyMailPassword",
+      },
+    },
+  },
   {
     cipherType: CipherType.Login,
     url: "https://accounts.google.com",
@@ -546,29 +609,6 @@ export const testPages: TestPage[] = [
       },
     },
   },
-  // Zillow has a bot/detection "press & hold" test that pariodically triggers
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.zillow.com",
-    inputs: {
-      username: {
-        preFillActions: async (page) => {
-          // Open the login options modal
-          await page
-            .locator(
-              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']"
-            )
-            .click();
-        },
-        selector: "#reg-login-email",
-        value: testUserEmail,
-      },
-      password: {
-        selector: "#inputs-password",
-        value: "fakeZillowPassword",
-      },
-    },
-  },
   {
     cipherType: CipherType.Login,
     url: "https://www.etsy.com",
@@ -621,45 +661,6 @@ export const testPages: TestPage[] = [
       password: {
         selector: "#password",
         value: "fakePinterestPassword",
-      },
-    },
-  },
-  // dailymail sometimes stalls waiting for the page load event
-  // Note: dailymail also fires a notification permissions request. If you accept, it automatically downloads an executable called `MailOnlineSetup.exe`.
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.dailymail.co.uk/registration/login.html",
-    inputs: {
-      username: {
-        selector: "input[name='j_username']",
-        value: testUserEmail,
-      },
-      password: {
-        selector: "input[name='j_password']",
-        value: "fakeDailyMailPassword",
-      },
-    },
-  },
-  // Home Depot's login requires an intermediate step of selecting a login with password option after entering an email
-  // Additionally, the email login sometimes fails on the first step (presumably due to automation detection)
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.homedepot.com/auth/view/signin",
-    inputs: {
-      username: {
-        multiStepNextInputKey: "password",
-        selector: "#username",
-        value: testUserEmail,
-      },
-      password: {
-        preFillActions: async (page) => {
-          const dismissButton = await page
-            .locator("button.u__default-link")
-            .filter({ hasText: "No Thanks" });
-          dismissButton?.click();
-        },
-        selector: "input#password-input-field",
-        value: "fakeHomeDepotPassword",
       },
     },
   },
