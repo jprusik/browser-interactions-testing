@@ -1,3 +1,8 @@
+
+# Autofill Playwright Tests
+
+This project leverages [Playwright](https://playwright.dev/) to run automated form-fill tests against real builds of the Bitwarden browser extension.
+
 - [Autofill Playwright Tests](#autofill-playwright-tests)
   - [Limitations](#limitations)
   - [Requirements](#requirements)
@@ -10,10 +15,6 @@
     - [Headless Mode](#headless-mode)
     - [Execute only selected page tests](#execute-only-selected-page-tests)
     - [Start tests from a specific point](#start-tests-from-a-specific-point)
-
-# Autofill Playwright Tests
-
-This project leverages [Playwright](https://playwright.dev/) to run automated form-fill tests against real builds of the Bitwarden browser extension.
 
 ## Limitations
 

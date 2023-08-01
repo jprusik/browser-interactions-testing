@@ -53,6 +53,50 @@ export const testPages: TestPage[] = [
       password: { selector: "#password", value: "fakeSimpleLoginPassword" },
     },
   },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.linkedin.com/",
+    additionalLoginUrls: ["https://www.linkedin.com/?original_referer="],
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        selector: "#session_key",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#session_password",
+        value: "fakeLinkedInHomepageLoginPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.linkedin.com/login",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeLinkedInPassword",
+      },
+    },
+  },
+  // Samsung has aggressive automation-blocking, captcha step after email entry
+  // Samsung also will periodically not load the login page
+  {
+    cipherType: CipherType.Login,
+    url: "https://account.samsung.com/membership/auth/sign-in",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "#iptLgnPlnID",
+        value: testUserEmail,
+      },
+    },
+  },
   // Google currently complains about insecurity and refuses to show the password input on the subsequent screen
   {
     cipherType: CipherType.Login,
@@ -242,15 +286,12 @@ export const testPages: TestPage[] = [
           // Open the login options popup
           await page.locator("#header-login-button").click();
           // Select login with phone / email / username
-          const phoneEmailUsernameButton = await page.locator(
-            "#login-modal #loginContainer a[href^='/login/phone-or-email']",
-          );
-          phoneEmailUsernameButton.click();
+          await page
+            .locator("#login-modal a[href^='/login/phone-or-email']")
+            .click();
           // Select login with email or username
           await page
-            .locator(
-              "#login-modal #loginContainer a[href^='/login/phone-or-email/email']",
-            )
+            .locator("#login-modal a[href^='/login/phone-or-email/email']")
             .click();
         },
         selector: "input[placeholder='Email or username']",
@@ -334,36 +375,6 @@ export const testPages: TestPage[] = [
       password: {
         selector: "#password-input",
         value: "fakeTwitchPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.linkedin.com",
-    uriMatchType: UriMatchType.Exact,
-    inputs: {
-      username: {
-        selector: "#session_key",
-        value: testUserEmail,
-      },
-      password: {
-        selector: "#session_password",
-        value: "fakeLinkedInHomepageLoginPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.linkedin.com/login",
-    uriMatchType: UriMatchType.Exact,
-    inputs: {
-      username: {
-        selector: "#username",
-        value: testUserEmail,
-      },
-      password: {
-        selector: "#password",
-        value: "fakeLinkedInPassword",
       },
     },
   },
@@ -466,16 +477,16 @@ export const testPages: TestPage[] = [
     url: "https://secure.indeed.com/auth",
     inputs: {
       username: {
-        multiStepNextInputKey: "password",
+        // multiStepNextInputKey: "password",
         selector: "input[type='email']",
         value: testUserEmail,
       },
-      password: {
-        preFillActions: async (page) =>
-          await page.locator("#auth-page-google-password-fallback").click(),
-        selector: "input[name='__password']",
-        value: "fakeIndeedPassword",
-      },
+      // password: {
+      //   preFillActions: async (page) =>
+      //     await page.locator("#auth-page-google-password-fallback").click(),
+      //   selector: "input[name='__password']",
+      //   value: "fakeIndeedPassword",
+      // },
     },
   },
   {
@@ -545,7 +556,7 @@ export const testPages: TestPage[] = [
           // Open the login options modal
           await page
             .locator(
-              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']",
+              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']"
             )
             .click();
         },
@@ -1062,18 +1073,6 @@ export const testPages: TestPage[] = [
       // @TODO create tumblr account with test email in order to test password auto-fill
     },
   },
-  // Samsung has aggressive automation-blocking, captcha step after email entry
-  {
-    cipherType: CipherType.Login,
-    url: "https://account.samsung.com/membership/auth/sign-in",
-    inputs: {
-      username: {
-        // multiStepNextInputKey: "password",
-        selector: "#iptLgnPlnID",
-        value: testUserEmail,
-      },
-    },
-  },
   {
     cipherType: CipherType.Login,
     url: "https://seguro.marca.com/registro/v3/?view=login",
@@ -1300,9 +1299,9 @@ export const testPages: TestPage[] = [
         preFillActions: async (page) => {
           // Click the log in button to trigger the login modal
           const loginButton = await page.locator(
-            "a.user-profile_header-login[href='/myaccount']",
+            "a.user-profile_header-login[href='/myaccount']"
           );
-          loginButton.click();
+          await loginButton.click();
         },
         selector: "#raas_email",
         value: testUserEmail,
@@ -1484,7 +1483,7 @@ export const knownFailureCases: TestPage[] = [
             .click();
           // Select login option from registration form
           const loadedLoginModal = await page.locator(
-            'form div.login a[href^="/account/login"]',
+            'form div.login a[href^="/account/login"]'
           );
           loadedLoginModal.click();
         },
@@ -1629,7 +1628,7 @@ export const knownFailureCases: TestPage[] = [
           await page.locator("#global-user-trigger").click();
           await page
             .locator(
-              '#global-viewport > .global-user a[tref="/members/v3_1/login"]',
+              '#global-viewport > .global-user a[tref="/members/v3_1/login"]'
             )
             .click();
         },

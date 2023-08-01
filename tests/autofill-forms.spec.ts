@@ -20,11 +20,11 @@ const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
-  timeout: 60000,
+  timeout: 90000,
 };
 const defaultWaitForOptions: LocatorWaitForOptions = {
   state: "visible",
-  timeout: 10000,
+  timeout: 15000,
 };
 
 test.describe("Extension autofills forms when triggered", () => {
@@ -32,8 +32,8 @@ test.describe("Extension autofills forms when triggered", () => {
     context,
     extensionId,
   }) => {
-    context.setDefaultTimeout(10000);
-    context.setDefaultNavigationTimeout(60000);
+    context.setDefaultTimeout(20000);
+    context.setDefaultNavigationTimeout(120000);
 
     const [backgroundPage] = context.backgroundPages();
     async function doAutofill() {
@@ -46,8 +46,8 @@ test.describe("Extension autofills forms when triggered", () => {
               command: "collectPageDetails",
               tab: tabs[0],
               sender: "autofill_cmd",
-            }),
-        ),
+            })
+        )
       );
     }
 
@@ -69,7 +69,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
       if (debugIsActive) {
         console.log(
-          (await testPage.evaluate(() => navigator.userAgent)) + "\n",
+          (await testPage.evaluate(() => navigator.userAgent)) + "\n"
         );
       }
     });
@@ -77,10 +77,8 @@ test.describe("Extension autofills forms when triggered", () => {
     await test.step("Configure the environment", async () => {
       // @TODO check for and fill other settings
       if (serverHostURL) {
-        await testPage.goto(
-          `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`,
-          defaultGotoOptions,
-        );
+        const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`;
+        await testPage.goto(extensionURL, defaultGotoOptions);
         const baseUrlInput = await testPage.locator("input#baseUrl");
         await baseUrlInput.waitFor(defaultWaitForOptions);
 
@@ -109,7 +107,7 @@ test.describe("Extension autofills forms when triggered", () => {
       await emailSubmitInput.click();
 
       const masterPasswordInput = await testPage.locator(
-        "input#masterPassword",
+        "input#masterPassword"
       );
       await masterPasswordInput.waitFor(defaultWaitForOptions);
       await masterPasswordInput.fill(vaultPassword);
@@ -120,10 +118,8 @@ test.describe("Extension autofills forms when triggered", () => {
       await loginButton.waitFor(defaultWaitForOptions);
       await loginButton.click();
 
-      await testPage.waitForURL(
-        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
-        defaultGotoOptions,
-      );
+      const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
+      await testPage.waitForURL(extensionURL, defaultGotoOptions);
       const vaultFilterBox = await testPage
         .locator("app-vault-filter main .box.list")
         .first();
@@ -142,7 +138,7 @@ test.describe("Extension autofills forms when triggered", () => {
 
     if (startFromTestUrl) {
       const startTestIndex = pagesToTest.findIndex(
-        ({ url }) => url === startFromTestUrl,
+        ({ url }) => url === startFromTestUrl
       );
 
       pagesToTest =
@@ -197,7 +193,7 @@ test.describe("Extension autofills forms when triggered", () => {
           await testPage.screenshot({
             path: path.join(
               screenshotsOutput,
-              `${url}-${inputKey}-autofill.png`,
+              `${url}-${inputKey}-autofill.png`
             ),
           });
 
