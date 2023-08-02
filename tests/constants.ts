@@ -5,16 +5,27 @@ import { TestPage } from "./abstractions/constants";
 
 configDotenv();
 
-const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
+export const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
+
+const testUserName = "bwplaywright";
+/*
+Some websites "prequalify" an entered email to see if they have an associated account.
+If they don't, they may disallow password entry or force account create workflow, so it is
+important that `testUserEmail` is a real address with organizational control.
+*/
+const testUserEmail = "bwplaywright@gmail.com";
 
 export const testPages: TestPage[] = [
+  /**
+   * Local webpages
+   */
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/basic-form.html`,
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      username: { value: "jsmith", selector: "#username" },
-      password: { value: "areallygoodpassword", selector: "#password" },
+      username: { selector: "#username", value: testUserName },
+      password: { selector: "#password", value: "fakeBasicFormPassword" },
     },
   },
   {
@@ -23,605 +34,91 @@ export const testPages: TestPage[] = [
     uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "ms-smith",
-        selector: "#username",
         multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserName,
       },
-      password: { value: "ms-password", selector: "#password" },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://fill.dev/form/login-simple",
-    inputs: {
-      username: { value: "simple-test", selector: "#username" },
-      password: { value: "apassword", selector: "#password" },
+      password: { selector: "#password", value: "fakeMultiStepPassword" },
     },
   },
 
   /**
-   * Top 100 websites in the US per SEM Rush as of May 2023
-   * @see https://www.semrush.com/blog/most-visited-websites/
+   * Live websites
    */
-  // Google currently complains about insecurity and refuses to show the password input on the subsequent screen
   {
     cipherType: CipherType.Login,
-    url: "https://accounts.google.com/",
+    url: "https://fill.dev/form/login-simple",
     inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
-        // multiStepNextInputKey: "password",
-      },
-      // password: {
-      //   value: "fakePassword",
-      //   selector: "input[type='password']",
-      // },
+      username: { selector: "#username", value: testUserName },
+      password: { selector: "#password", value: "fakeSimpleLoginPassword" },
     },
   },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.facebook.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#pass",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.reddit.com/",
-    hiddenForm: {
-      triggerSelectors: ['header a[role="button"]'],
-      iframeSource: "https://www.reddit.com/login/",
-    },
-    inputs: {
-      username: {
-        value: "bwplaywright",
-        selector: "#loginUsername",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#loginPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.reddit.com/login/",
-    inputs: {
-      username: {
-        value: "bwplaywright",
-        selector: "#loginUsername",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#loginPassword",
-      },
-    },
-  },
-  // Amazon sometimes adds an intermediate captcha step, skip testing password fill
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.amazon.com/gp/sign-in.html",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#ap_email",
-        // multiStepNextInputKey: "password",
-      },
-      // password: {
-      //   value: "fakePassword",
-      //   selector: "#ap_password",
-      // },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://twitter.com/login?lang=en",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[autocomplete='username']",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "areallygoodpassword",
-        selector: "input[name='password']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://login.yahoo.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright",
-        selector: "#login-username",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "ayahoopassword",
-        selector: "input#login-passwd",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page/",
-    inputs: {
-      username: {
-        value: "bwplaywright",
-        selector: "#wpName1",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#wpPassword1",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.instagram.com/accounts/login/",
-    inputs: {
-      username: {
-        value: "bwplaywright",
-        selector: "input[name='username']",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "input[name='password']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://auth.fandom.com/signin/",
-    inputs: {
-      username: {
-        value: "Bwplaywright",
-        selector: "input[data-test='signin-username-field']",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "input[data-test='signin-password-field']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://weather.com/login",
-    inputs: {
-      username: {
-        value: "bwplaywright",
-        selector: "#loginEmail",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#loginPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://login.live.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector:
-          "input[aria-label='Enter the password for bwplaywright@gmail.com']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://login.microsoftonline.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector:
-          "input[aria-label='Enter the password for bwplaywright@gmail.com']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.tiktok.com/en/",
-    hiddenForm: {
-      formSelector: "#login-modal",
-    },
-    formSetupClickSelectors: [
-      "a[href^='/login/phone-or-email']",
-      "a[href^='/login/phone-or-email/email']",
-    ],
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[placeholder='Email or username']",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "input[placeholder='Password']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://authentication.taboola.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#j_username[placeholder='Type Email...']",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#j_password[placeholder='Type Password...']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.cnn.com/account/log-in/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#login-email-input",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#login-password-input",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://signin.ebay.com/signin/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#userid",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#pass",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.twitch.tv/",
-    hiddenForm: {
-      triggerSelectors: ["button[data-a-target='login-button']"],
-      formSelector: "div[data-a-target='passport-modal']",
-    },
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#login-username",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password-input",
-      },
-    },
-  },
+  // @TODO In non-debug mode, LinkedIn is often hanging on page load
+  // LinkedIn periodically redirects to https://www.linkedin.com/authwall...
   {
     cipherType: CipherType.Login,
     url: "https://www.linkedin.com/",
+    additionalLoginUrls: ["https://www.linkedin.com/?original_referer="],
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#session_key",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#session_password",
+        value: "fakeLinkedInHomepageLoginPassword",
       },
     },
   },
   {
     cipherType: CipherType.Login,
-    url: "https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin",
+    url: "https://www.linkedin.com/login",
+    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeLinkedInPassword",
       },
     },
   },
-  /**
-   * Note: walmart.com has some pretty aggressive bot detection,
-   * so we're only testing the username autofill for now. */
+  // Samsung has aggressive automation-blocking, captcha step after email entry
+  // Samsung also will periodically not load the login page
   {
     cipherType: CipherType.Login,
-    url: "https://www.walmart.com/account/login",
+    url: "https://account.samsung.com/membership/auth/sign-in",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: 'input[name="Email Address"]',
         // multiStepNextInputKey: "password",
-      },
-      // password: {
-      //   value: "aWalmartPassword",
-      //   selector: "input[name='password']"
-      // },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.quora.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
+        selector: "#iptLgnPlnID",
+        value: testUserEmail,
       },
     },
   },
+  // Zillow has a bot/detection "press & hold" test that pariodically triggers
   {
     cipherType: CipherType.Login,
-    url: "https://myaccount.nytimes.com/auth/login",
+    url: "https://www.zillow.com",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://my.foxnews.com/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "input[type='password']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.espn.com/",
-    additionalLoginUrls: [
-      "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB/",
-    ],
-    hiddenForm: {
-      triggerSelectors: [
-        "#global-user-trigger",
-        '#global-viewport > .global-user a[tref="/members/v3_1/login"]',
-      ],
-      iframeSource:
-        "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB",
-    },
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "[data-testid='InputIdentityFlowValue']",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#InputPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://reg.usps.com/entreg/LoginAction_input",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#username",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.imdb.com/registration/signin",
-    formSetupClickSelectors: ["a[href^='https://www.imdb.com/ap/signin']"],
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#ap_email",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#ap_password",
-      },
-    },
-  },
-  // Indeed is sometimes failing to make it to the second (password) screen
-  {
-    cipherType: CipherType.Login,
-    url: "https://secure.indeed.com/auth",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[type='email']",
-        // multiStepNextInputKey: "password",
-      },
-      // password: {
-      //   value: "anIndeedPassword",
-      //   selector: "input[name='__password']"
-      // },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.paypal.com/signin",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-        multiStepNextInputKey: "password",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://zoom.us/signin",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://discord.com/login",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[aria-label='Email or Phone Number']",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "input[aria-label='Password']",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.netflix.com/login",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#id_userLoginId",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#id_password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.zillow.com/",
-    hiddenForm: {
-      triggerSelectors: [
-        'header nav > div:nth-child(2) a[href^="/user/acct/login/?cid=pf"]',
-      ],
-      formSelector: 'section[role="dialog"]',
-    },
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
+        preFillActions: async (page) => {
+          // Open the login options modal
+          await page
+            .locator(
+              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']"
+            )
+            .click();
+        },
         selector: "#reg-login-email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#inputs-password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.etsy.com/",
-    hiddenForm: {
-      triggerSelectors: ["button.signin-header-action"],
-      formSelector: "#join-neu-overlay > .wt-overlay__modal",
-    },
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#join_neu_email_field",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#join_neu_password_field",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.pinterest.com/",
-    hiddenForm: {
-      triggerSelectors: ['div[data-test-id="simple-login-button"]'],
-      formSelector: 'div[data-test-id="login-modal-default"]',
-    },
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.pinterest.com/login/",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "#email",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "#password",
-      },
-    },
-  },
-  // dailymail sometimes stalls waiting for the page load event
-  // Note: dailymail also fires a notification permissions request. If you accept, it automatically downloads an executable called `MailOnlineSetup.exe`.
-  {
-    cipherType: CipherType.Login,
-    url: "https://www.dailymail.co.uk/registration/login.html",
-    inputs: {
-      username: {
-        value: "bwplaywright@gmail.com",
-        selector: "input[name='j_username']",
-      },
-      password: {
-        value: "fakePassword",
-        selector: "input[name='j_password']",
+        value: "fakeZillowPassword",
       },
     },
   },
@@ -632,19 +129,539 @@ export const testPages: TestPage[] = [
     url: "https://www.homedepot.com/auth/view/signin",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
+        multiStepNextInputKey: "password",
         selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        preFillActions: async (page) => {
+          const dismissButton = await page
+            .locator("button.u__default-link")
+            .filter({ hasText: "No Thanks" });
+          await dismissButton?.click();
+        },
+        selector: "input#password-input-field",
+        value: "fakeHomeDepotPassword",
+      },
+    },
+  },
+  // dailymail sometimes stalls waiting for the page load event
+  // Note: dailymail also fires a notification permissions request. If you accept, it automatically downloads an executable called `MailOnlineSetup.exe`.
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.dailymail.co.uk/registration/login.html",
+    inputs: {
+      username: {
+        selector: "input[name='j_username']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[name='j_password']",
+        value: "fakeDailyMailPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.google.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[type='password']",
+        value: "fakeGooglePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.facebook.com",
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#pass",
+        value: "fakeFacebookPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.reddit.com/login",
+    inputs: {
+      username: {
+        selector: "#loginUsername",
+        value: testUserName,
+      },
+      password: {
+        selector: "#loginPassword",
+        value: "fakeRedditLoginPagePassword",
+      },
+    },
+  },
+  // Amazon sometimes adds an intermediate captcha step, skip testing password fill
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.amazon.com/gp/sign-in.html",
+    inputs: {
+      username: {
         // multiStepNextInputKey: "password",
+        selector: "#ap_email",
+        value: testUserEmail,
       },
       // password: {
-      //   preFill: () => {
-      //     const buttons = document.querySelectorAll('button.u__default-link');
-      //     const dismissButton = (Array.from(buttons) as HTMLButtonElement[]).find(({innerText}) => innerText === "No Thanks")
-      //     dismissButton && dismissButton.click();
-      //   },
-      //   value: "aHomeDepotPassword",
-      //   selector: "input#password-input-field"
+      //   selector: "#ap_password",
+      //   value: "fakeAmazonPassword",
       // },
+    },
+  },
+  // When Twitter sees "unusual login activity", it requests the username or phone number in an intermediate step
+  {
+    cipherType: CipherType.Login,
+    url: "https://twitter.com/login?lang=en",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "input[autocomplete='username']",
+        value: testUserEmail,
+      },
+      // password: {
+      //   selector: "input[name='password']",
+      //   value: "fakeTwitterPassword",
+      // },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.yahoo.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#login-username",
+        value: testUserName,
+      },
+      password: {
+        selector: "input#login-passwd",
+        value: "fakeYahooPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page",
+    inputs: {
+      username: {
+        selector: "#wpName1",
+        value: testUserName,
+      },
+      password: {
+        selector: "#wpPassword1",
+        value: "fakeWikipediaPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.instagram.com/accounts/login",
+    inputs: {
+      username: {
+        selector: "input[name='username']",
+        value: testUserName,
+      },
+      password: {
+        selector: "input[name='password']",
+        value: "fakeInstagramPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://auth.fandom.com/signin",
+    inputs: {
+      username: {
+        selector: "input[data-test='signin-username-field']",
+        // Fandom's ui auto-capitalizes any user input on the usernamefield
+        value: testUserName[0].toUpperCase() + testUserName.slice(1),
+      },
+      password: {
+        selector: "input[data-test='signin-password-field']",
+        value: "fakeFandomPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://weather.com/login",
+    inputs: {
+      username: {
+        selector: "#loginEmail",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#loginPassword",
+        value: "fakeWeatherPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.live.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
+      },
+      password: {
+        selector:
+          "input[aria-label='Enter the password for bwplaywright@gmail.com']",
+        value: "fakeLivePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.microsoftonline.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
+      },
+      password: {
+        selector:
+          "input[aria-label='Enter the password for bwplaywright@gmail.com']",
+        value: "fakeMicrosoftOnlinePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.tiktok.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open the login options popup
+          await page.locator("#header-login-button").click();
+          // Select login with phone / email / username
+          await page
+            .locator("#login-modal a[href^='/login/phone-or-email']")
+            .click();
+          // Select login with email or username
+          await page
+            .locator("#login-modal a[href^='/login/phone-or-email/email']")
+            .click();
+        },
+        selector: "input[placeholder='Email or username']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[placeholder='Password']",
+        value: "fakeTikTokPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.tiktok.com/login/phone-or-email/email",
+    inputs: {
+      username: {
+        selector: "input[placeholder='Email or username']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[placeholder='Password']",
+        value: "fakeTikTokPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://authentication.taboola.com",
+    inputs: {
+      username: {
+        selector: "#j_username[placeholder='Type Email...']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#j_password[placeholder='Type Password...']",
+        value: "fakeTaboolaPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.cnn.com/account/log-in",
+    inputs: {
+      username: {
+        selector: "#login-email-input",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#login-password-input",
+        value: "fakeCNNPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://signin.ebay.com/signin",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#userid",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#pass",
+        value: "fakeEbayPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.twitch.tv",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open the login modal
+          await page.locator("button[data-a-target='login-button']").click();
+        },
+        selector: "#login-username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password-input",
+        value: "fakeTwitchPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.walmart.com/account/login",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: 'input[name="Email Address"]',
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[name='password'][type='password']",
+        value: "fakeWalmartPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.quora.com",
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeQuoraPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://myaccount.nytimes.com/auth/login",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeNYTimesPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://my.foxnews.com",
+    inputs: {
+      username: {
+        selector: "input[type='email']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[type='password']",
+        value: "fakeFoxNewsPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://reg.usps.com/entreg/LoginAction_input",
+    inputs: {
+      username: {
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeUSPSPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.imdb.com/registration/signin",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the login with IMDB button to be redirected to the login page
+          await page
+            .locator("a[href^='https://www.imdb.com/ap/signin']")
+            .filter({ hasText: "Sign in with IMDb" })
+            .click();
+        },
+        selector: "#ap_email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#ap_password",
+        value: "fakeIMDBPassword",
+      },
+    },
+  },
+  // Indeed is sometimes requiring a captcha to make it to the second (password) screen
+  {
+    cipherType: CipherType.Login,
+    url: "https://secure.indeed.com/auth",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
+      },
+      // password: {
+      //   preFillActions: async (page) =>
+      //     await page.locator("#auth-page-google-password-fallback").click(),
+      //   selector: "input[name='__password']",
+      //   value: "fakeIndeedPassword",
+      // },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.paypal.com/signin",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakePaypalPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://zoom.us/signin",
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeZoomPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://discord.com/login",
+    inputs: {
+      username: {
+        selector: "input[aria-label='Email or Phone Number']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[aria-label='Password']",
+        value: "fakeDiscordPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.netflix.com/login",
+    inputs: {
+      username: {
+        selector: "#id_userLoginId",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#id_password",
+        value: "fakeNetflixPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.etsy.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open the sign in modal
+          await page.locator("button.signin-header-action").click();
+        },
+        selector: "#join_neu_email_field",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#join_neu_password_field",
+        value: "fakeEtsyPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.pinterest.com/",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open the log in modal
+          await page
+            .locator('div[data-test-id="simple-login-button"]')
+            .first()
+            .click();
+        },
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakePinterestPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.pinterest.com/login/",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakePinterestPassword",
+      },
     },
   },
   {
@@ -652,12 +669,12 @@ export const testPages: TestPage[] = [
     url: "https://github.com/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#login_field",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeGithubPassword",
       },
     },
   },
@@ -666,12 +683,12 @@ export const testPages: TestPage[] = [
     url: "https://nypost.com/account/login",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#email",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeNYPostPassword",
       },
     },
   },
@@ -680,47 +697,949 @@ export const testPages: TestPage[] = [
     url: "https://wwwl.accuweather.com/premium_login.php",
     inputs: {
       username: {
-        value: "bwplaywright@gmail.com",
         selector: "#username",
+        value: testUserEmail,
       },
       password: {
-        value: "fakePassword",
         selector: "#password",
+        value: "fakeAccuweatherPassword",
       },
     },
   },
-  //
-  //
-  //
-  //
-  //
-  /**
-   * Commenting out known failure cases for now
-   *
-  // Known failure cases:
+  {
+    cipherType: CipherType.Login,
+    url: "https://character.ai",
+    additionalLoginUrls: ["https://character-ai.us.auth0.com"],
+    uriMatchType: UriMatchType.Host,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // If there is a queue to access the site, use an alternate path to get to the login page
+          const siteQueue = await page
+            .locator("main .content-container")
+            .filter({ hasText: "You are now in line." });
+          const siteIsQueuing = await siteQueue.isVisible();
+
+          if (siteIsQueuing) {
+            await page
+              .locator("a div")
+              .filter({ hasText: "Click here to skip the line!" })
+              .click();
+            await page
+              .locator("button")
+              .filter({ hasText: "Login to Subscribe!" })
+              .click();
+          } else {
+            // Close the pop-up prompting you to use the mobile app
+            await page.locator("#mobile-app-modal-close").click();
+            // Accept the cookie policy
+            await page
+              .locator("button")
+              .filter({ hasText: "Accept" })
+              .first()
+              .click();
+            // Go to the login page (cannot go directly to the login page)
+            await page
+              .locator("button")
+              .filter({ hasText: "Log In" })
+              .first()
+              .click();
+          }
+        },
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeCharacterAIPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://platform.openai.com/login?launch",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeOpenAIPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.ups.com/lasso/login",
+    inputs: {
+      username: {
+        value: testUserEmail,
+        selector: "#email",
+        multiStepNextInputKey: "password",
+      },
+      password: {
+        value: "fakeUPSPassword",
+        selector: "#pwd",
+      },
+    },
+  },
+  // Patreon will sometimes send login links to the email
+  // Patreon prequalifies the email and starts account creation workflow if it isn't recognized as an existing account
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.patreon.com/login",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "input[name='email']",
+        value: testUserEmail,
+      },
+      // @TODO create Patreon account with test email in order to test password auto-fill
+      // password: {
+      //   selector: "input[placeholder='Your name']",
+      //   value: "fakePatreonPassword",
+      // },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://imgur.com/signin",
+    inputs: {
+      username: {
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeImgurPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://ign.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open user account menu
+          await page.locator("button.login-avatar").click();
+          // Open login modal
+          await page
+            .locator("button")
+            .filter({ hasText: "Login" })
+            .first()
+            .click();
+          // Open the login form
+          await page
+            .locator("button")
+            .filter({ hasText: "Log in with an email or username" })
+            .first()
+            .click();
+        },
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeIGNPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://aws.amazon.com",
+    additionalLoginUrls: ["https://signin.aws.amazon.com"],
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the login link to get redirected to the login domain/page
+          await page
+            .locator("#aws-page-header a")
+            .filter({ hasText: "Sign In" })
+            .first()
+            .click();
+        },
+        selector: "input#resolving_input[type='email']",
+        value: testUserEmail,
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create Amazon AWS account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.roblox.com/login",
+    inputs: {
+      username: {
+        selector: "#login-username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#login-password",
+        value: "fakeRobloxPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.spotify.com/en/login",
+    inputs: {
+      username: {
+        selector: "#login-username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#login-password",
+        value: "fakeSpotifyPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.instructure.com/canvas/login/free-for-teacher",
+    inputs: {
+      username: {
+        selector: "#edit-email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#edit-password",
+        value: "fakeInstructurePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://badgr.com/auth/login",
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#enter-password",
+        value: "fakeBadgrPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://portfolium.com/login",
+    inputs: {
+      username: {
+        selector: "#pf-simple-sign-in--field--identity",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#pf-simple-sign-in--field--password",
+        value: "fakePortfoliumPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://app.masteryconnect.com/login",
+    inputs: {
+      username: {
+        selector: "#login",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeMasteryPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://identity.us2.kimonocloud.com/login",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeElevateDSPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://app.learnplatform.com/users/sign_in",
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeLearnPlatformPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.target.com/account",
+    inputs: {
+      username: {
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeTargetPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://accounts.craigslist.org/login",
+    inputs: {
+      username: {
+        selector: "#inputEmailHandle",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#inputPassword",
+        value: "fakeCraigsListPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.capitalone.com",
+    uriMatchType: UriMatchType.Host,
+    inputs: {
+      username: {
+        selector: "input.login-username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input.login-password[type='password']",
+        value: "fakeCapitalOneWidgetPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://verified.capitalone.com/auth/signin",
+    uriMatchType: UriMatchType.Host,
+    inputs: {
+      username: {
+        selector: "input[aria-describedby='label-username-input']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[aria-describedby='label-password-input']",
+        value: "fakeCapitalOnePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.fedex.com/secure-login",
+    inputs: {
+      username: {
+        selector: "#userId",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeFedExPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.tumblr.com",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Click the login button to bring up the account modal
+          await page.locator("a").filter({ hasText: "Log In" }).first().click();
+          // Click the "Continue with email" button
+          await page
+            .locator('button[aria-label="Continue with email"]')
+            .first()
+            .click();
+        },
+        selector: "input[name='email']",
+        value: testUserEmail,
+      },
+      // @TODO create tumblr account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://seguro.marca.com/registro/v3/?view=login",
+    inputs: {
+      username: {
+        selector: "#inputEmailLogin",
+        value: testUserEmail,
+      },
+      // @TODO create marca account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.bestbuy.com/identity/global/signin",
+    inputs: {
+      username: {
+        selector: "#fld-e",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#fld-p1",
+        value: "fakeBestBuyPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.adobe.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the login button to get redirected to the login page (with token)
+          await page
+            .locator("span.feds-login-text")
+            .filter({ hasText: "Sign In" })
+            .first()
+            .click();
+        },
+        selector: "#EmailPage-EmailField",
+        value: testUserEmail,
+        // multiStepNextInputKey: "password",
+      },
+      // @TODO create an adobe account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://auth.hulu.com/web/login",
+    inputs: {
+      username: {
+        selector: "input[data-automationid='email-field']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "input[data-automationid='password-field']",
+        value: "fakeHuluPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://account.bbc.com/signin",
+    inputs: {
+      username: {
+        selector: "#user-identifier-input",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password-input",
+        value: "fakeBBCPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://steamcommunity.com/login/home",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        selector:
+          "form div:has-text('Sign in with account name') input[type='text']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "form input[type='password']",
+        value: "fakeSteamCommunityPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://store.steampowered.com/login",
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        selector:
+          "form div:has-text('Sign in with account name') input[type='text']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "form input[type='password']",
+        value: "fakeSteamStorePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.lowes.com/u/login",
+    inputs: {
+      username: {
+        selector: "#email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#user-password",
+        value: "fakeLowesPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.xfinity.com/login",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "#user",
+        value: testUserEmail,
+      },
+      // @TODO create an xfinity account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.bezzypsa.com/signin/SIGNIN",
+    inputs: {
+      username: {
+        selector: "#signin-email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#signin-password",
+        value: "fakeBezzyPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.yelp.com/login",
+    inputs: {
+      username: {
+        selector: ".login form #email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: ".login form #password",
+        value: "fakeYelpPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://wordpress.com/log-in",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "#usernameOrEmail",
+        value: testUserEmail,
+      },
+      // @TODO create a Wordpress account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://nextdoor.com/login",
+    inputs: {
+      username: {
+        selector: "#id_email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#id_password",
+        value: "fakeNextdoorPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://linktr.ee/login",
+    inputs: {
+      username: {
+        selector: "input[name='username']",
+        value: testUserName,
+      },
+      password: {
+        selector: "input[name='password']",
+        value: "fakeLinktreePassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://quizlet.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the log in button to trigger the login modal
+          await page.locator("button").filter({ hasText: "Log in" }).click();
+        },
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeQuizletPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://realtor.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Click the log in button to trigger the login modal
+          const loginButton = await page.locator(
+            "a.user-profile_header-login[href='/myaccount']"
+          );
+          await loginButton.click();
+        },
+        selector: "#raas_email",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#raas_password",
+        value: "fakeRealtorPassword",
+      },
+    },
+  },
+  // Canva prequalifies the email and starts account creation workflow if it isn't recognized as an existing account
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.canva.com",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Click the log in button to trigger the login modal
+          await page
+            .locator("header button span")
+            .filter({ hasText: "Log in" })
+            .first()
+            .click();
+          // Select Continue with email option
+          await page
+            .locator("button")
+            .filter({ hasText: "Continue with email" })
+            .click();
+        },
+        selector: "input[name='email']",
+        value: testUserEmail,
+      },
+      // @TODO create a Canva account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.att.com/acctmgmt/login",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#userID",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeATTPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://auth0.com/api/auth/login",
+    additionalLoginUrls: ["https://auth0.auth0.com"],
+    uriMatchType: UriMatchType.Host,
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeAuth0Password",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.washingtonpost.com/subscribe/signin",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "#username",
+        value: testUserEmail,
+      },
+      // @TODO create a Washington Post account with test email in order to test password auto-fill
+    },
+  },
+  // AOL uses a captcha between username entry and password entry
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.aol.com",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "#login-username",
+        value: testUserEmail,
+      },
+      // @TODO create a Washington Post account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.t-mobile.com",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Click the reject button on the interaction analysis modal
+          await page.locator("#onetrust-reject-all-handler").click();
+          // Click the log in button to trigger the login modal
+          await page
+            .locator("button")
+            .filter({ hasText: "Log in" })
+            .first()
+            .click();
+          // Select Continue with email option
+          await page
+            .locator(".unav-account__dropdown a")
+            .filter({ hasText: "Log in" })
+            .click();
+        },
+        selector: "#usernameTextBox",
+        value: testUserEmail,
+      },
+      // @TODO create a t-mobile account with test email in order to test password auto-fill
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.okta.com/signin",
+    inputs: {
+      username: {
+        selector: "#okta-signin-username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#okta-signin-password",
+        value: "fakeOktaSupportPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://bethesda.net",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click the LOG IN / SIGN UP button to bring up the login modal
+          await page
+            .locator("button span")
+            .filter({ hasText: "Log In / Sign Up" })
+            .click();
+        },
+        selector: "#username-input",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password-input",
+        value: "fakeBethesdaPassword",
+      },
+    },
+  },
+];
+
+// Known failure cases; expected to fail
+export const knownFailureCases: TestPage[] = [
   {
     cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/many-input-form.html`,
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      username: { value: "js", selector: "#username" },
-      password: { value: "", selector: "#password" },
+      username: { selector: "#username", value: "js" },
+      password: { selector: "#password", value: "" },
     },
   },
+  // The Reddit modal sign in inputs are nested under several levels of shadow roots
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.reddit.com",
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Open login modal
+          await page
+            .locator('header a[href^="https://www.reddit.com/login"]')
+            .click();
+          // Select login option from registration form
+          const loadedLoginModal = await page.locator(
+            'form div.login a[href^="/account/login"]'
+          );
+          loadedLoginModal.click();
+        },
+        selector: "#loginUsername",
+        value: testUserName,
+      },
+      password: {
+        selector: "#loginPassword",
+        value: "fakeRedditInlineLoginPassword",
+      },
+    },
+  },
+  // The Max sign in inputs are nested two-deep within shadow roots
   {
     cipherType: CipherType.Login,
     url: "https://auth.max.com/login",
     inputs: {
-      username: { value: "maxcom_user", selector: "#username" },
-      password: { value: "maxcom_password", selector: "#password" },
+      username: { selector: "#username", value: "maxcom_user" },
+      password: { selector: "#password", value: "maxcom_password" },
+    },
+  },
+  // Each Clear login input is nested within a shadow root
+  {
+    cipherType: CipherType.Login,
+    url: "https://login.clear.com.br",
+    inputs: {
+      // Clear expects numerically-formatted values
+      username: { selector: "#username", value: "12345678901111" },
+      password: { selector: "#password", value: "098765" },
+    },
+  },
+  // Auto-fill is targeting the registration form (on the same page) over the login form which appears after
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.gamespot.com/login-signup",
+    inputs: {
+      username: {
+        selector: "#form__username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#form__password",
+        value: "fakeGamespotPassword",
+      },
+    },
+  },
+  // Temu sometimes has a captcha challenge before showing the password field.
+  {
+    cipherType: CipherType.Login,
+    url: "https://temu.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Await and dismiss promo modals
+          await page.locator('div[role="dialog"]');
+          await page
+            .locator('div[role="dialog"] img[alt="close icon"]')
+            .click();
+          // Click the login/account button to trigger the login modal
+          await page
+            .locator('#mainHeader .mainContent div[role="button"]')
+            .filter({ hasText: "Sign in / Register" })
+            .first()
+            .click();
+        },
+        selector: "#user-account",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#pwdInputInLoginDialog",
+        value: "fakeTemuPassword",
+      },
     },
   },
   {
     cipherType: CipherType.Login,
-    url: "https://login.clear.com.br/",
+    url: "https://www.temu.com/login.html",
     inputs: {
-      username: { value: "12345678901111", selector: "#username" },
-      password: { value: "098765", selector: "#password" },
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#user-account",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#pwdInputInLoginDialog",
+        value: "fakeTemuLoginPagePassword",
+      },
+    },
+  },
+  // Apple sign in form is within an iframe
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.apple.com",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Click the store button to get the dropdown menu which includes the link to the login page
+          await page.locator("a#globalnav-menubutton-link-bag").click();
+          // Click the log in link to be redirected to the login page
+          await page.locator('a[data-autom="sign-in"]').first().click();
+        },
+        selector: "#account_name_text_field",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password_text_field",
+        value: "fakeApplePassword",
+      },
+    },
+  },
+  // Marvel sign in form is within an iframe
+  // Note; marvel.com has it's own login but checks against the existence of a Disney account before allowing password entry
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.marvel.com/signin",
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        selector: "#InputIdentityFlowValue",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#InputPassword",
+        value: "fakeMarvelPassword",
+      },
+    },
+  },
+  // ESPN sign in form is within an iframe; autofill will only work if the iframe domain is added to `additionalLoginUrls`
+  {
+    cipherType: CipherType.Login,
+    url: "https://www.espn.com",
+    // additionalLoginUrls: [
+    //   "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB",
+    // ],
+    inputs: {
+      username: {
+        multiStepNextInputKey: "password",
+        preFillActions: async (page) => {
+          // Open the account sidebar/menu
+          await page.locator("#global-user-trigger").click();
+          await page
+            .locator(
+              '#global-viewport > .global-user a[tref="/members/v3_1/login"]'
+            )
+            .click();
+        },
+        selector: "input[data-testid='InputIdentityFlowValue']",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#InputPassword",
+        value: "fakeESPNPassword",
+      },
     },
   },
 
@@ -730,12 +1649,12 @@ export const testPages: TestPage[] = [
     url: "https://fill.dev/form/credit-card-simple",
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      cardholderName: { value: "John Smith", selector: "#cc-name" },
-      brand: { value: "Visa", selector: "#cc-type" },
-      number: { value: "4111111111111111", selector: "#cc-number" },
-      expMonth: { value: "12", selector: "#cc-exp-month" },
-      expYear: { value: "2025", selector: "#cc-exp-year" },
-      code: { value: "123", selector: "#cc-csc" },
+      cardholderName: { selector: "#cc-name", value: "John Smith" },
+      brand: { selector: "#cc-type", value: "Visa" },
+      number: { selector: "#cc-number", value: "4111111111111111" },
+      expMonth: { selector: "#cc-exp-month", value: "12" },
+      expYear: { selector: "#cc-exp-year", value: "2025" },
+      code: { selector: "#cc-csc", value: "123" },
     },
   },
   {
@@ -743,17 +1662,15 @@ export const testPages: TestPage[] = [
     url: "https://fill.dev/form/identity-simple",
     uriMatchType: UriMatchType.Exact,
     inputs: {
-      firstName: { value: "John", selector: "#given-name" },
-      middleName: { value: "M", selector: "#additional-name" },
-      lastName: { value: "Smith", selector: "#family-name" },
-      address1: { value: "123 Main St", selector: "#address-line1" },
-      address2: { value: "Apt 1", selector: "#address-line2" },
-      city: { value: "New York", selector: "city" },
-      state: { value: "NY", selector: "#address-level1" },
-      postalCode: { value: "10001", selector: "#postal-code" },
-      country: { value: "USA", selector: "#country" },
+      firstName: { selector: "#given-name", value: "John" },
+      middleName: { selector: "#additional-name", value: "M" },
+      lastName: { selector: "#family-name", value: "Smith" },
+      address1: { selector: "#address-line1", value: "123 Main St" },
+      address2: { selector: "#address-line2", value: "Apt 1" },
+      city: { selector: "city", value: "New York" },
+      state: { selector: "#address-level1", value: "NY" },
+      postalCode: { selector: "#postal-code", value: "10001" },
+      country: { selector: "#country", value: "USA" },
     },
   },
-
-   **/
 ];

@@ -7,6 +7,7 @@ Thumbs.db
 dev-server.local.pem
 vault-seeder
 !vault-seeder/abstractions
+!vault-seeder/vault-seeder.ts
 ssl.crt
 ssl.key
 

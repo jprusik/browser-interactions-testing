@@ -1,3 +1,4 @@
+import { Page } from "@playwright/test";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import {
   FieldType,
@@ -9,7 +10,7 @@ type FillProperties = {
   value: string;
   selector: string;
   multiStepNextInputKey?: string;
-  preFill?: () => void;
+  preFillActions?: (page: Page) => void;
 };
 
 type TestPage = {
@@ -17,13 +18,7 @@ type TestPage = {
   url: string;
   additionalLoginUrls?: string[];
   uriMatchType?: UriMatchType;
-  hiddenForm?: {
-    triggerSelectors?: string[];
-    formSelector?: string;
-    iframeSource?: string;
-  };
   onlyTest?: boolean;
-  formSetupClickSelectors?: string[];
   inputs: {
     // Login fields
     username?: FillProperties;

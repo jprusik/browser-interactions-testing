@@ -1,12 +1,13 @@
 import { Page } from "@playwright/test";
 import path from "path";
 
-import { testPages } from "./constants";
+import { localPagesUri, testPages } from "./constants";
 import { test, expect } from "./fixtures";
 import {
   LocatorWaitForOptions,
   PageGoToOptions,
 } from "./abstractions/test-pages";
+import { FillProperties } from "./abstractions/constants";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -15,14 +16,15 @@ let testPage: Page;
 const vaultEmail = process.env.VAULT_EMAIL || "";
 const vaultPassword = process.env.VAULT_PASSWORD || "";
 const serverHostURL = process.env.SERVER_HOST_URL;
+const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
-  timeout: 60000,
+  timeout: 90000,
 };
 const defaultWaitForOptions: LocatorWaitForOptions = {
   state: "visible",
-  timeout: 10000,
+  timeout: 15000,
 };
 
 test.describe("Extension autofills forms when triggered", () => {
@@ -30,8 +32,8 @@ test.describe("Extension autofills forms when triggered", () => {
     context,
     extensionId,
   }) => {
-    context.setDefaultTimeout(10000);
-    context.setDefaultNavigationTimeout(60000);
+    context.setDefaultTimeout(20000);
+    context.setDefaultNavigationTimeout(120000);
 
     const [backgroundPage] = context.backgroundPages();
     async function doAutofill() {
@@ -44,8 +46,8 @@ test.describe("Extension autofills forms when triggered", () => {
               command: "collectPageDetails",
               tab: tabs[0],
               sender: "autofill_cmd",
-            }),
-        ),
+            })
+        )
       );
     }
 
@@ -64,15 +66,19 @@ test.describe("Extension autofills forms when triggered", () => {
       }
 
       testPage = contextPages[0];
+
+      if (debugIsActive) {
+        console.log(
+          (await testPage.evaluate(() => navigator.userAgent)) + "\n"
+        );
+      }
     });
 
     await test.step("Configure the environment", async () => {
       // @TODO check for and fill other settings
       if (serverHostURL) {
-        await testPage.goto(
-          `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`,
-          defaultGotoOptions,
-        );
+        const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`;
+        await testPage.goto(extensionURL, defaultGotoOptions);
         const baseUrlInput = await testPage.locator("input#baseUrl");
         await baseUrlInput.waitFor(defaultWaitForOptions);
 
@@ -101,7 +107,7 @@ test.describe("Extension autofills forms when triggered", () => {
       await emailSubmitInput.click();
 
       const masterPasswordInput = await testPage.locator(
-        "input#masterPassword",
+        "input#masterPassword"
       );
       await masterPasswordInput.waitFor(defaultWaitForOptions);
       await masterPasswordInput.fill(vaultPassword);
@@ -112,10 +118,8 @@ test.describe("Extension autofills forms when triggered", () => {
       await loginButton.waitFor(defaultWaitForOptions);
       await loginButton.click();
 
-      await testPage.waitForURL(
-        `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`,
-        defaultGotoOptions,
-      );
+      const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
+      await testPage.waitForURL(extensionURL, defaultGotoOptions);
       const vaultFilterBox = await testPage
         .locator("app-vault-filter main .box.list")
         .first();
@@ -132,99 +136,92 @@ test.describe("Extension autofills forms when triggered", () => {
       }
     }
 
+    if (startFromTestUrl) {
+      const startTestIndex = pagesToTest.findIndex(
+        ({ url }) => url === startFromTestUrl
+      );
+
+      pagesToTest =
+        startTestIndex > 0 ? pagesToTest.slice(startTestIndex) : pagesToTest;
+    }
+
+    test.setTimeout(480000);
+    testPage.setDefaultNavigationTimeout(60000);
+
     for (const page of pagesToTest) {
       const { url, inputs } = page;
+      const isLocalPage = url.startsWith(localPagesUri);
 
       await test.step(`Autofill the form on page ${url}`, async () => {
-        testPage.setDefaultNavigationTimeout(60000);
-        const navigationPromise =
-          testPage.waitForNavigation(defaultGotoOptions);
-        await testPage.goto(url);
-        await navigationPromise;
-
-        let hiddenFormSelector;
-        if (page.hiddenForm) {
-          hiddenFormSelector = page.hiddenForm.iframeSource
-            ? `iframe[src^="${page.hiddenForm.iframeSource}"]`
-            : page.hiddenForm.formSelector;
-          if (page.hiddenForm.triggerSelectors?.length) {
-            for (const selector of page.hiddenForm.triggerSelectors) {
-              const triggerElement = await testPage.locator(selector).first();
-              await triggerElement.waitFor(defaultWaitForOptions);
-              await triggerElement.click();
-            }
-          }
-          const hiddenForm = await testPage.locator(hiddenFormSelector).first();
-          await hiddenForm.waitFor(defaultWaitForOptions);
-
-          if (page.hiddenForm.iframeSource) {
-            const iframeElement = await testPage
-              .locator(hiddenFormSelector)
-              .elementHandle();
-            const frame = await iframeElement.contentFrame();
-            await frame.waitForURL(
-              new RegExp(`.*${page.hiddenForm.iframeSource}.*`, "i"),
-            );
-          }
-        }
-
-        if (page.formSetupClickSelectors) {
-          for (const selector of page.formSetupClickSelectors) {
-            await testPage.click(selector);
-          }
-        }
-
-        const testedFrame = Boolean(page.hiddenForm?.iframeSource)
-          ? testPage.frameLocator(hiddenFormSelector)
-          : testPage;
+        await testPage.goto(url, defaultGotoOptions);
 
         const inputKeys = Object.keys(inputs);
-        const firstInputKey = inputKeys[0];
-        const initialInputElement = await testedFrame
-          .locator(inputs[firstInputKey]?.selector)
+        const firstInput = inputs[inputKeys[0]];
+        const firstInputPreFill = firstInput.preFillActions;
+        if (firstInputPreFill) {
+          try {
+            await firstInputPreFill(testPage);
+          } catch (error) {
+            console.log("There was a prefill error:", error);
+
+            if (debugIsActive) {
+              await testPage.pause();
+            }
+          }
+        }
+
+        const initialInputElement = await testPage
+          .locator(firstInput?.selector)
           .first();
         await initialInputElement.waitFor(defaultWaitForOptions);
 
         await doAutofill();
 
         for (const inputKey of inputKeys) {
-          const currentInput = inputs[inputKey];
-          const currentInputElement = testedFrame.locator(
-            currentInput.selector,
-          );
-          await expect
-            // @TODO do not soft expect on local test pages
-            .soft(currentInputElement)
-            .toHaveValue(currentInput.value);
+          const currentInput: FillProperties = inputs[inputKey];
+          const currentInputElement = testPage.locator(currentInput.selector);
+
+          // Do not soft expect on local test pages; we want to stop the tests before hitting live pages
+          if (isLocalPage) {
+            await expect(currentInputElement).toHaveValue(currentInput.value);
+          } else {
+            await expect
+              .soft(currentInputElement)
+              .toHaveValue(currentInput.value);
+          }
 
           await testPage.screenshot({
             path: path.join(
               screenshotsOutput,
-              `${url}-${inputKey}-autofill.png`,
+              `${url}-${inputKey}-autofill.png`
             ),
           });
 
-          const nextInputKey = currentInput.multiStepNextInputKey;
-          if (nextInputKey && inputs[nextInputKey]) {
+          const nextStepInput: FillProperties | undefined =
+            currentInput.multiStepNextInputKey &&
+            inputs[currentInput.multiStepNextInputKey];
+
+          if (nextStepInput) {
             await currentInputElement.press("Enter");
 
-            const nextInputSelector = inputs[nextInputKey].selector;
+            const nextInputPreFill = nextStepInput.preFillActions;
+            if (nextInputPreFill) {
+              try {
+                nextInputPreFill(testPage);
+              } catch (error) {
+                console.log("There was a prefill error:", error);
 
-            const iframeElement = Boolean(page.hiddenForm?.iframeSource)
-              ? await testPage.locator(hiddenFormSelector).elementHandle()
-              : null;
-            const testedFrame = iframeElement
-              ? await iframeElement.contentFrame()
-              : testPage;
+                if (debugIsActive) {
+                  await testPage.pause();
+                }
+              }
+            }
 
-            const nextInputElement = testedFrame
+            const nextInputSelector = nextStepInput.selector;
+            const nextInputElement = testPage
               .locator(nextInputSelector)
               .first();
             await nextInputElement.waitFor(defaultWaitForOptions);
-
-            if (inputs[nextInputKey].preFill) {
-              inputs[nextInputKey].preFill();
-            }
 
             await doAutofill();
           }
