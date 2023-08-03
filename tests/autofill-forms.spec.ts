@@ -172,16 +172,22 @@ test.describe("Extension autofills forms when triggered", () => {
           }
         }
 
-        const initialInputElement = await testPage
-          .locator(firstInput?.selector)
-          .first();
-        await initialInputElement.waitFor(defaultWaitForOptions);
+        const firstInputSelector = firstInput.selector;
+        const firstInputElement =
+          typeof firstInputSelector === "string"
+            ? await testPage.locator(firstInputSelector).first()
+            : await firstInputSelector(testPage);
+        await firstInputElement.waitFor(defaultWaitForOptions);
 
         await doAutofill();
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
-          const currentInputElement = testPage.locator(currentInput.selector);
+          const currentInputSelector = currentInput.selector;
+          const currentInputElement =
+            typeof currentInputSelector === "string"
+              ? await testPage.locator(currentInputSelector).first()
+              : await currentInputSelector(testPage);
 
           // Do not soft expect on local test pages; we want to stop the tests before hitting live pages
           if (isLocalPage) {
@@ -221,9 +227,10 @@ test.describe("Extension autofills forms when triggered", () => {
             }
 
             const nextInputSelector = nextStepInput.selector;
-            const nextInputElement = testPage
-              .locator(nextInputSelector)
-              .first();
+            const nextInputElement =
+              typeof nextInputSelector === "string"
+                ? await testPage.locator(nextInputSelector).first()
+                : await nextInputSelector(testPage);
             await nextInputElement.waitFor(defaultWaitForOptions);
 
             await doAutofill();
