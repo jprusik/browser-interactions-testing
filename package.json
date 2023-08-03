@@ -35,7 +35,7 @@
   },
   "scripts": {
     "prepare": "husky install && npm run setup:clients",
-    "pretest": "rimraf tests-out && rimraf screenshots && tsc --incremental -p tests/tsconfig.json",
+    "pretest": "rimraf tests-out screenshots test-summary test-results && tsc --incremental -p tests/tsconfig.json",
     "build:clients": "cd clients/apps/browser && rimraf build && npm run build",
     "build:clients:autofill": "cd clients/apps/browser && rimraf build && cross-env AUTOFILL_VERSION=2 npm run build",
     "build:clients:autofill:mv3": "cd clients/apps/browser && rimraf build && cross-env AUTOFILL_VERSION=2 MANIFEST_VERSION=3 npm run build",
@@ -47,9 +47,9 @@
     "setup:clients": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
     "setup:ssl": "./scripts/generate-certs.sh",
     "setup:vault": "npm run seed:vault:account && npm run seed:vault:ciphers",
-    "test:autofill": "npm run pretest && playwright test --reporter=line",
+    "test:autofill": "npm run pretest && playwright test",
     "test:autofill:debug": "npm run pretest && playwright test --debug",
-    "test:autofill:headless": "npm run pretest && HEADLESS=true playwright test --reporter=line",
+    "test:autofill:headless": "npm run pretest && HEADLESS=true playwright test",
     "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
     "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch"
   }

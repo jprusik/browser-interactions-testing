@@ -35,9 +35,10 @@ export const test = base.extend<{
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
       slowMo: 600,
       viewport: {
-        width: 1000,
+        width: 1200,
         height: 1000,
       },
+      recordVideo: { dir: "tests-out/videos" },
     });
     await use(context);
   },

@@ -20,7 +20,7 @@ const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
-  timeout: 90000,
+  timeout: 60000,
 };
 const defaultWaitForOptions: LocatorWaitForOptions = {
   state: "visible",
@@ -36,6 +36,7 @@ test.describe("Extension autofills forms when triggered", () => {
     context.setDefaultNavigationTimeout(120000);
 
     const [backgroundPage] = context.backgroundPages();
+
     async function doAutofill() {
       await backgroundPage.evaluate(() =>
         chrome.tabs.query(
@@ -85,6 +86,7 @@ test.describe("Extension autofills forms when triggered", () => {
         await testPage.fill("input#baseUrl", serverHostURL);
 
         await testPage.screenshot({
+          fullPage: true,
           path: path.join(screenshotsOutput, `environment_configured.png`),
         });
 
@@ -191,6 +193,7 @@ test.describe("Extension autofills forms when triggered", () => {
           }
 
           await testPage.screenshot({
+            fullPage: true,
             path: path.join(
               screenshotsOutput,
               `${url}-${inputKey}-autofill.png`
