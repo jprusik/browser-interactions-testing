@@ -17,6 +17,7 @@ const vaultEmail = process.env.VAULT_EMAIL || "";
 const vaultPassword = process.env.VAULT_PASSWORD || "";
 const serverHostURL = process.env.SERVER_HOST_URL;
 const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
+const targetTestPages = process.env.TARGET;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
@@ -128,7 +129,12 @@ test.describe("Extension autofills forms when triggered", () => {
       await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
-    let pagesToTest = testPages;
+    let pagesToTest =
+      targetTestPages === "static"
+        ? testPages.filter(({ url }) => url.startsWith(localPagesUri))
+        : targetTestPages === "public"
+        ? testPages.filter(({ url }) => !url.startsWith(localPagesUri))
+        : testPages;
 
     if (debugIsActive) {
       pagesToTest = pagesToTest.filter(({ onlyTest }) => onlyTest);

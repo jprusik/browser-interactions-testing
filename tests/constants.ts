@@ -51,6 +51,29 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
+    url: `${localPagesUri}/tests/test-pages/sandboxed-iframe-form.html`,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Accept the iframe fill prompt
+          await page.on("dialog", (dialog) => dialog.accept());
+        },
+        shouldNotFill: true,
+        selector: async (page) =>
+          await page.frameLocator("#test-iframe").locator("#username"),
+        value: testUserName,
+      },
+      password: {
+        shouldNotFill: true,
+        selector: async (page) =>
+          await page.frameLocator("#test-iframe").locator("#password"),
+        value: "fakeSandboxedIframeBasicFormPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
     uriMatchType: UriMatchType.Exact,
     inputs: {
