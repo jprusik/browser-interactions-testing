@@ -7,10 +7,11 @@ import {
 } from "../../clients/libs/common/src/enums";
 
 type FillProperties = {
-  value: string;
-  selector: string | ((page: Page) => Promise<Locator>);
   multiStepNextInputKey?: string;
   preFillActions?: (page: Page) => void;
+  selector: string | ((page: Page) => Promise<Locator>);
+  shouldNotFill?: boolean;
+  value: string;
 };
 
 type TestPage = {

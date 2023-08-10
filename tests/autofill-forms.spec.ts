@@ -195,13 +195,15 @@ test.describe("Extension autofills forms when triggered", () => {
               ? await testPage.locator(currentInputSelector).first()
               : await currentInputSelector(testPage);
 
+          const expectedValue = currentInput.shouldNotFill
+            ? ""
+            : currentInput.value;
+
           // Do not soft expect on local test pages; we want to stop the tests before hitting live pages
           if (isLocalPage) {
-            await expect(currentInputElement).toHaveValue(currentInput.value);
+            await expect(currentInputElement).toHaveValue(expectedValue);
           } else {
-            await expect
-              .soft(currentInputElement)
-              .toHaveValue(currentInput.value);
+            await expect.soft(currentInputElement).toHaveValue(expectedValue);
           }
 
           await testPage.screenshot({
