@@ -17,10 +17,11 @@ const vaultEmail = process.env.VAULT_EMAIL || "";
 const vaultPassword = process.env.VAULT_PASSWORD || "";
 const serverHostURL = process.env.SERVER_HOST_URL;
 const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
+const targetTestPages = process.env.TARGET;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
-  timeout: 90000,
+  timeout: 60000,
 };
 const defaultWaitForOptions: LocatorWaitForOptions = {
   state: "visible",
@@ -36,6 +37,7 @@ test.describe("Extension autofills forms when triggered", () => {
     context.setDefaultNavigationTimeout(120000);
 
     const [backgroundPage] = context.backgroundPages();
+
     async function doAutofill() {
       await backgroundPage.evaluate(() =>
         chrome.tabs.query(
@@ -85,6 +87,7 @@ test.describe("Extension autofills forms when triggered", () => {
         await testPage.fill("input#baseUrl", serverHostURL);
 
         await testPage.screenshot({
+          fullPage: true,
           path: path.join(screenshotsOutput, `environment_configured.png`),
         });
 
@@ -126,13 +129,18 @@ test.describe("Extension autofills forms when triggered", () => {
       await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
-    let pagesToTest = testPages;
+    let pagesToTest =
+      targetTestPages === "static"
+        ? testPages.filter(({ url }) => url.startsWith(localPagesUri))
+        : targetTestPages === "public"
+        ? testPages.filter(({ url }) => !url.startsWith(localPagesUri))
+        : testPages;
 
     if (debugIsActive) {
-      pagesToTest = pagesToTest.filter(({ onlyTest }) => onlyTest);
+      const onlyTestPages = pagesToTest.filter(({ onlyTest }) => onlyTest);
 
-      if (!pagesToTest.length) {
-        pagesToTest = testPages;
+      if (onlyTestPages.length) {
+        pagesToTest = onlyTestPages;
       }
     }
 
@@ -170,27 +178,36 @@ test.describe("Extension autofills forms when triggered", () => {
           }
         }
 
-        const initialInputElement = await testPage
-          .locator(firstInput?.selector)
-          .first();
-        await initialInputElement.waitFor(defaultWaitForOptions);
+        const firstInputSelector = firstInput.selector;
+        const firstInputElement =
+          typeof firstInputSelector === "string"
+            ? await testPage.locator(firstInputSelector).first()
+            : await firstInputSelector(testPage);
+        await firstInputElement.waitFor(defaultWaitForOptions);
 
         await doAutofill();
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
-          const currentInputElement = testPage.locator(currentInput.selector);
+          const currentInputSelector = currentInput.selector;
+          const currentInputElement =
+            typeof currentInputSelector === "string"
+              ? await testPage.locator(currentInputSelector).first()
+              : await currentInputSelector(testPage);
+
+          const expectedValue = currentInput.shouldNotFill
+            ? ""
+            : currentInput.value;
 
           // Do not soft expect on local test pages; we want to stop the tests before hitting live pages
           if (isLocalPage) {
-            await expect(currentInputElement).toHaveValue(currentInput.value);
+            await expect(currentInputElement).toHaveValue(expectedValue);
           } else {
-            await expect
-              .soft(currentInputElement)
-              .toHaveValue(currentInput.value);
+            await expect.soft(currentInputElement).toHaveValue(expectedValue);
           }
 
           await testPage.screenshot({
+            fullPage: true,
             path: path.join(
               screenshotsOutput,
               `${url}-${inputKey}-autofill.png`
@@ -218,9 +235,10 @@ test.describe("Extension autofills forms when triggered", () => {
             }
 
             const nextInputSelector = nextStepInput.selector;
-            const nextInputElement = testPage
-              .locator(nextInputSelector)
-              .first();
+            const nextInputElement =
+              typeof nextInputSelector === "string"
+                ? await testPage.locator(nextInputSelector).first()
+                : await nextInputSelector(testPage);
             await nextInputElement.waitFor(defaultWaitForOptions);
 
             await doAutofill();

@@ -1,4 +1,3 @@
-
 # Autofill Playwright Tests
 
 This project leverages [Playwright](https://playwright.dev/) to run automated form-fill tests against real builds of the Bitwarden browser extension.
@@ -50,11 +49,11 @@ The aim of this project is to track and anticipate the compatibility of the Bitw
 - Do a clean-install with `npm ci` (this will also fetch and set up the Bitwarden clients repo)
   - If prompted, run `npx playwright install` as well
   - (Optional) Checkout the local `clients` to the branch with the version of the extension you want to test with (`master` by default)
-- Build the extension to test against with `npm run build:clients`. Other build options:
-  - `build:clients:prod`: build the production version of the extension
-  - `build:clients:mv3`: build the extension using Manifest v3 (builds otherwise default to v2)
-  - `build:clients:autofill`: build the extension with the new (v2) Autofill features
-  - `build:clients:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
+- Build the extension to test against with `npm run build:extension`. Other build options:
+  - `build:extension:prod`: build the production version of the extension
+  - `build:extension:mv3`: build the extension using Manifest v3 (builds otherwise default to v2)
+  - `build:extension:autofill`: build the extension with the new (v2) Autofill features
+  - `build:extension:autofill:mv3`: build the extensions with both Manifest v3 and Autofill v2
 - For the targeted environment, configure the vault with the credentials you put in `.env`
 - (Only once) Generate SSL certificates with `npm run setup:ssl`. These will be used by the web client, Bitwarden CLI, and Docker compose
   - You should have two files in the root project folder: `ssl.crt` and `ssl.key`
@@ -94,8 +93,10 @@ Create and start the containers and volumes with `docker compose up -d --build -
   - Ensure your targeted `API` and `Identity` services are configured and running (either [locally](https://contributing.bitwarden.com/getting-started/server/guide) or via Docker)
   - Ensure the Web Vault client is running (either with `npm run test:webserve` locally or via Docker)
     - Don't forget to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) in the `clients/apps/web` folder
-- Run headless testing with `npm run test:autofill:headless`
-- Run headed tests in debug mode with `npm run test:autofill:debug`
+- Run headless testing with `npm run test:all:headless`
+- Run headed tests in debug mode with `npm run test:all:debug`
+- Run only the static pages testing with `npm run test:static:debug`
+- Run only the public pages testing with `npm run test:public:debug`
 
 ## Debugging and Updating Tests
 
@@ -117,4 +118,4 @@ If debug mode is not active, `onlyTest` values will be ignored.
 
 ### Start tests from a specific point
 
-Passing the environment variable `START_FROM_TEST_URL` with the url of the test you wish to start with can help avoid re-running "known good" tests, when using `onlyTest` is impractical (e.g. `START_FROM_TEST_URL=https://www.pinterest.com/login/ npm run test:autofill:debug`)
+Passing the environment variable `START_FROM_TEST_URL` with the url of the test you wish to start with can help avoid re-running "known good" tests, when using `onlyTest` is impractical (e.g. `START_FROM_TEST_URL=https://www.pinterest.com/login/ npm run test:all:debug`)

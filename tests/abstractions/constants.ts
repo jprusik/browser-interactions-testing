@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Page, Locator } from "@playwright/test";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import {
   FieldType,
@@ -7,10 +7,11 @@ import {
 } from "../../clients/libs/common/src/enums";
 
 type FillProperties = {
-  value: string;
-  selector: string;
   multiStepNextInputKey?: string;
   preFillActions?: (page: Page) => void;
+  selector: string | ((page: Page) => Promise<Locator>);
+  shouldNotFill?: boolean;
+  value: string;
 };
 
 type TestPage = {

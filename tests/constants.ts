@@ -30,6 +30,50 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
+    url: `${localPagesUri}/tests/test-pages/iframe-form.html`,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Accept the iframe fill prompt
+          await page.on("dialog", (dialog) => dialog.accept());
+        },
+        selector: async (page) =>
+          await page.frameLocator("#test-iframe").locator("#username"),
+        value: testUserName,
+      },
+      password: {
+        selector: async (page) =>
+          await page.frameLocator("#test-iframe").locator("#password"),
+        value: "fakeIframeBasicFormPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${localPagesUri}/tests/test-pages/sandboxed-iframe-form.html`,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Accept the iframe fill prompt
+          await page.on("dialog", (dialog) => dialog.accept());
+        },
+        shouldNotFill: true,
+        selector: async (page) =>
+          await page.frameLocator("#test-iframe").locator("#username"),
+        value: testUserName,
+      },
+      password: {
+        shouldNotFill: true,
+        selector: async (page) =>
+          await page.frameLocator("#test-iframe").locator("#password"),
+        value: "fakeSandboxedIframeBasicFormPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
     url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
     uriMatchType: UriMatchType.Exact,
     inputs: {
@@ -120,6 +164,73 @@ export const testPages: TestPage[] = [
         selector: "#inputs-password",
         value: "fakeZillowPassword",
       },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: "https://beta.character.ai/",
+    additionalLoginUrls: ["https://character-ai.us.auth0.com"],
+    uriMatchType: UriMatchType.Host,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // If there is a queue to access the site, use an alternate path to get to the login page
+          const siteQueue = await page
+            .locator("main .content-container")
+            .filter({ hasText: "You are now in line." });
+          const siteIsQueuing = await siteQueue.isVisible();
+
+          if (siteIsQueuing) {
+            await page
+              .locator("a div")
+              .filter({ hasText: "Click here to skip the line!" })
+              .click();
+            await page
+              .locator("button")
+              .filter({ hasText: "Login to Subscribe!" })
+              .click();
+          } else {
+            // Close the pop-up prompting you to use the mobile app
+            await page.locator("#mobile-app-modal-close").click();
+            // Accept the cookie policy
+            await page
+              .locator("button")
+              .filter({ hasText: "Accept" })
+              .first()
+              .click();
+            // Go to the login page (cannot go directly to the login page)
+            await page
+              .locator("button")
+              .filter({ hasText: "Log In" })
+              .first()
+              .click();
+          }
+        },
+        selector: "#username",
+        value: testUserEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeCharacterAIPassword",
+      },
+    },
+  },
+  // Indeed is sometimes requiring captchas to make it to the first (email) and/or second (password) screen
+  {
+    cipherType: CipherType.Login,
+    url: "https://secure.indeed.com/auth",
+    inputs: {
+      username: {
+        // multiStepNextInputKey: "password",
+        selector: "input[type='email']",
+        value: testUserEmail,
+      },
+      // password: {
+      //   preFillActions: async (page) =>
+      //     await page.locator("#auth-page-google-password-fallback").click(),
+      //   selector: "input[name='__password']",
+      //   value: "fakeIndeedPassword",
+      // },
     },
   },
   // Home Depot's login requires an intermediate step of selecting a login with password option after entering an email
@@ -534,24 +645,6 @@ export const testPages: TestPage[] = [
       },
     },
   },
-  // Indeed is sometimes requiring a captcha to make it to the second (password) screen
-  {
-    cipherType: CipherType.Login,
-    url: "https://secure.indeed.com/auth",
-    inputs: {
-      username: {
-        // multiStepNextInputKey: "password",
-        selector: "input[type='email']",
-        value: testUserEmail,
-      },
-      // password: {
-      //   preFillActions: async (page) =>
-      //     await page.locator("#auth-page-google-password-fallback").click(),
-      //   selector: "input[name='__password']",
-      //   value: "fakeIndeedPassword",
-      // },
-    },
-  },
   {
     cipherType: CipherType.Login,
     url: "https://www.paypal.com/signin",
@@ -703,55 +796,6 @@ export const testPages: TestPage[] = [
       password: {
         selector: "#password",
         value: "fakeAccuweatherPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: "https://character.ai",
-    additionalLoginUrls: ["https://character-ai.us.auth0.com"],
-    uriMatchType: UriMatchType.Host,
-    inputs: {
-      username: {
-        preFillActions: async (page) => {
-          // If there is a queue to access the site, use an alternate path to get to the login page
-          const siteQueue = await page
-            .locator("main .content-container")
-            .filter({ hasText: "You are now in line." });
-          const siteIsQueuing = await siteQueue.isVisible();
-
-          if (siteIsQueuing) {
-            await page
-              .locator("a div")
-              .filter({ hasText: "Click here to skip the line!" })
-              .click();
-            await page
-              .locator("button")
-              .filter({ hasText: "Login to Subscribe!" })
-              .click();
-          } else {
-            // Close the pop-up prompting you to use the mobile app
-            await page.locator("#mobile-app-modal-close").click();
-            // Accept the cookie policy
-            await page
-              .locator("button")
-              .filter({ hasText: "Accept" })
-              .first()
-              .click();
-            // Go to the login page (cannot go directly to the login page)
-            await page
-              .locator("button")
-              .filter({ hasText: "Log In" })
-              .first()
-              .click();
-          }
-        },
-        selector: "#username",
-        value: testUserEmail,
-      },
-      password: {
-        selector: "#password",
-        value: "fakeCharacterAIPassword",
       },
     },
   },

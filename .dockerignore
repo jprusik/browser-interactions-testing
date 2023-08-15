@@ -13,7 +13,8 @@ node_modules
 .DS_Store
 
 # other
-playwright-report/
+test-results/
+test-summary/
 ../user-data/
 build
 docker-compose.yml

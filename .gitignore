@@ -38,10 +38,5 @@ server
 # Playwright
 tests-out
 test-results
-playwright-report
---cache-strategy
-/playwright/.cache/
-screenshots
-/test-results/
-/playwright-report/
+test-summary
 /playwright/.cache/
