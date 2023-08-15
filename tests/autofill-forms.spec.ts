@@ -7,7 +7,7 @@ import {
   LocatorWaitForOptions,
   PageGoToOptions,
 } from "./abstractions/test-pages";
-import { FillProperties } from "./abstractions/constants";
+import { CipherType, FillProperties } from "./abstractions/constants";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -38,8 +38,40 @@ test.describe("Extension autofills forms when triggered", () => {
 
     const [backgroundPage] = context.backgroundPages();
 
-    async function doAutofill() {
-      await backgroundPage.evaluate(() =>
+    async function doAutofill(cipherType) {
+      if (cipherType === CipherType.Card) {
+        return await backgroundPage.evaluate(() =>
+          chrome.tabs.query(
+            { active: true },
+            (tabs) =>
+              tabs[0] &&
+              chrome.tabs.sendMessage(tabs[0]?.id || 0, {
+                command: "collectPageDetails",
+                tab: tabs[0],
+                // @TODO final sender value TBD/not active
+                sender: "autofill_card",
+              })
+          )
+        );
+      }
+
+      if (cipherType === CipherType.Identity) {
+        return await backgroundPage.evaluate(() =>
+          chrome.tabs.query(
+            { active: true },
+            (tabs) =>
+              tabs[0] &&
+              chrome.tabs.sendMessage(tabs[0]?.id || 0, {
+                command: "collectPageDetails",
+                tab: tabs[0],
+                // @TODO final sender value TBD/not active
+                sender: "autofill_identity",
+              })
+          )
+        );
+      }
+
+      return await backgroundPage.evaluate(() =>
         chrome.tabs.query(
           { active: true },
           (tabs) =>
@@ -157,7 +189,7 @@ test.describe("Extension autofills forms when triggered", () => {
     testPage.setDefaultNavigationTimeout(60000);
 
     for (const page of pagesToTest) {
-      const { url, inputs } = page;
+      const { url, cipherType, inputs } = page;
       const isLocalPage = url.startsWith(localPagesUri);
 
       await test.step(`Autofill the form on page ${url}`, async () => {
@@ -185,7 +217,7 @@ test.describe("Extension autofills forms when triggered", () => {
             : await firstInputSelector(testPage);
         await firstInputElement.waitFor(defaultWaitForOptions);
 
-        await doAutofill();
+        await doAutofill(cipherType);
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
@@ -241,7 +273,7 @@ test.describe("Extension autofills forms when triggered", () => {
                 : await nextInputSelector(testPage);
             await nextInputElement.waitFor(defaultWaitForOptions);
 
-            await doAutofill();
+            await doAutofill(cipherType);
           }
 
           if (debugIsActive) {

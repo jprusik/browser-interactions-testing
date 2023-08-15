@@ -97,6 +97,37 @@ export const testPages: TestPage[] = [
       password: { selector: "#password", value: "fakeSimpleLoginPassword" },
     },
   },
+  {
+    cipherType: CipherType.Card,
+    url: "https://fill.dev/form/credit-card-simple",
+    onlyTest: true,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      cardholderName: { selector: "#cc-name", value: "John Smith" },
+      brand: { selector: "#cc-type", value: "Visa" },
+      number: { selector: "#cc-number", value: "4111111111111111" },
+      expMonth: { selector: "#cc-exp-month", value: "12" },
+      expYear: { selector: "#cc-exp-year", value: "2025" },
+      code: { selector: "#cc-csc", value: "123" },
+    },
+  },
+  {
+    cipherType: CipherType.Identity,
+    url: "https://fill.dev/form/identity-simple",
+    onlyTest: true,
+    uriMatchType: UriMatchType.Exact,
+    inputs: {
+      firstName: { selector: "#given-name", value: "John" },
+      middleName: { selector: "#additional-name", value: "M" },
+      lastName: { selector: "#family-name", value: "Smith" },
+      address1: { selector: "#address-line1", value: "123 Main St" },
+      address2: { selector: "#address-line2", value: "Apt 1" },
+      city: { selector: "city", value: "New York" },
+      state: { selector: "#address-level1", value: "NY" },
+      postalCode: { selector: "#postal-code", value: "10001" },
+      country: { selector: "#country", value: "USA" },
+    },
+  },
   // @TODO In non-debug mode, LinkedIn is often hanging on page load
   // LinkedIn periodically redirects to https://www.linkedin.com/authwall...
   {
