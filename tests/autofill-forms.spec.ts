@@ -137,10 +137,10 @@ test.describe("Extension autofills forms when triggered", () => {
         : testPages;
 
     if (debugIsActive) {
-      pagesToTest = pagesToTest.filter(({ onlyTest }) => onlyTest);
+      const onlyTestPages = pagesToTest.filter(({ onlyTest }) => onlyTest);
 
-      if (!pagesToTest.length) {
-        pagesToTest = testPages;
+      if (onlyTestPages.length) {
+        pagesToTest = onlyTestPages;
       }
     }
 
