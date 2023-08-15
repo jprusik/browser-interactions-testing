@@ -95,6 +95,8 @@ Create and start the containers and volumes with `docker compose up -d --build -
     - Don't forget to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) in the `clients/apps/web` folder
 - Run headless testing with `npm run test:all:headless`
 - Run headed tests in debug mode with `npm run test:all:debug`
+- Run only the static pages testing with `npm run test:static:debug`
+- Run only the public pages testing with `npm run test:public:debug`
 
 ## Debugging and Updating Tests
 
