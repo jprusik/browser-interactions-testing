@@ -69,7 +69,7 @@ jobs:
           cd clients
           git checkout ${{ inputs.CLIENTS_BRANCH }}
           npm ci
-          cd clients/apps/browser
+          cd apps/browser
           cross-env AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
         working-directory: ./
 
