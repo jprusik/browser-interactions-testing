@@ -56,14 +56,10 @@ jobs:
         working-directory: ./
 
       - name: Set up keychain
-        run: |
-          security create-keychain -p tempkeychainpassword build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p tempkeychainpassword build.keychain
-          security authorizationdb write com.apple.trust-settings.admin allow
+        run: sudo security authorizationdb write com.apple.trust-settings.admin allow
 
       - name: Install Certs
-        run: security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
+        run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
         # run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         working-directory: ./
 
