@@ -6,11 +6,21 @@ on:
       CLIENTS_BRANCH:
         required: true
         default: 'master'
-        description: "clients extensions branch or commit hash to build"
+        description: "clients branch or commit hash to build extensions with"
         type: string
+      EXTENSION_AUTOFILL_VERSION:
+        required: true
+        default: 2
+        description: "version of autofill to use"
+        type: number
+      EXTENSION_MANIFEST_VERSION:
+        required: true
+        default: 2
+        description: "version of extensions manifest to use"
+        type: number
 jobs:
   build-and-test:
-    # runs-on: macos-12
+    # macos runners don't support docker
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -31,10 +41,15 @@ jobs:
       #     npm install -g node-gyp@9.4.0
       #     node-gyp install $(node -v)
 
-      # - name: Print environment
-      #   run: |
-      #     node --version
-      #     npm --version
+      - name: Generate Certs
+        run: npm run setup:ssl
+        working-directory: ./
+
+      - name: Install Certs
+        run: |
+          sudo cp ssl.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+        working-directory: ./
 
       - name: Install Bitwarden CLI
         run: npm install -g @bitwarden/cli@2023.7.0
@@ -49,44 +64,21 @@ jobs:
         working-directory: ./
 
       - name: Build extension
-        run: npm run prepare
-        working-directory: ./
-
-      - name: Generate Certs
-        run: npm run setup:ssl
-        working-directory: ./
-
-      # - name: Set up keychain
-      #   run: |
-      #     sudo security authorizationdb write com.apple.trust-settings.admin allow
-      #     security create-keychain -p tempkeychainpassword build.keychain
-      #     security default-keychain -s build.keychain
-      #     security unlock-keychain -p tempkeychainpassword build.keychain
-
-      # - name: Fix Cert permissions
-      #   run: |
-      #     sudo chown root / && sudo chown root /etc/ && sudo chown root /etc/ssl/ && sudo chown root /etc/ssl/certs/ && sudo chown root /etc/ssl/certs/ca-certificates.crt
-      #     sudo chmod 755 /
-      #     sudo chmod 755 /etc/
-      #     sudo chmod 755 /etc/ssl/
-      #     sudo chmod 755 /etc/ssl/certs
-      #     sudo chmod 644 /etc/ssl/certs/ca-certificates.crt
-      #     sudo update-ca-certificates
-
-      - name: Install Certs
-        # run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
-        # run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         run: |
-          sudo cp ssl.crt /usr/local/share/ca-certificates/
-          sudo update-ca-certificates
+          git clone https://github.com/bitwarden/clients.git clients
+          cd clients
+          git checkout ${{ CLIENTS_BRANCH }}
+          npm ci
+          cd clients/apps/browser
+          cross-env AUTOFILL_VERSION=${{ EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ EXTENSION_MANIFEST_VERSION }} npm run build
         working-directory: ./
 
       - name: Build and start the test vault
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      - name: Sleep for 20 seconds
-        run: sleep 20s
+      - name: Sleep for 25 seconds
+        run: sleep 25s
         shell: bash
 
       - name: Setup the test vault account
