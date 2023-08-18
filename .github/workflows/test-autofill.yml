@@ -63,19 +63,22 @@ jobs:
       #     security default-keychain -s build.keychain
       #     security unlock-keychain -p tempkeychainpassword build.keychain
 
-      - name: Fix Cert permissions
-        run: |
-          sudo chown root / && sudo chown root /etc/ && sudo chown root /etc/ssl/ && sudo chown root /etc/ssl/certs/ && sudo chown root /etc/ssl/certs/ca-certificates.crt
-          sudo chmod 755 /
-          sudo chmod 755 /etc/
-          sudo chmod 755 /etc/ssl/
-          sudo chmod 755 /etc/ssl/certs
-          sudo chmod 644 /etc/ssl/certs/ca-certificates.crt
-          sudo update-ca-certificates
+      # - name: Fix Cert permissions
+      #   run: |
+      #     sudo chown root / && sudo chown root /etc/ && sudo chown root /etc/ssl/ && sudo chown root /etc/ssl/certs/ && sudo chown root /etc/ssl/certs/ca-certificates.crt
+      #     sudo chmod 755 /
+      #     sudo chmod 755 /etc/
+      #     sudo chmod 755 /etc/ssl/
+      #     sudo chmod 755 /etc/ssl/certs
+      #     sudo chmod 644 /etc/ssl/certs/ca-certificates.crt
+      #     sudo update-ca-certificates
 
       - name: Install Certs
         # run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
-        run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+        # run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+        run: |
+          cp ssl.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
         working-directory: ./
 
       - name: Build and start the test vault
