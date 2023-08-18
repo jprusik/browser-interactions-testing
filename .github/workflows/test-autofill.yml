@@ -66,8 +66,8 @@ jobs:
       - name: Install Certs
         # run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
         run: |
-          apt-get install ca-certificates openssl
-          cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+          sudo apt-get install ca-certificates openssl
+          sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         working-directory: ./
 
       - name: Build and start the test vault
