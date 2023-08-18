@@ -71,6 +71,7 @@ jobs:
           sudo chmod 755 /etc/ssl/
           sudo chmod 755 /etc/ssl/certs
           sudo chmod 644 /etc/ssl/certs/ca-certificates.crt
+          sudo update-ca-certificates
 
       - name: Install Certs
         # run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
