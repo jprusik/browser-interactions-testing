@@ -36,21 +36,21 @@ jobs:
       #     node --version
       #     npm --version
 
-      # - name: Install Bitwarden CLI
-      #   run: npm install -g @bitwarden/cli@2023.7.0
-      #   working-directory: ./
+      - name: Install Bitwarden CLI
+        run: npm install -g @bitwarden/cli@2023.7.0
+        working-directory: ./
 
-      # - name: NPM setup
-      #   run: npm ci
-      #   working-directory: ./
+      - name: NPM setup
+        run: npm ci
+        working-directory: ./
 
-      # - name: Install Playwright
-      #   run: npx playwright install
-      #   working-directory: ./
+      - name: Install Playwright
+        run: npx playwright install
+        working-directory: ./
 
-      # - name: Build extension
-      #   run: npm run prepare
-      #   working-directory: ./
+      - name: Build extension
+        run: npm run prepare
+        working-directory: ./
 
       - name: Generate Certs
         run: npm run setup:ssl
@@ -85,22 +85,22 @@ jobs:
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      # - name: Sleep for 25 seconds
-      #   run: sleep 25s
-      #   shell: bash
+      - name: Sleep for 20 seconds
+        run: sleep 20s
+        shell: bash
 
-      # - name: Setup the test vault account
-      #   run: npm run seed:vault:account
-      #   working-directory: ./
+      - name: Setup the test vault account
+        run: npm run seed:vault:account
+        working-directory: ./
 
-      # - name: Sleep for 5 seconds
-      #   run: sleep 5s
-      #   shell: bash
+      - name: Sleep for 5 seconds
+        run: sleep 5s
+        shell: bash
 
-      # - name: Setup the test account ciphers
-      #   run: npm run seed:vault:ciphers
-      #   working-directory: ./
+      - name: Setup the test account ciphers
+        run: npm run seed:vault:ciphers
+        working-directory: ./
 
-      # - name: Run local tests
-      #   run: npm run test:local:headless
-      #   working-directory: ./
+      - name: Run local tests
+        run: npm run test:local:headless
+        working-directory: ./
