@@ -57,6 +57,7 @@ jobs:
 
       - name: Set up keychain
         run: |
+          security authorizationdb write com.apple.trust-settings.admin allow
           security create-keychain -p tempkeychainpassword build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p tempkeychainpassword build.keychain
