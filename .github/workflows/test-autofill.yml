@@ -55,8 +55,15 @@ jobs:
         run: npm run setup:ssl
         working-directory: ./
 
+      - name: Set up keychain
+        run: |
+          security create-keychain -p ${{ BW_DB_PASSWORD }} build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ${{ BW_DB_PASSWORD }} build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k ${{ BW_DB_PASSWORD }} build.keychain
+
       - name: Install Certs
-        run: sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ssl.crt
+        run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
         # run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         working-directory: ./
 
