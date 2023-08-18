@@ -4,7 +4,7 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # shellcheck source=.env
 set -o allexport
-source $ROOT_DIR/.env
+. $ROOT_DIR/.env
 set +o allexport
 
 export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
