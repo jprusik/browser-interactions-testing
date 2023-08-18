@@ -77,7 +77,7 @@ jobs:
         # run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
         # run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         run: |
-          cp ssl.crt /usr/local/share/ca-certificates/
+          sudo cp ssl.crt /usr/local/share/ca-certificates/
           sudo update-ca-certificates
         working-directory: ./
 
