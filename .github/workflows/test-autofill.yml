@@ -1,5 +1,5 @@
 name: test-autofill
-run-name: ${{ github.actor }} is learning GitHub Actions
+run-name: autofill testing has been started by ${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
@@ -54,7 +54,7 @@ jobs:
         working-directory: ./
 
       - name: Install Certs
-        run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+        run: cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         working-directory: ./
 
       - name: Build and start the test vault
