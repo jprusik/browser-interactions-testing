@@ -57,9 +57,7 @@ jobs:
       #   working-directory: ./
 
       - name: Install Bitwarden CLI
-        run: |
-          export BITWARDENCLI_APPDATA_DIR=$HOME
-          npm install -g @bitwarden/cli@2023.7.0
+        run: npm install -g @bitwarden/cli@2023.7.0
         working-directory: ./
 
       - name: Build and start the test vault

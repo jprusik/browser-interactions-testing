@@ -23,6 +23,10 @@ if [[ -z "${SERVER_HOST_URL:-}" ]]; then
     export SERVER_HOST_URL='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
 fi
 
+# Ensure data file is created
+export BITWARDENCLI_APPDATA_DIR=$HOME
+BW_COMMAND status
+
 # Login to the vault
 # shellcheck disable=SC2086 # we want to pass the server host url as a single argument
 BW_COMMAND logout --quiet # In case there's an active outdated session (e.g. docker container was rebuilt)
