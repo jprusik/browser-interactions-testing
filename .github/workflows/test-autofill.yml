@@ -10,7 +10,7 @@ on:
         type: string
       EXTENSION_AUTOFILL_VERSION:
         required: true
-        default: 2
+        default: 1
         description: "version of autofill to use"
         type: number
       EXTENSION_MANIFEST_VERSION:
@@ -67,10 +67,10 @@ jobs:
         run: |
           git clone https://github.com/bitwarden/clients.git clients
           cd clients
-          git checkout ${{ CLIENTS_BRANCH }}
+          git checkout ${{ inputs.CLIENTS_BRANCH }}
           npm ci
           cd clients/apps/browser
-          cross-env AUTOFILL_VERSION=${{ EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ EXTENSION_MANIFEST_VERSION }} npm run build
+          cross-env AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
         working-directory: ./
 
       - name: Build and start the test vault
