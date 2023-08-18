@@ -1,9 +1,11 @@
 name: test-autofill
-run-name: autofill testing has been started by ${{ github.actor }}
+run-name: Test extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
       CLIENTS_BRANCH:
+        required: true
+        default: 'master'
         description: "branch or commit hash to build extensions with"
         type: string
 jobs:
