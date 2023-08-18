@@ -36,9 +36,9 @@ jobs:
       #     node --version
       #     npm --version
 
-      - name: Install Bitwarden CLI
-        run: npm install -g @bitwarden/cli@2023.7.0
-        working-directory: ./
+      # - name: Install Bitwarden CLI
+      #   run: npm install -g @bitwarden/cli@2023.7.0
+      #   working-directory: ./
 
       # - name: NPM setup
       #   run: npm ci
@@ -66,29 +66,29 @@ jobs:
       - name: Install Certs
         # run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
         run: |
-          sudo apt-get install ca-certificates openssl
-          sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+          apt-get install ca-certificates openssl
+          cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         working-directory: ./
 
       - name: Build and start the test vault
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      - name: Sleep for 25 seconds
-        run: sleep 25s
-        shell: bash
+      # - name: Sleep for 25 seconds
+      #   run: sleep 25s
+      #   shell: bash
 
-      - name: Setup the test vault account
-        run: npm run seed:vault:account
-        working-directory: ./
+      # - name: Setup the test vault account
+      #   run: npm run seed:vault:account
+      #   working-directory: ./
 
-      - name: Sleep for 5 seconds
-        run: sleep 5s
-        shell: bash
+      # - name: Sleep for 5 seconds
+      #   run: sleep 5s
+      #   shell: bash
 
-      - name: Setup the test account ciphers
-        run: npm run seed:vault:ciphers
-        working-directory: ./
+      # - name: Setup the test account ciphers
+      #   run: npm run seed:vault:ciphers
+      #   working-directory: ./
 
       # - name: Run local tests
       #   run: npm run test:local:headless
