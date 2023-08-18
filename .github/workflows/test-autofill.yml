@@ -57,13 +57,12 @@ jobs:
 
       - name: Set up keychain
         run: |
-          security create-keychain -p tempkeychainpass build.keychain
+          security create-keychain -p tempkeychainpassword build.keychain
           security default-keychain -s build.keychain
-          security unlock-keychain -p tempkeychainpass build.keychain
-          security set-key-partition-list -S apple-tool:,apple: -s -k tempkeychainpass build.keychain
+          security unlock-keychain -p tempkeychainpassword build.keychain
 
       - name: Install Certs
-        run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
+        run: security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
         # run: sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
         working-directory: ./
 
