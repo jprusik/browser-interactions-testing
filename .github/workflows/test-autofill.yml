@@ -57,10 +57,10 @@ jobs:
 
       - name: Set up keychain
         run: |
-          security create-keychain -p ${{ BW_DB_PASSWORD }} build.keychain
+          security create-keychain -p tempkeychainpass build.keychain
           security default-keychain -s build.keychain
-          security unlock-keychain -p ${{ BW_DB_PASSWORD }} build.keychain
-          security set-key-partition-list -S apple-tool:,apple: -s -k ${{ BW_DB_PASSWORD }} build.keychain
+          security unlock-keychain -p tempkeychainpass build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k tempkeychainpass build.keychain
 
       - name: Install Certs
         run: sudo security add-trusted-cert -d -r trustRoot -k build.keychain ssl.crt
