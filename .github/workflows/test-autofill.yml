@@ -42,6 +42,10 @@ jobs:
       #     npm install -g node-gyp@9.4.0
       #     node-gyp install $(node -v)
 
+      - name: NPM setup
+        run: npm ci
+        working-directory: ./
+
       - name: Generate Certs
         run: npm run setup:ssl
         working-directory: ./
@@ -53,20 +57,18 @@ jobs:
         working-directory: ./
 
       - name: Install Bitwarden CLI
-        run: npm install -g @bitwarden/cli@2023.7.0
+        run: |
+          export BITWARDENCLI_APPDATA_DIR=$HOME
+          npm install -g @bitwarden/cli@2023.7.0
         working-directory: ./
 
       - name: Build and start the test vault
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      # - name: Sleep for 25 seconds
-      #   run: sleep 25s
-      #   shell: bash
-
-      - name: NPM setup
-        run: npm ci
-        working-directory: ./
+      - name: Sleep for 25 seconds
+        run: sleep 25s
+        shell: bash
 
       # TODO: Figure out why CLI is generating new certs instead of using the ones provided
       # - name: Install Server Certs
