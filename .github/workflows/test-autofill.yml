@@ -68,7 +68,7 @@ jobs:
       - name: Install Server Certs
         run: |
           openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ./ssl.crt
-          sudo cp ssl.crt /usr/local/share/ca-certificates/
+          sudo cp ssl.crt /usr/local/share/ca-certificates/ssl.crt
           sudo update-ca-certificates
         working-directory: ./
 
