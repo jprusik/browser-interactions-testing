@@ -30,6 +30,7 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
           node-version: '18'
 
+      # TODO temp for dev- move to individual secrets
       - name: Create env file
         run: |
           touch .env
@@ -59,6 +60,10 @@ jobs:
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
+      - name: Sleep for 25 seconds
+        run: sleep 25s
+        shell: bash
+
       # TODO: Figure out why CLI is generating new certs instead of using the ones provided
       - name: Install Server Certs
         run: |
@@ -66,10 +71,6 @@ jobs:
           sudo cp certificate.pem /usr/local/share/ca-certificates/certificate.crt
           sudo update-ca-certificates
         working-directory: ./
-
-      - name: Sleep for 25 seconds
-        run: sleep 25s
-        shell: bash
 
       - name: Setup the test vault account
         run: npm run seed:vault:account
