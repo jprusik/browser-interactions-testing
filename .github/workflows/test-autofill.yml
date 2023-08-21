@@ -46,15 +46,15 @@ jobs:
         run: npm ci
         working-directory: ./
 
-      - name: Generate Certs
-        run: npm run setup:ssl
-        working-directory: ./
+      # - name: Generate Certs
+      #   run: npm run setup:ssl
+      #   working-directory: ./
 
-      - name: Install Certs
-        run: |
-          sudo cp ssl.crt /usr/local/share/ca-certificates/
-          sudo update-ca-certificates
-        working-directory: ./
+      # - name: Install Certs
+      #   run: |
+      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
+      #     sudo update-ca-certificates
+      #   working-directory: ./
 
       - name: Install Bitwarden CLI
         run: |
@@ -66,17 +66,27 @@ jobs:
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      - name: Sleep for 25 seconds
-        run: sleep 25s
-        shell: bash
-
       # TODO: Figure out why CLI is generating new certs instead of using the ones provided
-      # - name: Install Server Certs
-      #   run: |
-      #     openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
-      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
-      #     sudo update-ca-certificates
-      #   working-directory: ./
+      - name: Install Server Certs
+        run: |
+          openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
+          sudo cp ssl.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+        working-directory: ./
+
+      - name: Build extension
+        run: |
+          git clone https://github.com/bitwarden/clients.git clients
+          cd clients
+          git checkout ${{ inputs.CLIENTS_BRANCH }}
+          npm ci
+          cd apps/browser
+          AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
+        working-directory: ./
+
+      # - name: Sleep for 25 seconds
+      #   run: sleep 25s
+      #   shell: bash
 
       - name: Setup the test vault account
         run: npm run seed:vault:account
@@ -93,16 +103,6 @@ jobs:
       - name: Install Playwright
         # for now, we're only using chromium
         run: npx playwright install chromium
-        working-directory: ./
-
-      - name: Build extension
-        run: |
-          git clone https://github.com/bitwarden/clients.git clients
-          cd clients
-          git checkout ${{ inputs.CLIENTS_BRANCH }}
-          npm ci
-          cd apps/browser
-          AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
         working-directory: ./
 
       - name: Run local tests
