@@ -42,15 +42,15 @@ jobs:
       #     npm install -g node-gyp@9.4.0
       #     node-gyp install $(node -v)
 
-      # - name: Generate Certs
-      #   run: npm run setup:ssl
-      #   working-directory: ./
+      - name: Generate Certs
+        run: npm run setup:ssl
+        working-directory: ./
 
-      # - name: Install Certs
-      #   run: |
-      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
-      #     sudo update-ca-certificates
-      #   working-directory: ./
+      - name: Install Certs
+        run: |
+          sudo cp ssl.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+        working-directory: ./
 
       - name: Install Bitwarden CLI
         run: npm install -g @bitwarden/cli@2023.7.0
@@ -69,12 +69,12 @@ jobs:
         working-directory: ./
 
       # TODO: Figure out why CLI is generating new certs instead of using the ones provided
-      - name: Install Server Certs
-        run: |
-          openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > awd.crt
-          sudo cp ssl.crt /usr/local/share/ca-certificates/
-          sudo update-ca-certificates
-        working-directory: ./
+      # - name: Install Server Certs
+      #   run: |
+      #     openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
+      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
+      #     sudo update-ca-certificates
+      #   working-directory: ./
 
       - name: Setup the test vault account
         run: npm run seed:vault:account
