@@ -65,7 +65,6 @@ jobs:
           openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ./certificate.pem
           sudo cp certificate.pem /usr/local/share/ca-certificates/certificate.crt
           sudo update-ca-certificates
-          curl https://localhost
         working-directory: ./
 
       - name: Sleep for 25 seconds
