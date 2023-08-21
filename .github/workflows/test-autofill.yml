@@ -60,15 +60,19 @@ jobs:
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      - name: Sleep for 25 seconds
-        run: sleep 25s
-        shell: bash
+      # - name: Sleep for 25 seconds
+      #   run: sleep 25s
+      #   shell: bash
+
+      - name: NPM setup
+        run: npm ci
+        working-directory: ./
 
       # TODO: Figure out why CLI is generating new certs instead of using the ones provided
       - name: Install Server Certs
         run: |
-          openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ./ssl.crt
-          sudo cp ssl.crt /usr/local/share/ca-certificates/ssl.crt
+          openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > awd.crt
+          sudo cp ssl.crt /usr/local/share/ca-certificates/
           sudo update-ca-certificates
         working-directory: ./
 
@@ -82,10 +86,6 @@ jobs:
 
       - name: Setup the test account ciphers
         run: npm run seed:vault:ciphers
-        working-directory: ./
-
-      - name: NPM setup
-        run: npm ci
         working-directory: ./
 
       - name: Install Playwright
