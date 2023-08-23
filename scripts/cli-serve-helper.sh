@@ -4,7 +4,7 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # shellcheck source=.env
 set -o allexport
-source $ROOT_DIR/.env
+. $ROOT_DIR/.env
 set +o allexport
 
 export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
@@ -23,6 +23,10 @@ if [[ -z "${SERVER_HOST_URL:-}" ]]; then
     export SERVER_HOST_URL='--api http://localhost:4000 --identity http://localhost:33656 --web-vault https://localhost:8080 --events http://localhost:46273'
 fi
 
+# Ensure data file is created
+export BITWARDENCLI_APPDATA_DIR=$HOME
+BW_COMMAND status
+
 # Login to the vault
 # shellcheck disable=SC2086 # we want to pass the server host url as a single argument
 BW_COMMAND logout --quiet # In case there's an active outdated session (e.g. docker container was rebuilt)
@@ -31,4 +35,4 @@ BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" --nointeraction || true # no e
 BW_COMMAND sync || true # no error if already synced
 
 # Start Vault Management API
-BW_COMMAND serve --hostname $CLI_SERVE_HOST --port $CLI_SERVE_PORT &
+BW_COMMAND serve --hostname $CLI_SERVE_HOST --port $CLI_SERVE_PORT
