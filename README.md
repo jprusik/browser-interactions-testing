@@ -68,7 +68,7 @@ The aim of this project is to track and anticipate the compatibility of the Bitw
   **Linux**
 
   ```shell
-  sudo cat ssl.crt >> /etc/ssl/certs/ca-certificates.crt
+  sudo cp ssl.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
   ```
 
 ### Seeding Your Vault
