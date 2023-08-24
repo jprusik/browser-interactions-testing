@@ -82,7 +82,6 @@ jobs:
         run: |
           mkdir -p clients/apps/browser/dist
           unzip -o dist-chrome-*.zip/dist-chrome.zip -d clients/apps/browser/dist
-          tree clients/apps/browser
         working-directory: ./
 
       # - name: Build extension
