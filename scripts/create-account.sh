@@ -8,7 +8,7 @@ set -o allexport
 set +o allexport
 
 CURL_COMMAND() {
-  curl "$VAULT_HOST_URL/identity/accounts/register" \
+  curl -s "$VAULT_HOST_URL/identity/accounts/register" \
     -sX POST \
     -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/109.0' \
     -H 'Accept: application/json' \
@@ -48,7 +48,9 @@ CURL_COMMAND() {
 }
 
 # wait for readiness
-until [[ "$(CURL_COMMAND | jq .validationErrors)" == *"already taken"* ]]; do
+until [[ "$(CURL_COMMAND | jq .validationErrors 2>/dev/null)" == *"already taken"* ]]; do
   echo "Retrying account creation..."
   sleep 1
 done
+
+echo "Account created successfully!"
