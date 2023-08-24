@@ -1,5 +1,7 @@
-import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
-import { UriMatchType } from "../clients/libs/common/src/enums";
+import {
+  CipherType,
+  UriMatchType,
+} from "../scripts/vault-seeder/abstractions/vault-seeder";
 import { configDotenv } from "dotenv";
 import { TestPage } from "./abstractions/constants";
 
