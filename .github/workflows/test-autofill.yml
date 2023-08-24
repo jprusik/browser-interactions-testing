@@ -13,11 +13,11 @@ on:
         default: 1
         description: "version of autofill to use"
         type: number
-      EXTENSION_MANIFEST_VERSION:
-        required: true
-        default: 2
-        description: "version of extensions manifest to use"
-        type: number
+      # EXTENSION_MANIFEST_VERSION:
+      #   required: true
+      #   default: 2
+      #   description: "version of extensions manifest to use"
+      #   type: number
 jobs:
   build-and-test:
     # macos runners don't support docker
@@ -34,8 +34,7 @@ jobs:
       - name: Create env file
         run: |
           touch .env
-          echo ${{ secrets.ENV_FILE }} | base64 --decode > .env
-          cat .env
+          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
 
       - name: NPM setup
         run: npm ci
@@ -67,23 +66,38 @@ jobs:
       #     sudo update-ca-certificates
       #   working-directory: ./
 
-      - name: Build extension
+      - name: Download extension artifact
+        uses: dawidd6/action-download-artifact@246dbf436b23d7c49e21a7ab8204ca9ecd1fe615 # v2.27.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-browser.yml
+          workflow_conclusion: success
+          branch: ${{ inputs.CLIENTS_BRANCH }}
+          name: ^dist-chrome-(?!MV3-)\w{7}\.zip$
+          name_is_regexp: true
+          repo: bitwarden/clients
+          if_no_artifact_found: fail
+
+      - name: Unzip extension artifact
         run: |
-          git clone https://github.com/bitwarden/clients.git clients
-          cd clients
-          git checkout ${{ inputs.CLIENTS_BRANCH }}
-          npm ci
-          cd apps/browser
-          AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
+          mkdir -p clients/apps/browser/dist
+          unzip -o dist-chrome-*.zip/dist-chrome.zip -d clients/apps/browser/dist
+          tree clients/apps/browser
         working-directory: ./
+
+      # - name: Build extension
+      #   run: |
+      #     git clone https://github.com/bitwarden/clients.git clients
+      #     cd clients
+      #     git checkout ${{ inputs.CLIENTS_BRANCH }}
+      #     npm ci
+      #     cd apps/browser
+      #     AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
+      #   working-directory: ./
 
       - name: Setup the test vault account
         run: npm run seed:vault:account
         working-directory: ./
-
-      - name: Sleep for 5 seconds
-        run: sleep 5s
-        shell: bash
 
       - name: Setup the test account ciphers
         run: npm run seed:vault:ciphers:pipeline
@@ -97,3 +111,10 @@ jobs:
       - name: Run local tests
         run: npm run test:static:headless
         working-directory: ./
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        if: always()
+        with:
+          name: test-summary
+          path: ./test-summary
