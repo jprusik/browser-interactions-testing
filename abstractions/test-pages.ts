@@ -1,10 +1,5 @@
 import { Page, Locator } from "@playwright/test";
-import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
-import {
-  FieldType,
-  LinkedIdType,
-  UriMatchType,
-} from "../../clients/libs/common/src/enums";
+import { CipherType, UriMatchType } from "./vault-seeder";
 
 type FillProperties = {
   multiStepNextInputKey?: string;
@@ -55,4 +50,15 @@ type TestPage = {
   };
 };
 
-export { FillProperties, TestPage };
+type LocatorWaitForOptions = {
+  state?: "visible" | "attached" | "detached" | "hidden";
+  timeout?: number;
+};
+
+type PageGoToOptions = {
+  waitUntil: "domcontentloaded" | "load" | "networkidle" | "commit";
+  timeout?: number;
+  referer?: string;
+};
+
+export { FillProperties, TestPage, LocatorWaitForOptions, PageGoToOptions };

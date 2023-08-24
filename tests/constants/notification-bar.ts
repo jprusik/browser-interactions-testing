@@ -1,6 +1,6 @@
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../../clients/libs/common/src/enums";
-import { TestPage } from "../abstractions/constants";
+import { TestPage } from "../../abstractions/test-pages";
 import { localPagesUri } from "./server";
 
 const testUserName = "bwplaywright";

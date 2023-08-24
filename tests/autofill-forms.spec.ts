@@ -1,13 +1,12 @@
 import { Page } from "@playwright/test";
 import path from "path";
-
 import { localPagesUri, autofillTestPages } from "./constants";
 import { test, expect } from "./fixtures";
 import {
+  FillProperties,
   LocatorWaitForOptions,
   PageGoToOptions,
-} from "./abstractions/test-pages";
-import { FillProperties } from "./abstractions/constants";
+} from "../abstractions";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 

@@ -1,4 +1,18 @@
-import { UriMatchType } from "../../../clients/libs/common/src/enums";
+enum CipherType {
+  Login = 1,
+  SecureNote = 2,
+  Card = 3,
+  Identity = 4,
+}
+
+enum UriMatchType {
+  Domain = 0,
+  Host = 1,
+  StartsWith = 2,
+  Exact = 3,
+  RegularExpression = 4,
+  Never = 5,
+}
 
 type LoginUriTemplate = {
   match: UriMatchType;
@@ -75,17 +89,18 @@ type VaultItem = {
 type FolderItem = {
   object: string;
   id: string;
-  FolderTemplate;
-};
+} & FolderTemplate;
 
 export {
+  CipherType,
+  UriMatchType,
   LoginUriTemplate,
   LoginItemTemplate,
   CardItemTemplate,
   IdentityItemTemplate,
   FieldTemplate,
-  ItemTemplate,
   FolderTemplate,
-  FolderItem,
+  ItemTemplate,
   VaultItem,
+  FolderItem,
 };
