@@ -18,7 +18,6 @@ const serverHostURL = process.env.SERVER_HOST_URL;
 const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
 const targetTestPages = process.env.TARGET;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
-console.log("debugIsActive:", debugIsActive);
 const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
   timeout: 60000,
