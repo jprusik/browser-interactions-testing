@@ -1,9 +1,5 @@
-import {
-  CipherType,
-  UriMatchType,
-} from "../scripts/vault-seeder/abstractions/vault-seeder";
+import { CipherType, TestPage, UriMatchType } from "../abstractions";
 import { configDotenv } from "dotenv";
-import { TestPage } from "./abstractions/constants";
 
 configDotenv();
 

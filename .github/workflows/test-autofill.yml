@@ -11,16 +11,10 @@ on:
       EXTENSION_AUTOFILL_VERSION:
         required: true
         default: 1
-        description: "version of autofill to use"
+        description: "version of auto-fill to use"
         type: number
-      # EXTENSION_MANIFEST_VERSION:
-      #   required: true
-      #   default: 2
-      #   description: "version of extensions manifest to use"
-      #   type: number
 jobs:
   build-and-test:
-    # macos runners don't support docker
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -58,14 +52,6 @@ jobs:
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
         working-directory: ./
 
-      # TODO: Figure out why CLI is generating new certs instead of using the ones provided
-      # - name: Install Server Certs
-      #   run: |
-      #     openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
-      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
-      #     sudo update-ca-certificates
-      #   working-directory: ./
-
       - name: Download extension artifact
         uses: dawidd6/action-download-artifact@246dbf436b23d7c49e21a7ab8204ca9ecd1fe615 # v2.27.0
         with:
@@ -80,19 +66,9 @@ jobs:
 
       - name: Unzip extension artifact
         run: |
-          mkdir -p clients/apps/browser/dist
-          unzip -o dist-chrome-*.zip/dist-chrome.zip -d clients/apps/browser/dist
+          mkdir -p build
+          unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
         working-directory: ./
-
-      # - name: Build extension
-      #   run: |
-      #     git clone https://github.com/bitwarden/clients.git clients
-      #     cd clients
-      #     git checkout ${{ inputs.CLIENTS_BRANCH }}
-      #     npm ci
-      #     cd apps/browser
-      #     AUTOFILL_VERSION=${{ inputs.EXTENSION_AUTOFILL_VERSION }} MANIFEST_VERSION=${{ inputs.EXTENSION_MANIFEST_VERSION }} npm run build
-      #   working-directory: ./
 
       - name: Setup the test vault account
         run: npm run seed:vault:account

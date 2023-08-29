@@ -99,8 +99,8 @@ export {
   CardItemTemplate,
   IdentityItemTemplate,
   FieldTemplate,
-  ItemTemplate,
   FolderTemplate,
-  FolderItem,
+  ItemTemplate,
   VaultItem,
+  FolderItem,
 };

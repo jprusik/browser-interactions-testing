@@ -48,6 +48,7 @@ The aim of this project is to track and anticipate the compatibility of the Bitw
 - Install Bitwarden CLI (with npm: `npm install -g @bitwarden/cli`)
 - Do a clean-install with `npm ci` (this will also fetch and set up the Bitwarden clients repo)
   - If prompted, run `npx playwright install` as well
+- Clone the clients repo and install its dependencies with `npm run setup:extension`
   - (Optional) Checkout the local `clients` to the branch with the version of the extension you want to test with (`master` by default)
 - Build the extension to test against with `npm run build:extension`. Other build options:
   - `build:extension:prod`: build the production version of the extension
