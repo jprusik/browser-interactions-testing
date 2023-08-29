@@ -50,7 +50,7 @@ CURL_COMMAND() {
 # wait for readiness
 until [[ "$(CURL_COMMAND | jq .validationErrors 2>/dev/null)" == *"already taken"* ]]; do
   echo "Retrying account creation..."
-  sleep 1
+  sleep 2
 done
 
 echo "Account created successfully!"

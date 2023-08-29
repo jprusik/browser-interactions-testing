@@ -1,25 +1,24 @@
 import fetch from "cross-fetch";
 import { configDotenv } from "dotenv";
 import {
-  CipherType,
-  UriMatchType,
   CardItemTemplate,
+  CipherType,
+  FillProperties,
   FolderItem,
   IdentityItemTemplate,
   ItemTemplate,
   LoginItemTemplate,
+  TestPage,
+  UriMatchType,
   VaultItem,
-} from "./abstractions/vault-seeder";
-import { FillProperties, TestPage } from "../../tests/abstractions/constants";
-import { testPages, knownFailureCases } from "../../tests/constants";
+} from "../abstractions";
+import { testPages, knownFailureCases } from "../tests/constants";
 
 const PLAYWRIGHT_CIPHERS_FOLDER = "AutofillPlaywrightTestingItems";
 
 configDotenv();
 
 class VaultSeeder {
-  private readonly apiDebounce = 275;
-
   constructor() {
     this.runSeeder().then(async () => {
       console.log("Seeding complete, locking vault...");
@@ -416,10 +415,6 @@ class VaultSeeder {
     }
 
     return { success: false, message: "Error encountered during fetch" };
-  }
-
-  private sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
