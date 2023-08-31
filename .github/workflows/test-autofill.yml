@@ -80,12 +80,29 @@ jobs:
 
       - name: Install Playwright
         # for now, we're only using chromium
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
         working-directory: ./
 
+      # - name: Install Server Certs
+      #   run: |
+      #     openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
+      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
+      #     sudo update-ca-certificates
+      #   working-directory: ./
+
       - name: Run local tests
-        run: npm run test:static:headless
+        run: |
+          export ROOT_DIR=$(git rev-parse --show-toplevel)
+          . $ROOT_DIR/.env
+          export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
+          npm run test:static:headless
         working-directory: ./
+
+      # - name: Start SSH session
+      #   uses: luchihoratiu/debug-via-ssh@main
+      #   with:
+      #     NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+      #     SSH_PASS: ${{ secrets.SSH_PASS }}
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2

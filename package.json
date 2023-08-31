@@ -57,6 +57,7 @@
     "test:public:headless": "npm run pretest && TARGET=public HEADLESS=true playwright test",
     "test:static": "npm run pretest && TARGET=static playwright test",
     "test:static:debug": "npm run pretest && TARGET=static playwright test --debug",
-    "test:static:headless": "npm run pretest && TARGET=static HEADLESS=true playwright test"
+    "test:static:headless": "npm run pretest && TARGET=static HEADLESS=true playwright test",
+    "test:static:headless:pipeline": "npm run pretest && NODE_EXTRA_CA_CERTS=./ssl.crt TARGET=static HEADLESS=true playwright test"
   }
 }
