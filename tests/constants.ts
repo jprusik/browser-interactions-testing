@@ -1,7 +1,5 @@
-import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
-import { UriMatchType } from "../clients/libs/common/src/enums";
+import { CipherType, TestPage, UriMatchType } from "../abstractions";
 import { configDotenv } from "dotenv";
-import { TestPage } from "./abstractions/constants";
 
 configDotenv();
 

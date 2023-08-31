@@ -35,7 +35,7 @@
     "trailingComma": "es5"
   },
   "scripts": {
-    "prepare": "husky install && npm run setup:extension",
+    "prepare": "husky install",
     "pretest": "rimraf tests-out screenshots test-summary test-results && tsc --incremental -p tests/tsconfig.json",
     "build:extension": "cd clients/apps/browser && rimraf build && npm run build",
     "build:extension:autofill": "cd clients/apps/browser && rimraf build && cross-env AUTOFILL_VERSION=2 npm run build",
@@ -43,8 +43,9 @@
     "build:extension:mv3": "cd clients/apps/browser && rimraf build && npm run build:mv3",
     "build:extension:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",
     "seed:vault:account": "./scripts/create-account.sh",
-    "seed:vault:ciphers": "./scripts/cli-serve-helper.sh && ts-node ./scripts/vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
-    "seed:vault:ciphers:refresh": "./scripts/cli-serve-helper.sh && REFRESH=true ts-node ./scripts/vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
+    "seed:vault:ciphers": "./scripts/cli-serve-helper.sh && ts-node ./scripts/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
+    "seed:vault:ciphers:pipeline": "./scripts/cli-serve-helper.sh && ts-node ./scripts/vault-seeder.ts",
+    "seed:vault:ciphers:refresh": "./scripts/cli-serve-helper.sh && REFRESH=true ts-node ./scripts/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "setup:extension": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
     "setup:ssl": "./scripts/generate-certs.sh",
     "setup:vault": "npm run seed:vault:account && npm run seed:vault:ciphers",
@@ -57,7 +58,6 @@
     "test:static": "npm run pretest && TARGET=static playwright test",
     "test:static:debug": "npm run pretest && TARGET=static playwright test --debug",
     "test:static:headless": "npm run pretest && TARGET=static HEADLESS=true playwright test",
-    "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
-    "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch"
+    "test:static:headless:pipeline": "npm run pretest && NODE_EXTRA_CA_CERTS=./ssl.crt TARGET=static HEADLESS=true playwright test"
   }
 }

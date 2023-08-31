@@ -1,13 +1,12 @@
 import { Page } from "@playwright/test";
 import path from "path";
-
 import { localPagesUri, testPages } from "./constants";
 import { test, expect } from "./fixtures";
 import {
+  FillProperties,
   LocatorWaitForOptions,
   PageGoToOptions,
-} from "./abstractions/test-pages";
-import { FillProperties } from "./abstractions/constants";
+} from "../abstractions";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -54,10 +53,7 @@ test.describe("Extension autofills forms when triggered", () => {
     }
 
     await test.step("Close the extension welcome page when it pops up", async () => {
-      // If not in debug, wait for the extension to open the welcome page before continuing
-      if (!debugIsActive) {
-        await context.waitForEvent("page");
-      }
+      await context.waitForEvent("page");
 
       let contextPages = context.pages();
       expect(contextPages.length).toBe(2);
@@ -101,6 +97,15 @@ test.describe("Extension autofills forms when triggered", () => {
     });
 
     await test.step("Log in to the extension vault", async () => {
+      const fetchRequestURL = `${serverHostURL}/api/config`;
+      await fetch(fetchRequestURL)
+        .then(async (r) =>
+          console.log(
+            `server configuration via ${fetchRequestURL}:`,
+            await r.json()
+          )
+        )
+        .catch((e) => console.log("fetch errored", e));
       const emailInput = await testPage.getByLabel("Email address");
       await emailInput.waitFor(defaultWaitForOptions);
       await emailInput.fill(vaultEmail);
@@ -122,7 +127,9 @@ test.describe("Extension autofills forms when triggered", () => {
       await loginButton.click();
 
       const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
+      console.log("testPage url before wait:", testPage.url());
       await testPage.waitForURL(extensionURL, defaultGotoOptions);
+      console.log("testPage url after wait:", testPage.url());
       const vaultFilterBox = await testPage
         .locator("app-vault-filter main .box.list")
         .first();
