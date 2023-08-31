@@ -8,9 +8,10 @@ on:
         default: 'master'
         description: "clients branch or commit hash to build extensions with"
         type: string
+      # @TODO This will be controlled by feature flags
       EXTENSION_AUTOFILL_VERSION:
         required: true
-        default: 1
+        default: "1"
         description: "version of auto-fill to use"
         type: number
 jobs:
@@ -98,11 +99,11 @@ jobs:
           npm run test:static:headless
         working-directory: ./
 
-      # - name: Start SSH session
-      #   uses: luchihoratiu/debug-via-ssh@main
-      #   with:
-      #     NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-      #     SSH_PASS: ${{ secrets.SSH_PASS }}
+      - name: Start SSH session
+        uses: luchihoratiu/debug-via-ssh@main
+        with:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+          SSH_PASS: ${{ secrets.SSH_PASS }}
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
