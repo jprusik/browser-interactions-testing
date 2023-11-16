@@ -7,18 +7,18 @@ set -o allexport
 source $ROOT_DIR/.env
 set +o allexport
 
-curl "$SERVER_HOST_URL/identity/accounts/register" \
+curl "$VAULT_HOST_URL/identity/accounts/register" \
   -sX POST \
   -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/109.0' \
   -H 'Accept: application/json' \
   -H 'Accept-Language: en-US,en;q=0.5' \
   -H 'Accept-Encoding: gzip, deflate, br' \
-  -H "Referer: $SERVER_HOST_URL/" \
+  -H "Referer: $VAULT_HOST_URL/" \
   -H 'content-type: application/json; charset=utf-8' \
   -H 'device-type: 10' \
   -H 'Bitwarden-Client-Name: web' \
   -H 'Bitwarden-Client-Version: 2023.1.1' \
-  -H "Origin: $SERVER_HOST_URL" \
+  -H "Origin: $VAULT_HOST_URL" \
   -H 'DNT: 1' \
   -H 'Connection: keep-alive' \
   -H 'Sec-Fetch-Dest: empty' \

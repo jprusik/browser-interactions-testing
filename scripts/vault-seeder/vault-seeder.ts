@@ -9,7 +9,7 @@ import {
   VaultItem,
 } from "./abstractions/vault-seeder";
 import { FillProperties, TestPage } from "../../tests/abstractions/constants";
-import { testPages, knownFailureCases } from "../../tests/constants";
+import { testPages, knownFailureCases } from "../../tests/constants/autofill-forms";
 import { CipherType } from "../../clients/libs/common/src/vault/enums/cipher-type";
 import { UriMatchType } from "../../clients/libs/common/src/enums";
 
