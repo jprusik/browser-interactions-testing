@@ -11,7 +11,7 @@ export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
 
 # BITWARDENCLI_APPDATA_DIR is a special var. See:
 # https://github.com/bitwarden/clients/blob/1a6573ba96613ebcfd19c1c90ee5523452b8903a/apps/cli/src/bw.ts#L149
-export BITWARDENCLI_APPDATA_DIR="$ROOT_DIR/vault-seeder/tmp"
+export BITWARDENCLI_APPDATA_DIR="$ROOT_DIR/scripts/tmp-vault-seeder"
 mkdir -p "$BITWARDENCLI_APPDATA_DIR"
 
 BW_COMMAND() {

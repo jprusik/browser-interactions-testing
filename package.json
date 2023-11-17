@@ -1,16 +1,16 @@
 {
-  "name": "@bitwarden/autofill-playwright",
+  "name": "@bitwarden/test-autofill",
   "version": "0.0.0",
-  "description": "Bitwarden Autofill Playwright Tests",
+  "description": "Bitwarden Autofill Testing",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitwarden/autofill-playwright.git"
+    "url": "git+https://github.com/bitwarden/test-autofill.git"
   },
   "author": "Bitwarden Inc. <hello@bitwarden.com> (https://bitwarden.com)",
   "license": "SEE LICENSE IN LICENSE.txt",
   "bugs": {
-    "url": "https://github.com/bitwarden/autofill-playwright/issues"
+    "url": "https://github.com/bitwarden/test-autofill/issues"
   },
   "homepage": "https://bitwarden.com",
   "devDependencies": {
@@ -40,11 +40,12 @@
     "build:extension": "cd clients/apps/browser && rimraf build && npm run build",
     "build:extension:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",
     "seed:vault:account": "./scripts/create-account.sh",
-    "seed:vault:ciphers": "./scripts/cli-serve-helper.sh && ts-node ./scripts/vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
-    "seed:vault:ciphers:refresh": "./scripts/cli-serve-helper.sh && REFRESH=true ts-node ./scripts/vault-seeder/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
+    "seed:vault:ciphers": "./scripts/cli-serve-helper.sh && ts-node ./scripts/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
+    "seed:vault:ciphers:refresh": "./scripts/cli-serve-helper.sh && REFRESH=true ts-node ./scripts/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "setup:extension": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
     "setup:ssl": "./scripts/generate-certs.sh",
     "setup:vault": "npm run seed:vault:account && npm run seed:vault:ciphers",
+    "setup:all": "./scripts/first-time-setup.sh",
     "test:all": "npm run pretest && playwright test",
     "test:all:debug": "npm run pretest && playwright test --debug",
     "test:all:headless": "npm run pretest && HEADLESS=true playwright test",
