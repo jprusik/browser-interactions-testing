@@ -5,8 +5,8 @@ Thumbs.db
 # Secrets
 .env
 dev-server.local.pem
-vault-seeder
-!vault-seeder/abstractions
+vault-seeder/*
+!vault-seeder/abstractions/*
 !vault-seeder/vault-seeder.ts
 ssl.crt
 ssl.key
@@ -31,7 +31,6 @@ ssl.key
 # Node
 node_modules
 npm-debug.log
-bitwarden-clients-0.0.0.tgz
 clients
 server
 

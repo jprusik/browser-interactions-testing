@@ -1,11 +1,5 @@
-import { CipherType } from "../clients/libs/common/src/vault/enums/cipher-type";
-import { UriMatchType } from "../clients/libs/common/src/enums";
-import { configDotenv } from "dotenv";
-import { TestPage } from "./abstractions/constants";
-
-configDotenv();
-
-export const localPagesUri = `${process.env.PAGES_HOST}:${process.env.PAGES_HOST_PORT}`;
+import { CipherType, UriMatchType, TestPage } from "../../abstractions";
+import { localPagesUri } from "./server";
 
 const testUserName = "bwplaywright";
 /*

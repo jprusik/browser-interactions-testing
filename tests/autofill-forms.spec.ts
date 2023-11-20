@@ -1,13 +1,12 @@
 import { Page } from "@playwright/test";
 import path from "path";
-
-import { localPagesUri, testPages } from "./constants";
+import { localPagesUri, autofillTestPages } from "./constants";
 import { test, expect } from "./fixtures";
 import {
+  FillProperties,
   LocatorWaitForOptions,
   PageGoToOptions,
-} from "./abstractions/test-pages";
-import { FillProperties } from "./abstractions/constants";
+} from "../abstractions";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -15,7 +14,7 @@ let testPage: Page;
 
 const vaultEmail = process.env.VAULT_EMAIL || "";
 const vaultPassword = process.env.VAULT_PASSWORD || "";
-const serverHostURL = process.env.SERVER_HOST_URL;
+const vaultHostURL = process.env.VAULT_HOST_URL;
 const startFromTestUrl = process.env.START_FROM_TEST_URL || null;
 const targetTestPages = process.env.TARGET;
 const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
@@ -78,13 +77,13 @@ test.describe("Extension autofills forms when triggered", () => {
 
     await test.step("Configure the environment", async () => {
       // @TODO check for and fill other settings
-      if (serverHostURL) {
+      if (vaultHostURL) {
         const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`;
         await testPage.goto(extensionURL, defaultGotoOptions);
         const baseUrlInput = await testPage.locator("input#baseUrl");
         await baseUrlInput.waitFor(defaultWaitForOptions);
 
-        await testPage.fill("input#baseUrl", serverHostURL);
+        await testPage.fill("input#baseUrl", vaultHostURL);
 
         await testPage.screenshot({
           fullPage: true,
@@ -131,10 +130,10 @@ test.describe("Extension autofills forms when triggered", () => {
 
     let pagesToTest =
       targetTestPages === "static"
-        ? testPages.filter(({ url }) => url.startsWith(localPagesUri))
+        ? autofillTestPages.filter(({ url }) => url.startsWith(localPagesUri))
         : targetTestPages === "public"
-        ? testPages.filter(({ url }) => !url.startsWith(localPagesUri))
-        : testPages;
+        ? autofillTestPages.filter(({ url }) => !url.startsWith(localPagesUri))
+        : autofillTestPages;
 
     if (debugIsActive) {
       const onlyTestPages = pagesToTest.filter(({ onlyTest }) => onlyTest);
