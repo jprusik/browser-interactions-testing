@@ -14,17 +14,5 @@
   ],
   "enabledManagers": ["github-actions", "npm"],
   "commitMessagePrefix": "[deps]:",
-  "commitMessageTopic": "{{depName}}",
-  "packageRules": [
-    {
-      "groupName": "gh minor",
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch"]
-    },
-    {
-      "groupName": "npm minor",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"]
-    }
-  ]
+  "commitMessageTopic": "{{depName}}"
 }
