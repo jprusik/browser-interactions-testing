@@ -1,14 +1,15 @@
 import fetch from "cross-fetch";
 import { configDotenv } from "dotenv";
 import {
+  AutofillTestPage,
   CardItemTemplate,
   CipherType,
+  FieldTemplate,
   FillProperties,
   FolderItem,
   IdentityItemTemplate,
   ItemTemplate,
   LoginItemTemplate,
-  TestPage,
   UriMatchType,
   VaultItem,
 } from "../abstractions";
@@ -40,7 +41,7 @@ class VaultSeeder {
     }
 
     const testsFolder = await this.getPlaywrightCiphersFolder(
-      PLAYWRIGHT_CIPHERS_FOLDER
+      PLAYWRIGHT_CIPHERS_FOLDER,
     );
 
     if (!testsFolder) {
@@ -84,9 +85,9 @@ class VaultSeeder {
   }
 
   private async createVaultItem(
-    testPage: TestPage,
+    testPage: AutofillTestPage,
     itemName: string,
-    folderId: string
+    folderId: string,
   ): Promise<void> {
     const itemData: ItemTemplate = {
       organizationId: null,
@@ -96,7 +97,7 @@ class VaultSeeder {
       name: itemName,
       notes: "",
       favorite: false,
-      fields: [],
+      fields: this.generateCustomFieldsLoginItemData(testPage),
       login: this.generateLoginItemData(testPage),
       secureNote: null,
       card: this.generateCardItemData(testPage),
@@ -107,11 +108,11 @@ class VaultSeeder {
     const { success, message } = await this.queryApi(
       `/object/item`,
       "POST",
-      itemData
+      itemData,
     );
     if (!success) {
       console.error(
-        `ERROR: Unable to create login item for ${testPage.url}, ${message}`
+        `ERROR: Unable to create login item for ${testPage.url}, ${message}`,
       );
       return;
     }
@@ -121,7 +122,7 @@ class VaultSeeder {
 
   private async updateVaultItem(
     existingItem: VaultItem,
-    testPage: TestPage
+    testPage: AutofillTestPage,
   ): Promise<void> {
     if (!this.isVaultItemModified(existingItem, testPage)) {
       console.log(`Skipping ${testPage.url}, no changes detected...`);
@@ -131,6 +132,7 @@ class VaultSeeder {
     let itemData: ItemTemplate = existingItem;
     if (testPage.cipherType === CipherType.Login) {
       itemData.login = this.generateLoginItemData(testPage);
+      itemData.fields = this.generateCustomFieldsLoginItemData(testPage);
     }
 
     if (testPage.cipherType === CipherType.Card) {
@@ -144,11 +146,11 @@ class VaultSeeder {
     const { success, message } = await this.queryApi(
       `/object/item/${existingItem.id}`,
       "PUT",
-      itemData
+      itemData,
     );
     if (!success) {
       console.error(
-        `ERROR: Unable to update login item for ${testPage.url}, ${message}`
+        `ERROR: Unable to update login item for ${testPage.url}, ${message}`,
       );
       return;
     }
@@ -159,11 +161,11 @@ class VaultSeeder {
   private async deleteVaultItem(vaultItem: VaultItem): Promise<void> {
     const { success, message } = await this.queryApi(
       `/object/item/${vaultItem.id}`,
-      "DELETE"
+      "DELETE",
     );
     if (!success) {
       console.error(
-        `ERROR: Unable to delete login item ${vaultItem.name}, ${message}`
+        `ERROR: Unable to delete login item ${vaultItem.name}, ${message}`,
       );
       return;
     }
@@ -171,12 +173,12 @@ class VaultSeeder {
 
   private isVaultItemModified(
     vaultItem: ItemTemplate,
-    testPage: TestPage
+    testPage: AutofillTestPage,
   ): boolean {
     let comparedValues: [FillProperties | undefined, any][] = [];
     const isValueModified = (
       testItem?: FillProperties,
-      vaultValue?: any
+      vaultValue?: any,
     ): boolean => {
       const testValue = testItem?.value;
       return Boolean(testValue) && testValue !== vaultValue;
@@ -236,7 +238,32 @@ class VaultSeeder {
     return false;
   }
 
-  private generateLoginItemData(testPage: TestPage): LoginItemTemplate | null {
+  private generateCustomFieldsLoginItemData(
+    testPage: AutofillTestPage,
+  ): FieldTemplate[] {
+    if (testPage.cipherType !== CipherType.Login) {
+      return [];
+    }
+
+    const inputKeys = Object.keys(testPage.inputs).filter(
+      (keyName) => !["username", "password", "totp"].includes(keyName),
+    );
+
+    return inputKeys.map((keyName: string) => {
+      const input =
+        testPage.inputs[keyName as keyof AutofillTestPage["inputs"]];
+
+      return {
+        name: (input?.selector as string).replace(/#/g, "") || "",
+        value: input?.value || "",
+        type: 1,
+      };
+    });
+  }
+
+  private generateLoginItemData(
+    testPage: AutofillTestPage,
+  ): LoginItemTemplate | null {
     if (testPage.cipherType !== CipherType.Login) {
       return null;
     }
@@ -250,7 +277,7 @@ class VaultSeeder {
       uris.push({
         match: testPage.uriMatchType || UriMatchType.Domain,
         uri: url,
-      })
+      }),
     );
 
     const { username, password, totp } = testPage.inputs;
@@ -263,7 +290,9 @@ class VaultSeeder {
     };
   }
 
-  private generateCardItemData(testPage: TestPage): CardItemTemplate | null {
+  private generateCardItemData(
+    testPage: AutofillTestPage,
+  ): CardItemTemplate | null {
     if (testPage.cipherType !== CipherType.Card) {
       return null;
     }
@@ -281,7 +310,7 @@ class VaultSeeder {
   }
 
   private generateIdentityItemData(
-    testPage: TestPage
+    testPage: AutofillTestPage,
   ): IdentityItemTemplate | null {
     if (testPage.cipherType !== CipherType.Identity) {
       return null;
@@ -349,10 +378,10 @@ class VaultSeeder {
   }
 
   private async getPlaywrightCiphersFolder(
-    folderName: string
+    folderName: string,
   ): Promise<FolderItem | undefined> {
     const { success, data, message } = await this.queryApi(
-      `/object/folder/${folderName}`
+      `/object/folder/${folderName}`,
     );
 
     if (success) {
@@ -361,19 +390,19 @@ class VaultSeeder {
 
     if (message === "Not found.") {
       console.log(
-        "Playwright testing items folder not found, creating folder..."
+        "Playwright testing items folder not found, creating folder...",
       );
       return await this.createPlaywrightCiphersFolder(folderName);
     }
   }
 
   private async createPlaywrightCiphersFolder(
-    folderName: string
+    folderName: string,
   ): Promise<FolderItem | undefined> {
     const { success, data, message } = await this.queryApi(
       `/object/folder`,
       "POST",
-      { name: folderName }
+      { name: folderName },
     );
 
     if (!success) {
@@ -386,11 +415,11 @@ class VaultSeeder {
 
   private async getAllVaultItems(folderId: string): Promise<VaultItem[]> {
     const { success, data, message } = await this.queryApi(
-      `/list/object/items?folderid=${folderId}`
+      `/list/object/items?folderid=${folderId}`,
     );
     if (!success) {
       throw new Error(
-        `ERROR: Unable to get vault items for folder ${folderId}, ${message}`
+        `ERROR: Unable to get vault items for folder ${folderId}, ${message}`,
       );
     }
 
@@ -400,7 +429,7 @@ class VaultSeeder {
   private async queryApi(
     route: string,
     method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-    body?: any
+    body?: any,
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
       const response = await fetch(
@@ -411,7 +440,7 @@ class VaultSeeder {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(body),
-        }
+        },
       );
 
       return await response.json();

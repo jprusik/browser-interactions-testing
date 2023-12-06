@@ -1,10 +1,10 @@
 import { Page } from "@playwright/test";
 import path from "path";
 import {
-  autofillTestPages,
   debugIsActive,
   defaultGotoOptions,
   defaultWaitForOptions,
+  overlayPages,
   startFromTestUrl,
   targetTestPages,
   testSiteHost,
@@ -24,28 +24,10 @@ test.describe("Extension autofills forms when triggered", () => {
     context,
     extensionId,
   }) => {
-    const [backgroundPage] = context.backgroundPages();
-
-    async function doAutofill() {
-      await backgroundPage.evaluate(() =>
-        chrome.tabs.query(
-          { active: true },
-          (tabs) =>
-            tabs[0] &&
-            chrome.tabs.sendMessage(tabs[0]?.id || 0, {
-              command: "collectPageDetails",
-              tab: tabs[0],
-              sender: "autofill_cmd",
-            }),
-        ),
-      );
-    }
-
     await test.step("Close the extension welcome page when it pops up", async () => {
-      // Wait for the extension to open the welcome page before continuing
       await context.waitForEvent("page");
 
-      let contextPages = await context.pages();
+      let contextPages = context.pages();
       expect(contextPages.length).toBe(2);
 
       const welcomePage = contextPages[1];
@@ -74,7 +56,10 @@ test.describe("Extension autofills forms when triggered", () => {
 
         await testPage.screenshot({
           fullPage: true,
-          path: path.join(screenshotsOutput, `environment_configured.png`),
+          path: path.join(
+            screenshotsOutput,
+            `environment_configured-input_overlay_tests.png`,
+          ),
         });
 
         const serverConfigContent = await testPage.locator("#baseUrlHelp");
@@ -115,7 +100,7 @@ test.describe("Extension autofills forms when triggered", () => {
       await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
-    let pagesToTest = autofillTestPages.filter(
+    let pagesToTest = overlayPages.filter(
       ({ cipherType, url }) =>
         // @TODO additional work needed for non-login ciphers
         cipherType === CipherType.Login &&
@@ -151,7 +136,7 @@ test.describe("Extension autofills forms when triggered", () => {
       const { url, inputs } = page;
       const isLocalPage = url.startsWith(testSiteHost);
 
-      await test.step(`Autofill the form at ${url}`, async () => {
+      await test.step(`Fill the form via overlay and submit at ${url}`, async () => {
         await testPage.goto(url, defaultGotoOptions);
 
         const inputKeys = Object.keys(inputs);
@@ -176,7 +161,10 @@ test.describe("Extension autofills forms when triggered", () => {
             : await firstInputSelector(testPage);
         await firstInputElement.waitFor(defaultWaitForOptions);
 
-        await doAutofill();
+        // Navigate overlay for autofill
+        await firstInputElement.focus();
+        await testPage.keyboard.press("ArrowDown");
+        await testPage.keyboard.press("Space");
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
@@ -201,7 +189,7 @@ test.describe("Extension autofills forms when triggered", () => {
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${url}-${inputKey}-autofill.png`,
+              `${url}-${inputKey}-overlay.png`,
             ),
           });
 
@@ -232,7 +220,10 @@ test.describe("Extension autofills forms when triggered", () => {
                 : await nextInputSelector(testPage);
             await nextInputElement.waitFor(defaultWaitForOptions);
 
-            await doAutofill();
+            // Navigate overlay for autofill
+            await nextInputElement.focus();
+            await testPage.keyboard.press("ArrowDown");
+            await testPage.keyboard.press("Space");
           }
 
           if (debugIsActive) {

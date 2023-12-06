@@ -12,7 +12,6 @@ type FillProperties = {
 type TestPage = {
   cipherType: CipherType;
   url: string;
-  additionalLoginUrls?: string[];
   uriMatchType?: UriMatchType;
   onlyTest?: boolean;
   inputs: {
@@ -50,6 +49,17 @@ type TestPage = {
   };
 };
 
+type AutofillTestPage = TestPage & {
+  additionalLoginUrls?: string[];
+};
+
+type NotificationTestPage = TestPage & {
+  actions?: {
+    submit?: (page: Page) => void;
+  };
+  shouldNotTriggerNotification?: boolean;
+};
+
 type LocatorWaitForOptions = {
   state?: "visible" | "attached" | "detached" | "hidden";
   timeout?: number;
@@ -61,4 +71,11 @@ type PageGoToOptions = {
   referer?: string;
 };
 
-export { FillProperties, TestPage, LocatorWaitForOptions, PageGoToOptions };
+export {
+  FillProperties,
+  AutofillTestPage,
+  TestPage,
+  NotificationTestPage,
+  LocatorWaitForOptions,
+  PageGoToOptions,
+};

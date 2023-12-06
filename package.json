@@ -31,10 +31,8 @@
   "lint-staged": {
     "*": "prettier --cache --write --ignore-unknown"
   },
-  "prettier": {
-    "trailingComma": "es5"
-  },
   "scripts": {
+    "prettier:fix": "prettier --write .",
     "prepare": "husky install && npm run setup:extension",
     "pretest": "rimraf tests-out screenshots test-summary test-results && tsc --incremental -p tests/tsconfig.json",
     "build:extension": "cd clients/apps/browser && rimraf build && npm run build",
@@ -44,8 +42,10 @@
     "seed:vault:ciphers:refresh": "./scripts/cli-serve-helper.sh && REFRESH=true ts-node ./scripts/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "setup:extension": "rimraf clients && git clone https://github.com/bitwarden/clients.git clients && cd clients && npm ci",
     "setup:ssl": "./scripts/generate-certs.sh",
+    "setup:test-site": "rimraf test-site && git clone git@github.com:bitwarden/test-the-web.git test-site && find -E . -type f -maxdepth 1 -mindepth 1 -regex '.*\\.(crt|key)' -exec cp '{}' test-site/api/ ';' && cd test-site && npm ci && npm run build",
     "setup:vault": "npm run seed:vault:account && npm run seed:vault:ciphers",
     "setup:all": "./scripts/first-time-setup.sh",
+    "start:test-site": "./scripts/serve-test-site.sh",
     "test:all": "npm run pretest && playwright test",
     "test:all:debug": "npm run pretest && playwright test --debug",
     "test:all:headless": "npm run pretest && HEADLESS=true playwright test",
@@ -55,6 +55,9 @@
     "test:static": "npm run pretest && TARGET=static playwright test",
     "test:static:debug": "npm run pretest && TARGET=static playwright test --debug",
     "test:static:headless": "npm run pretest && TARGET=static HEADLESS=true playwright test",
+    "test:static:autofill": "npm run pretest && TARGET=static playwright test tests/autofill-forms.spec.ts",
+    "test:static:notification": "npm run pretest && TARGET=static playwright test tests/notification-bar.spec.ts",
+    "test:static:overlay": "npm run pretest && TARGET=static playwright test tests/input-overlay.spec.ts",
     "test:webserve": "cd clients/apps/web && npm run build:bit:watch",
     "test:webserve:bitwarden": "cd clients/apps/web && ENV=cloud npm run build:oss:watch"
   }

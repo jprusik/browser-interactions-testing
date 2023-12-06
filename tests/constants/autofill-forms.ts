@@ -1,22 +1,15 @@
-import { CipherType, UriMatchType, TestPage } from "../../abstractions";
-import { localPagesUri } from "./server";
+import { AutofillTestPage, CipherType, UriMatchType } from "../../abstractions";
+import { testSiteHost } from "./server";
+import { testUserName, testEmail, testUserEmail } from "./settings";
 
-const testUserName = "bwplaywright";
-/*
-Some websites "prequalify" an entered email to see if they have an associated account.
-If they don't, they may disallow password entry or force account create workflow, so it is
-important that `testUserEmail` is a real address with organizational control.
-*/
-const testUserEmail = "bwplaywright@gmail.com";
-
-export const testPages: TestPage[] = [
+export const testPages: AutofillTestPage[] = [
   /**
    * Local webpages
    */
   {
     cipherType: CipherType.Login,
-    url: `${localPagesUri}/tests/test-pages/basic-form.html`,
-    uriMatchType: UriMatchType.Exact,
+    url: `${testSiteHost}/forms/login/simple`,
+    uriMatchType: UriMatchType.StartsWith,
     inputs: {
       username: { selector: "#username", value: testUserName },
       password: { selector: "#password", value: "fakeBasicFormPassword" },
@@ -24,8 +17,8 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: `${localPagesUri}/tests/test-pages/iframe-form.html`,
-    uriMatchType: UriMatchType.Exact,
+    url: `${testSiteHost}/forms/login/iframe-login`,
+    uriMatchType: UriMatchType.StartsWith,
     inputs: {
       username: {
         preFillActions: async (page) => {
@@ -45,8 +38,8 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: `${localPagesUri}/tests/test-pages/sandboxed-iframe-form.html`,
-    uriMatchType: UriMatchType.Exact,
+    url: `${testSiteHost}/forms/login/iframe-sandboxed-login`,
+    uriMatchType: UriMatchType.StartsWith,
     inputs: {
       username: {
         preFillActions: async (page) => {
@@ -68,29 +61,113 @@ export const testPages: TestPage[] = [
   },
   {
     cipherType: CipherType.Login,
-    url: `${localPagesUri}/tests/test-pages/multi-step-form.html`,
-    uriMatchType: UriMatchType.Exact,
+    url: `${testSiteHost}/forms/login/multi-step-login`,
+    uriMatchType: UriMatchType.StartsWith,
     inputs: {
       username: {
-        multiStepNextInputKey: "password",
+        multiStepNextInputKey: "email",
         selector: "#username",
         value: testUserName,
       },
+      email: {
+        multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testEmail,
+      },
       password: { selector: "#password", value: "fakeMultiStepPassword" },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${testSiteHost}/forms/login/bare-inputs-login`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      username: { selector: "#username", value: testUserName },
+      password: { selector: "#password", value: "fakeBareInputsPassword" },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${testSiteHost}/forms/login/input-constraints-login`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      username: { selector: "#email", value: testEmail },
+      password: {
+        selector: "#password",
+        value: "fakeInputConstraintsPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${testSiteHost}/forms/login/shadow-root-inputs`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      username: {
+        selector: async (page) => await page.getByLabel("Username"),
+        value: testUserName,
+      },
+      password: {
+        selector: async (page) => await page.getByLabel("Password"),
+        value: "fakeShadowRootInputsPassword",
+      },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${testSiteHost}/forms/search/simple-search`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      username: {
+        shouldNotFill: true,
+        selector: "#search",
+        value: testUserName,
+      },
+      password: {
+        shouldNotFill: true,
+        selector: "#search",
+        value: "fakeSearchPassword",
+      },
+    },
+  },
+
+  // Card and Identity Ciphers currently cannot be autofilled through the same mechanism that Login Ciphers are. This is because of how we handle messaging the background for autofilling login items. The extension will need to be updated to handle these types of Ciphers.
+  {
+    cipherType: CipherType.Card,
+    url: `${testSiteHost}/forms/payment/card-payment`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      cardholderName: { selector: "#card-name", value: "John Smith" },
+      // @TODO handle cases where there is no input for card brand/type
+      brand: { selector: "#card-number", value: "Visa" },
+      number: { selector: "#card-number", value: "4111111111111111" },
+      // @TODO handle inputs that enforce different and/or concatenated date formats
+      expMonth: { selector: "#card-expiration", value: "12" },
+      expYear: { selector: "#card-expiration", value: "2025" },
+      code: { selector: "#card-cvv", value: "123" },
+    },
+  },
+  {
+    cipherType: CipherType.Identity,
+    url: `${testSiteHost}/forms/identity/address-na`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      // @TODO handle cases where there is a single name input (e.g. "full name")
+      firstName: { selector: "#full-name", value: "John" },
+      middleName: { selector: "#full-name", value: "M" },
+      lastName: { selector: "#full-name", value: "Smith" },
+      address1: { selector: "#address", value: "123 Main St" },
+      address2: { selector: "#address-ext", value: "Apt 1" },
+      city: { selector: "#city", value: "New York" },
+      state: { selector: "#state", value: "NY" },
+      postalCode: { selector: "#postcode", value: "10001" },
+      country: { selector: "#country", value: "USA" },
     },
   },
 
   /**
    * Live websites
    */
-  {
-    cipherType: CipherType.Login,
-    url: "https://fill.dev/form/login-simple",
-    inputs: {
-      username: { selector: "#username", value: testUserName },
-      password: { selector: "#password", value: "fakeSimpleLoginPassword" },
-    },
-  },
   // @TODO In non-debug mode, LinkedIn is often hanging on page load
   // LinkedIn periodically redirects to https://www.linkedin.com/authwall...
   {
@@ -147,7 +224,7 @@ export const testPages: TestPage[] = [
           // Open the login options modal
           await page
             .locator(
-              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']"
+              "header nav .znav-links ul[data-zg-section='reg-login'] a[href^='/user/acct/login/?cid=pf']",
             )
             .click();
         },
@@ -1338,7 +1415,7 @@ export const testPages: TestPage[] = [
         preFillActions: async (page) => {
           // Click the log in button to trigger the login modal
           const loginButton = await page.locator(
-            "a.user-profile_header-login[href='/myaccount']"
+            "a.user-profile_header-login[href='/myaccount']",
           );
           await loginButton.click();
         },
@@ -1499,11 +1576,11 @@ export const testPages: TestPage[] = [
 ];
 
 // Known failure cases; expected to fail
-export const knownFailureCases: TestPage[] = [
+export const knownFailureCases: AutofillTestPage[] = [
   {
     cipherType: CipherType.Login,
-    url: `${localPagesUri}/tests/test-pages/many-input-form.html`,
-    uriMatchType: UriMatchType.Exact,
+    url: `${testSiteHost}/forms/login/many-inputs-login`,
+    uriMatchType: UriMatchType.StartsWith,
     inputs: {
       username: { selector: "#username", value: "js" },
       password: { selector: "#password", value: "" },
@@ -1522,7 +1599,7 @@ export const knownFailureCases: TestPage[] = [
             .click();
           // Select login option from registration form
           const loadedLoginModal = await page.locator(
-            'form div.login a[href^="/account/login"]'
+            'form div.login a[href^="/account/login"]',
           );
           loadedLoginModal.click();
         },
@@ -1667,7 +1744,7 @@ export const knownFailureCases: TestPage[] = [
           await page.locator("#global-user-trigger").click();
           await page
             .locator(
-              '#global-viewport > .global-user a[tref="/members/v3_1/login"]'
+              '#global-viewport > .global-user a[tref="/members/v3_1/login"]',
             )
             .click();
         },
@@ -1678,37 +1755,6 @@ export const knownFailureCases: TestPage[] = [
         selector: "#InputPassword",
         value: "fakeESPNPassword",
       },
-    },
-  },
-
-  // Card and Identity Ciphers currently cannot be autofilled through the same mechanism that Login Ciphers are. This is because of how we handle messaging the background for autofilling login items. The extension will need to be updated to handle these types of Ciphers.
-  {
-    cipherType: CipherType.Card,
-    url: "https://fill.dev/form/credit-card-simple",
-    uriMatchType: UriMatchType.Exact,
-    inputs: {
-      cardholderName: { selector: "#cc-name", value: "John Smith" },
-      brand: { selector: "#cc-type", value: "Visa" },
-      number: { selector: "#cc-number", value: "4111111111111111" },
-      expMonth: { selector: "#cc-exp-month", value: "12" },
-      expYear: { selector: "#cc-exp-year", value: "2025" },
-      code: { selector: "#cc-csc", value: "123" },
-    },
-  },
-  {
-    cipherType: CipherType.Identity,
-    url: "https://fill.dev/form/identity-simple",
-    uriMatchType: UriMatchType.Exact,
-    inputs: {
-      firstName: { selector: "#given-name", value: "John" },
-      middleName: { selector: "#additional-name", value: "M" },
-      lastName: { selector: "#family-name", value: "Smith" },
-      address1: { selector: "#address-line1", value: "123 Main St" },
-      address2: { selector: "#address-line2", value: "Apt 1" },
-      city: { selector: "city", value: "New York" },
-      state: { selector: "#address-level1", value: "NY" },
-      postalCode: { selector: "#postal-code", value: "10001" },
-      country: { selector: "#country", value: "USA" },
     },
   },
 ];
