@@ -1,6 +1,9 @@
 import path from "path";
 import fs from "fs";
 import { test as base, chromium, type BrowserContext } from "@playwright/test";
+import { configDotenv } from "dotenv";
+
+configDotenv();
 
 const pathToExtension = path.join(
   __dirname,
@@ -50,6 +53,12 @@ export const test = base.extend<{
   },
   extensionId: async ({ context }, use) => {
     let background;
+    console.log("process.env.CI:", process.env.CI);
+    console.log("pathToExtension:", pathToExtension);
+    console.log(
+      "process.env.EXTENSION_BUILD_PATH:",
+      process.env.EXTENSION_BUILD_PATH,
+    );
     const manifest = JSON.parse(
       fs.readFileSync(path.join(pathToExtension, "manifest.json"), "utf8"),
     );

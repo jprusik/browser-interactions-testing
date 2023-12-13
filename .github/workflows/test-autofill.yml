@@ -16,6 +16,37 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-22.04
+    # env:
+    #   CI: true
+    #   PAGES_HOST_PORT: ${{ secrets.PAGES_HOST_PORT }}
+    #   PAGES_HOST_INSECURE_PORT: ${{ secrets.PAGES_HOST_INSECURE_PORT }}
+    #   PAGES_HOST: ${{ secrets.PAGES_HOST }}
+    #   PUBLIC_TEST_EMAIL: ${{ secrets.PUBLIC_TEST_EMAIL }}
+    #   VAULT_EMAIL: ${{ secrets.VAULT_EMAIL }}
+    #   VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
+    #   CLI_SERVE_HOST: ${{ secrets.CLI_SERVE_HOST }}
+    #   CLI_SERVE_PORT: ${{ secrets.CLI_SERVE_PORT }}
+    #   VAULT_HOST_PORT: ${{ secrets.VAULT_HOST_PORT }}
+    #   VAULT_HOST_INSECURE_PORT: ${{ secrets.VAULT_HOST_INSECURE_PORT }}
+    #   VAULT_HOST_URL: ${{ secrets.VAULT_HOST_URL }}
+    #   EXTENSION_BUILD_PATH: ${{ secrets.EXTENSION_BUILD_PATH }}
+    #   BW_DOMAIN: ${{ secrets.BW_DOMAIN }}
+    #   BW_DB_PROVIDER: ${{ secrets.BW_DB_PROVIDER }}
+    #   BW_DB_SERVER: ${{ secrets.BW_DB_SERVER }}
+    #   BW_DB_DATABASE: ${{ secrets.BW_DB_DATABASE }}
+    #   BW_DB_USERNAME: ${{ secrets.BW_DB_USERNAME }}
+    #   BW_DB_PASSWORD: ${{ secrets.BW_DB_PASSWORD }}
+    #   BW_DB_PORT: ${{ secrets.BW_DB_PORT }}
+    #   BW_INSTALLATION_ID: ${{ secrets.BW_INSTALLATION_ID }}
+    #   BW_INSTALLATION_KEY: ${{ secrets.BW_INSTALLATION_KEY }}
+    #   BW_ENABLE_SSL: ${{ secrets.BW_ENABLE_SSL }}
+    #   BW_SSL_CERT: ${{ secrets.BW_SSL_CERT }}
+    #   BW_SSL_KEY: ${{ secrets.BW_SSL_KEY }}
+    #   KDF_ITERATIONS: ${{ secrets.KDF_ITERATIONS }}
+    #   MASTER_PASSWORD_HASH: ${{ secrets.MASTER_PASSWORD_HASH }}
+    #   PROTECTED_SYMMETRIC_KEY: ${{ secrets.PROTECTED_SYMMETRIC_KEY }}
+    #   GENERATED_RSA_KEY_PAIR_PUBLIC_KEY: ${{ secrets.GENERATED_RSA_KEY_PAIR_PUBLIC_KEY }}
+    #   GENERATED_RSA_KEY_PAIR_PROTECTED_PRIVATE_KEY: ${{ secrets.GENERATED_RSA_KEY_PAIR_PROTECTED_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
@@ -23,34 +54,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
           node-version: '18'
-
-      # TODO temp for dev- move to individual secrets
-      - name: Create env file
-        run: |
-          touch .env
-          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
-
-      - name: NPM setup
-        run: npm ci
-        working-directory: ./
-
-      - name: Generate Certs
-        run: npm run setup:ssl
-        working-directory: ./
-
-      - name: Install Certs
-        run: |
-          sudo cp ssl.crt /usr/local/share/ca-certificates/
-          sudo update-ca-certificates
-        working-directory: ./
-
-      - name: Install Bitwarden CLI
-        run: npm install -g @bitwarden/cli@2023.7.0
-        working-directory: ./
-
-      - name: Build and start the test vault
-        run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
-        working-directory: ./
 
       - name: Download extension artifact
         uses: dawidd6/action-download-artifact@246dbf436b23d7c49e21a7ab8204ca9ecd1fe615 # v2.27.0
@@ -64,45 +67,135 @@ jobs:
           repo: bitwarden/clients
           if_no_artifact_found: fail
 
-      - name: Unzip extension artifact
+      - name: Setup everything and run tests
         run: |
+          sudo setcap 'cap_net_bind_service=+ep' `which node`
+          touch .env
+          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+          echo "VAULT_HOST_PORT: $VAULT_HOST_PORT"
+          export ROOT_DIR=$(git rev-parse --show-toplevel)
+          . $ROOT_DIR/.env
+          echo "VAULT_HOST_PORT: $VAULT_HOST_PORT"
+          npm run setup:ssl
+          sudo cp ssl.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+          npm install -g @bitwarden/cli@2023.7.0
+          npm ci
+          npx playwright install --with-deps chromium
+          docker compose up -d --build --remove-orphans --wait --wait-timeout 60
+          npm run seed:vault:account
+          npm run seed:vault:ciphers:pipeline
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}'
+          git clone git@github.com:jprusik/test-the-web.git test-site
+          find . -maxdepth 1 -mindepth 1 -type f -regex ".*\.\(crt\|key\)" -exec sudo cp -t ./test-site/api -- {} +
+          cd test-site
+          npm ci
+          npm run build
+          cd ..
           mkdir -p build
           unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
+          npm run test:static:headless
         working-directory: ./
 
-      - name: Setup the test vault account
-        run: npm run seed:vault:account
-        working-directory: ./
+      # - name: Start SSH session
+      #   if: always()
+      #   uses: luchihoratiu/debug-via-ssh@main
+      #   with:
+      #     NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+      #     SSH_PASS: ${{ secrets.SSH_PASS }}
 
-      - name: Setup the test account ciphers
-        run: npm run seed:vault:ciphers:pipeline
-        working-directory: ./
+      # # TODO temp for dev- move to individual secrets
+      # - name: Create env file
+      #   run: |
+      #     touch .env
+      #     echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+      #   # working-directory: ./
 
-      - name: Install Playwright
-        # for now, we're only using chromium
-        run: npx playwright install --with-deps chromium
-        working-directory: ./
+      # - name: NPM setup
+      #   run: npm ci
+      #   working-directory: ./
 
-      # - name: Install Server Certs
+      # - name: Generate Certs
+      #   run: npm run setup:ssl
+      #   working-directory: ./
+
+      # - name: Install Certs
+      #   run: |
+      #     sudo cp ssl.crt /usr/local/share/ca-certificates/
+      #     sudo update-ca-certificates
+      #   working-directory: ./
+
+      # - name: Setup test site
+      #   run: |
+      #     eval `ssh-agent -s`
+      #     ssh-add - <<< '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}'
+      #     npm run setup:test-site
+      #   working-directory: ./
+
+      # - name: Install Bitwarden CLI
+      #   run: npm install -g @bitwarden/cli@2023.7.0
+      #   working-directory: ./
+
+      # - name: Build and start the test vault
+      #   run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
+      #   working-directory: ./
+
+      # - name: Download extension artifact
+      #   uses: dawidd6/action-download-artifact@246dbf436b23d7c49e21a7ab8204ca9ecd1fe615 # v2.27.0
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     workflow: build-browser.yml
+      #     workflow_conclusion: success
+      #     branch: ${{ inputs.CLIENTS_BRANCH }}
+      #     name: ^dist-chrome-(?!MV3-)\w{7}\.zip$
+      #     name_is_regexp: true
+      #     repo: bitwarden/clients
+      #     if_no_artifact_found: fail
+
+      # - name: Do More
+      #   run: |
+      #     mkdir -p build
+      #     unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
+      #     echo "CI: $CI"
+      #     echo "VAULT_HOST_PORT: $VAULT_HOST_PORT"
+      #   working-directory: ./
+
+      # - name: Unzip extension artifact
+      #   run: |
+      #     mkdir -p build
+      #     unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
+      #   working-directory: ./
+
+      # - name: Setup the test vault account
+      #   run: npm run seed:vault:account
+      #   working-directory: ./
+
+      # - name: Setup the test account ciphers
+      #   run: npm run seed:vault:ciphers:pipeline
+      #   working-directory: ./
+
+      # - name: Install Playwright
+      #   # for now, we're only using chromium
+      #   run: npx playwright install --with-deps chromium
+      #   working-directory: ./
+
+      # - name: Install Server Certs (probably redundant)
       #   run: |
       #     openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
       #     sudo cp ssl.crt /usr/local/share/ca-certificates/
       #     sudo update-ca-certificates
       #   working-directory: ./
 
-      - name: Run local tests
-        run: |
-          export ROOT_DIR=$(git rev-parse --show-toplevel)
-          . $ROOT_DIR/.env
-          export NODE_EXTRA_CA_CERTS=$ROOT_DIR/$BW_SSL_CERT
-          npm run test:static:headless
-        working-directory: ./
-
-      # - name: Start SSH session
-      #   uses: luchihoratiu/debug-via-ssh@main
-      #   with:
-      #     NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-      #     SSH_PASS: ${{ secrets.SSH_PASS }}
+      # - name: Run local tests
+      #   run: |
+      #     sudo setcap 'cap_net_bind_service=+ep' `which node`
+      #     echo "VAULT_HOST_PORT: $VAULT_HOST_PORT"
+      #     export ROOT_DIR=$(git rev-parse --show-toplevel)
+      #     . $ROOT_DIR/.env
+      #     echo "VAULT_HOST_PORT: $VAULT_HOST_PORT"
+      #     npm run test:static:headless
+      #   working-directory: ./
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
