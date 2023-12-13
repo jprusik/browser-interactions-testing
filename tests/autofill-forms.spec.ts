@@ -5,15 +5,14 @@ import {
   debugIsActive,
   defaultGotoOptions,
   defaultWaitForOptions,
-  startFromTestUrl,
-  targetTestPages,
   testSiteHost,
   vaultEmail,
   vaultHostURL,
   vaultPassword,
 } from "./constants";
 import { test, expect } from "./fixtures";
-import { CipherType, FillProperties } from "../abstractions";
+import { FillProperties } from "../abstractions";
+import { getPagesToTest, doAutofill } from "./utils";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -25,21 +24,6 @@ test.describe("Extension autofills forms when triggered", () => {
     extensionId,
   }) => {
     const [backgroundPage] = context.backgroundPages();
-
-    async function doAutofill() {
-      await backgroundPage.evaluate(() =>
-        chrome.tabs.query(
-          { active: true },
-          (tabs) =>
-            tabs[0] &&
-            chrome.tabs.sendMessage(tabs[0]?.id || 0, {
-              command: "collectPageDetails",
-              tab: tabs[0],
-              sender: "autofill_cmd",
-            }),
-        ),
-      );
-    }
 
     await test.step("Close the extension welcome page when it pops up", async () => {
       // Wait for the extension to open the welcome page before continuing
@@ -115,34 +99,7 @@ test.describe("Extension autofills forms when triggered", () => {
       await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
-    let pagesToTest = autofillTestPages.filter(
-      ({ cipherType, url }) =>
-        // @TODO additional work needed for non-login ciphers
-        cipherType === CipherType.Login &&
-        (targetTestPages === "static"
-          ? url.startsWith(testSiteHost)
-          : targetTestPages === "public"
-            ? !url.startsWith(testSiteHost)
-            : true),
-    );
-
-    // When debug is active, only run tests against `onlyTest` pages if any are specified
-    if (debugIsActive) {
-      const onlyTestPages = pagesToTest.filter(({ onlyTest }) => onlyTest);
-
-      if (onlyTestPages.length) {
-        pagesToTest = onlyTestPages;
-      }
-    }
-
-    if (startFromTestUrl) {
-      const startTestIndex = pagesToTest.findIndex(
-        ({ url }) => url === startFromTestUrl,
-      );
-
-      pagesToTest =
-        startTestIndex > 0 ? pagesToTest.slice(startTestIndex) : pagesToTest;
-    }
+    const pagesToTest = getPagesToTest(autofillTestPages);
 
     test.setTimeout(480000);
     testPage.setDefaultNavigationTimeout(60000);
@@ -176,7 +133,7 @@ test.describe("Extension autofills forms when triggered", () => {
             : await firstInputSelector(testPage);
         await firstInputElement.waitFor(defaultWaitForOptions);
 
-        await doAutofill();
+        await doAutofill(backgroundPage);
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
@@ -232,7 +189,7 @@ test.describe("Extension autofills forms when triggered", () => {
                 : await nextInputSelector(testPage);
             await nextInputElement.waitFor(defaultWaitForOptions);
 
-            await doAutofill();
+            await doAutofill(backgroundPage);
           }
 
           if (debugIsActive) {

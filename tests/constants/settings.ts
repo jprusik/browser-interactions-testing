@@ -1,6 +1,8 @@
 import { LocatorWaitForOptions, PageGoToOptions } from "../../abstractions";
 
-export const debugIsActive = ["1", "console"].includes(process.env.PWDEBUG);
+export const debugIsActive = ["1", "console"].includes(
+  process.env.PWDEBUG || "",
+);
 
 export const defaultGotoOptions: PageGoToOptions = {
   waitUntil: "domcontentloaded",
@@ -18,7 +20,7 @@ export const targetTestPages = process.env.TARGET;
 
 export const vaultEmail = process.env.VAULT_EMAIL || "";
 
-export const vaultHostURL = process.env.VAULT_HOST_URL;
+export const vaultHostURL = `${process.env.VAULT_HOST_URL}:${process.env.VAULT_HOST_PORT}`;
 
 export const vaultPassword = process.env.VAULT_PASSWORD || "";
 
@@ -30,4 +32,4 @@ Some websites "prequalify" an entered email to see if they have an associated ac
 If they don't, they may disallow password entry or force account create workflow, so it is
 important that `testUserEmail` is a real address with organizational control.
 */
-export const testUserEmail = "bwplaywright@gmail.com";
+export const testUserEmail = process.env.PUBLIC_TEST_EMAIL || "";
