@@ -61,11 +61,11 @@ const config: PlaywrightTestConfig = {
   outputDir: "test-results/",
 
   /* Run your local static tests server before starting the tests */
-  webServer: {
-    command: "npm run start:test-site",
-    url: testSiteHost,
-    reuseExistingServer: !process.env.CI,
-  },
+  // webServer: {
+  //   command: "npm run start:test-site",
+  //   url: testSiteHost,
+  //   reuseExistingServer: !process.env.CI,
+  // },
 };
 
 export default config;
