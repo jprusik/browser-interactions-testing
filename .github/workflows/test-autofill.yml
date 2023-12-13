@@ -83,6 +83,19 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: ./
 
+      - name: Add access for test-site repo
+        run:  |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}'
+
+      - name: Setup test site
+        run: npm run setup:test-site
+        working-directory: ./
+
+      - name: Start test site
+        run: npm run start:test-site
+        working-directory: ./
+
       # - name: Install Server Certs
       #   run: |
       #     openssl s_client -servername localhost -connect localhost:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ssl.crt
