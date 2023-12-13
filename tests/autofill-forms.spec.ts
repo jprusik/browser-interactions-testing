@@ -71,6 +71,15 @@ test.describe("Extension autofills forms when triggered", () => {
     });
 
     await test.step("Log in to the extension vault", async () => {
+      const fetchRequestURL = `${vaultHostURL}/api/config`;
+      await fetch(fetchRequestURL)
+        .then(async (r) =>
+          console.log(
+            `server configuration via ${fetchRequestURL}:`,
+            await r.json(),
+          ),
+        )
+        .catch((e) => console.log("fetch errored", e));
       const emailInput = await testPage.getByLabel("Email address");
       await emailInput.waitFor(defaultWaitForOptions);
       await emailInput.fill(vaultEmail);
@@ -92,7 +101,9 @@ test.describe("Extension autofills forms when triggered", () => {
       await loginButton.click();
 
       const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
+      console.log("testPage url before wait:", testPage.url());
       await testPage.waitForURL(extensionURL, defaultGotoOptions);
+      console.log("testPage url after wait:", testPage.url());
       const vaultFilterBox = await testPage
         .locator("app-vault-filter main .box.list")
         .first();

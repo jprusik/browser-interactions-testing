@@ -23,8 +23,6 @@ const PLAYWRIGHT_CIPHERS_FOLDER = "AutofillPlaywrightTestingItems";
 configDotenv();
 
 class VaultSeeder {
-  private readonly apiDebounce = 275;
-
   constructor() {
     this.runSeeder().then(async () => {
       console.log("Seeding complete, locking vault...");
@@ -449,10 +447,6 @@ class VaultSeeder {
     }
 
     return { success: false, message: "Error encountered during fetch" };
-  }
-
-  private sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
