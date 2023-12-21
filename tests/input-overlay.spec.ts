@@ -57,7 +57,7 @@ test.describe("Extension presents page input overlay with options for vault inte
           fullPage: true,
           path: path.join(
             screenshotsOutput,
-            `environment_configured-input_overlay_tests.png`,
+            "environment_configured-input_overlay_tests.png",
           ),
         });
 
@@ -161,7 +161,7 @@ test.describe("Extension presents page input overlay with options for vault inte
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${url}-${inputKey}-overlay.png`,
+              `${url.replace(/[^a-z\d]/gi, "-")}-${inputKey}-overlay.png`,
             ),
           });
 
