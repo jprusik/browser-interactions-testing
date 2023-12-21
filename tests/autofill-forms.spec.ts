@@ -158,7 +158,7 @@ test.describe("Extension autofills forms when triggered", () => {
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${url}-${inputKey}-autofill.png`,
+              `${url.replace(/[^a-z\d]/gi, "-")}-${inputKey}-autofill.png`,
             ),
           });
 

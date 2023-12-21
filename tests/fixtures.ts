@@ -1,6 +1,9 @@
 import path from "path";
 import fs from "fs";
 import { test as base, chromium, type BrowserContext } from "@playwright/test";
+import { configDotenv } from "dotenv";
+
+configDotenv();
 
 const pathToExtension = path.join(
   __dirname,

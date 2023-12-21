@@ -1,0 +1,98 @@
+name: test-autofill
+run-name: Test extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
+on:
+  workflow_dispatch:
+    inputs:
+      CLIENTS_BRANCH:
+        required: true
+        default: 'main'
+        description: "clients branch or commit hash to build extensions with"
+        type: string
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+          node-version: '18'
+
+      - name: Create dotenv file
+        run: |
+          sudo setcap 'cap_net_bind_service=+ep' `which node`
+          touch .env
+          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+        working-directory: ./
+
+      - name: Download extension artifact
+        uses: dawidd6/action-download-artifact@246dbf436b23d7c49e21a7ab8204ca9ecd1fe615 # v2.27.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-browser.yml
+          workflow_conclusion: success
+          branch: ${{ inputs.CLIENTS_BRANCH }}
+          name: ^dist-chrome-(?!MV3-)\w{7}\.zip$
+          name_is_regexp: true
+          repo: bitwarden/clients
+          if_no_artifact_found: fail
+
+      - name: Unzip extension artifact
+        run: |
+          mkdir -p build
+          unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
+        working-directory: ./
+
+      - name: Generate and install certs
+        run: |
+          npm run setup:ssl
+          sudo apt-get install libnss3-tools
+          . .env
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N --empty-password
+          certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
+        working-directory: ./
+
+      - name: Install Bitwarden CLI
+        run: npm install -g @bitwarden/cli@2023.7.0
+        working-directory: ./
+
+      - name: Install project dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+        working-directory: ./
+
+      - name: Build and start the test vault
+        run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
+        working-directory: ./
+
+      - name: Setup the vault test account
+        run: npm run seed:vault:account
+        working-directory: ./
+
+      - name: Setup the vault test account ciphers
+        run: npm run seed:vault:ciphers:ci
+        working-directory: ./
+
+      - name: Setup test site
+        run: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}'
+          npm run setup:test-site
+        working-directory: ./
+
+      - name: Run autofill tests
+        run: npm run test:static:autofill:headless
+        working-directory: ./
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        if: always()
+        with:
+          name: test-summary
+          path: |
+            ./test-summary
+            ./tests-out/videos
+            ./tests-out/screenshots

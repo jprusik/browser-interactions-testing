@@ -60,7 +60,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
           fullPage: true,
           path: path.join(
             screenshotsOutput,
-            `environment_configured-notification_bar_tests.png`,
+            "environment_configured-notification_bar_tests.png",
           ),
         });
 
@@ -151,7 +151,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${url}-${inputKey}-notification.png`,
+              `${url.replace(/[^a-z\d]/gi, "-")}-${inputKey}-notification.png`,
             ),
           });
 
