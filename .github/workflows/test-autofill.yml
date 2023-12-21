@@ -8,6 +8,11 @@ on:
         default: 'main'
         description: "clients branch or commit hash to build extensions with"
         type: string
+      FEATURE_FLAGS:
+        required: true
+        default: '{"autofill-v2": true, "autofill-overlay": false}'
+        description: 'JSON key-value pairs representing feature flag states. (e.g. {"autofill-v2": true, "autofill-overlay": false})'
+        type: string
 jobs:
   build-and-test:
     runs-on: ubuntu-22.04
@@ -24,6 +29,11 @@ jobs:
           sudo setcap 'cap_net_bind_service=+ep' `which node`
           touch .env
           echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+        working-directory: ./
+
+      - name: Create feature flags file
+        run: |
+          echo '{"flagValues": ${{ inputs.FEATURE_FLAGS }}}' > flags.json
         working-directory: ./
 
       - name: Download extension artifact
