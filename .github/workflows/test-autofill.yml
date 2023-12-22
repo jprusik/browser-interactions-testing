@@ -6,7 +6,7 @@ on:
       CLIENTS_BRANCH:
         required: true
         default: 'main'
-        description: "clients branch or commit hash to build extensions with"
+        description: "clients branch or commit hash of extensions build to use"
         type: string
       FEATURE_FLAGS:
         required: true
@@ -65,7 +65,7 @@ jobs:
         working-directory: ./
 
       - name: Install Bitwarden CLI
-        run: npm install -g @bitwarden/cli@2023.7.0
+        run: npm install -g @bitwarden/cli@2023.12.1
         working-directory: ./
 
       - name: Install project dependencies
