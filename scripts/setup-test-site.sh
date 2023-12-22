@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-git clone git@github.com:bitwarden/test-the-web.git test-site
+git clone git@github.com:jprusik/test-the-web.git test-site
 
 # Mac OSX
 if [[ "$OSTYPE" == "darwin"* ]]; then
