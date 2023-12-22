@@ -47,7 +47,8 @@ The aim of this project is to track and anticipate the compatibility of the Bitw
 
 > Note: Docker is required for quick start
 
-- From the project root, run `cp .env.example .env` and update the `.env` values.
+- Install the requirements listed above
+- From the project root, run `cp .env.example .env` and update the `.env` values per the commented notes in the file.
 - If NVM is installed, run `nvm install`.
 - Next run `npm run setup:all`, entering your system password when prompted.
 - Run static tests with `npm run test:static`.
@@ -64,7 +65,7 @@ The aim of this project is to track and anticipate the compatibility of the Bitw
 - Build the extension to test against with `npm run build:extension` or build the production version of the extension with `npm run build:extension:prod`.
 - For the targeted environment, configure the vault with the credentials you put in `.env`
 - (Only once) Generate SSL certificates with `npm run setup:ssl`. These will be used by the web client, Bitwarden CLI, and Docker Compose
-  - You should have two files in the root project folder: `ssl.crt` and `ssl.key`
+  - You should have two files in the root project folder: `ssl.crt` and `ssl.key` (or otherwise named in your `.env`)
 - Add the Certificate Authority to your system's secure store:
 
   **Mac OS**
@@ -131,3 +132,9 @@ If debug mode is not active, `onlyTest` values will be ignored.
 ### Start tests from a specific point
 
 Passing the environment variable `START_FROM_TEST_URL` with the url of the test you wish to start with can help avoid re-running "known good" tests, when using `onlyTest` is impractical (e.g. `START_FROM_TEST_URL=https://www.pinterest.com/login/ npm run test:all:debug`)
+
+## CI / CD
+
+In order to leverage the provided Github Actions testing workflows, you'll need to create an actions secret named `ENV_FILE` in your project repo settings at `https://github.com/<your fork owner>/test-autofill/settings/secrets/actions`. The value of that secret should be the contents of your `.env` in Base64 format.
+
+Additionally, in order to use the provided test site, you will also need to add an actions secret named `DEPLOY_SSH_PRIVATE_KEY`. The value of this secret should be the private key of a [public/private key pair](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key). The public key should be registered as a read-only [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys), by the test site project owner or fork owner.
