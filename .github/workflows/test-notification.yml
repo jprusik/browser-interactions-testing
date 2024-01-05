@@ -1,5 +1,5 @@
-name: test-autofill
-run-name: Autofill tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
+name: test-notification
+run-name: Notification tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
@@ -84,7 +84,7 @@ jobs:
           npm run setup:test-site
 
       - name: Run autofill tests
-        run: npm run test:static:autofill:headless
+        run: npm run test:static:notification:headless
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0

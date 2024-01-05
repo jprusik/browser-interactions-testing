@@ -1,5 +1,5 @@
-name: test-autofill
-run-name: Autofill tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
+name: test-overlay
+run-name: Overlay tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +10,7 @@ on:
         type: string
       FEATURE_FLAGS:
         required: true
-        default: '{"autofill-v2": true, "autofill-overlay": false}'
+        default: '{"autofill-v2": true, "autofill-overlay": true}'
         description: 'JSON key-value pairs representing feature flag states. (e.g. {"autofill-v2": true, "autofill-overlay": false})'
         type: string
 jobs:
@@ -84,7 +84,7 @@ jobs:
           npm run setup:test-site
 
       - name: Run autofill tests
-        run: npm run test:static:autofill:headless
+        run: npm run test:static:overlay:headless
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
