@@ -29,12 +29,10 @@ jobs:
           sudo setcap 'cap_net_bind_service=+ep' `which node`
           touch .env
           echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
-        working-directory: ./
 
       - name: Create feature flags file
         run: |
           echo '{"flagValues": ${{ inputs.FEATURE_FLAGS }}}' > flags.json
-        working-directory: ./
 
       - name: Download extension artifact
         uses: dawidd6/action-download-artifact@e7466d1a7587ed14867642c2ca74b5bcc1e19a2d # v3.0.0
@@ -52,7 +50,6 @@ jobs:
         run: |
           mkdir -p build
           unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
-        working-directory: ./
 
       - name: Generate and install certs
         run: |
@@ -62,40 +59,32 @@ jobs:
           mkdir -p $HOME/.pki/nssdb
           certutil -d $HOME/.pki/nssdb -N --empty-password
           certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
-        working-directory: ./
 
       - name: Install Bitwarden CLI
         run: npm install -g @bitwarden/cli@2023.12.1
-        working-directory: ./
 
       - name: Install project dependencies
         run: |
           npm ci
           npx playwright install --with-deps chromium
-        working-directory: ./
 
       - name: Build and start the test vault
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
-        working-directory: ./
 
       - name: Setup the vault test account
         run: npm run seed:vault:account
-        working-directory: ./
 
       - name: Setup the vault test account ciphers
         run: npm run seed:vault:ciphers:ci
-        working-directory: ./
 
       - name: Setup test site
         run: |
           eval `ssh-agent -s`
           ssh-add - <<< '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}'
           npm run setup:test-site
-        working-directory: ./
 
       - name: Run autofill tests
         run: npm run test:static:autofill:headless
-        working-directory: ./
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0

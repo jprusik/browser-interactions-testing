@@ -1,3 +1,4 @@
+import { Page } from "@playwright/test";
 import {
   AutofillPageTest,
   NotificationPageTest,
@@ -56,7 +57,7 @@ export function getPagesToTest(
   return filteredPageTests;
 }
 
-export async function doAutofill(backgroundPage) {
+export async function doAutofill(backgroundPage: Page) {
   await backgroundPage.evaluate(() =>
     chrome.tabs.query(
       { active: true },
@@ -69,4 +70,8 @@ export async function doAutofill(backgroundPage) {
         }),
     ),
   );
+}
+
+export function formatUrlToFilename(urlString: string) {
+  return urlString.replace(/[^a-z\d]/gi, "-");
 }
