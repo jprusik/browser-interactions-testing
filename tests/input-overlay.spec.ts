@@ -12,7 +12,7 @@ import {
 } from "./constants";
 import { test, expect } from "./fixtures";
 import { FillProperties } from "../abstractions";
-import { getPagesToTest } from "./utils";
+import { getPagesToTest, formatUrlToFilename } from "./utils";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -161,7 +161,7 @@ test.describe("Extension presents page input overlay with options for vault inte
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${url.replace(/[^a-z\d]/gi, "-")}-${inputKey}-overlay.png`,
+              `${formatUrlToFilename(url)}-${inputKey}-overlay.png`,
             ),
           });
 

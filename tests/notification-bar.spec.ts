@@ -12,7 +12,7 @@ import {
 } from "./constants";
 import { test, expect } from "./fixtures";
 import { FillProperties } from "../abstractions";
-import { getNotificationPagesToTest } from "./utils";
+import { getNotificationPagesToTest, formatUrlToFilename } from "./utils";
 
 export const screenshotsOutput = path.join(__dirname, "../screenshots");
 
@@ -151,7 +151,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${url.replace(/[^a-z\d]/gi, "-")}-${inputKey}-notification.png`,
+              `${formatUrlToFilename(url)}-${inputKey}-notification.png`,
             ),
           });
 
