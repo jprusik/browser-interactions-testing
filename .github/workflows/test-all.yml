@@ -1,6 +1,8 @@
 name: Test-all
 run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
+  repository_dispatch:
+    types: [trigger-workflow]
   push:
     branches:
       - "main"
@@ -16,6 +18,7 @@ on:
         description: "URL to an endpoint returning a vault configuration (will default to US prod configuration)"
         required: false
         type: string
+
 jobs:
   build-and-test:
     name: Build and test
@@ -65,7 +68,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build-browser.yml
           workflow_conclusion: ""
-          branch: ${{ inputs.CLIENTS_BRANCH || 'main' }}
+          branch: ${{ github.event.client_payload.branch || inputs.CLIENTS_BRANCH || 'main' }}
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
           repo: bitwarden/clients
