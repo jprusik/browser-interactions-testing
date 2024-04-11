@@ -6,6 +6,11 @@ import {
 import { testSiteHost } from "./server";
 import { testUserName, testEmail } from "./settings";
 
+export const TestNames = {
+  PasswordUpdate: "passwordUpdate",
+  NewCredentials: "newCredentials",
+};
+
 export const testPages: NotificationPageTest[] = [
   /**
    * Local webpages
@@ -17,6 +22,18 @@ export const testPages: NotificationPageTest[] = [
     inputs: {
       username: { selector: "#username", value: testUserName },
       password: { selector: "#password", value: "fakeBasicFormPassword" },
+    },
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${testSiteHost}/forms/login/input-constraints-login`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      username: { selector: "#email", value: testEmail },
+      password: {
+        selector: "#password",
+        value: "123456",
+      },
     },
   },
   {
@@ -35,6 +52,14 @@ export const testPages: NotificationPageTest[] = [
         value: "fakeIframeBasicFormPassword",
       },
     },
+    actions: {
+      submit: async (page) =>
+        await page
+          .frameLocator("#test-iframe")
+          .getByRole("button", { name: "Login", exact: true })
+          .click(),
+    },
+    skipTests: [TestNames.PasswordUpdate],
   },
   {
     cipherType: CipherType.Login,
@@ -52,39 +77,15 @@ export const testPages: NotificationPageTest[] = [
         value: "fakeSandboxedIframeBasicFormPassword",
       },
     },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/input-constraints-login`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: { selector: "#email", value: testEmail },
-      password: {
-        selector: "#password",
-        value: "123456",
-      },
+    actions: {
+      submit: async (page) =>
+        await page
+          .frameLocator("#test-iframe")
+          .getByRole("button", { name: "Login", exact: true })
+          .click(),
     },
+    skipTests: [TestNames.PasswordUpdate],
   },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/search/simple-search`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: {
-        selector: "#search",
-        value: testUserName,
-      },
-      password: {
-        selector: "#search",
-        value: "fakeSearchPassword",
-      },
-    },
-    shouldNotTriggerNotification: true,
-  },
-];
-
-// Known failure cases; expected to fail
-export const knownFailureCases: NotificationPageTest[] = [
   {
     cipherType: CipherType.Login,
     url: `${testSiteHost}/forms/login/multi-step-login`,
@@ -102,6 +103,7 @@ export const knownFailureCases: NotificationPageTest[] = [
       },
       password: { selector: "#password", value: "fakeMultiStepPassword" },
     },
+    skipTests: [TestNames.NewCredentials, TestNames.PasswordUpdate],
   },
   {
     cipherType: CipherType.Login,
@@ -115,6 +117,7 @@ export const knownFailureCases: NotificationPageTest[] = [
       submit: async (page) =>
         await page.getByRole("button", { name: "Login", exact: true }).click(),
     },
+    skipTests: [TestNames.NewCredentials, TestNames.PasswordUpdate],
   },
   {
     cipherType: CipherType.Login,
@@ -134,5 +137,22 @@ export const knownFailureCases: NotificationPageTest[] = [
       submit: async (page) =>
         await page.getByRole("button", { name: "Login", exact: true }).click(),
     },
+    skipTests: [TestNames.NewCredentials, TestNames.PasswordUpdate],
+  },
+  {
+    cipherType: CipherType.Login,
+    url: `${testSiteHost}/forms/search/simple-search`,
+    uriMatchType: UriMatchType.StartsWith,
+    inputs: {
+      username: {
+        selector: "#search",
+        value: testUserName,
+      },
+      password: {
+        selector: "#search",
+        value: "fakeSearchPassword",
+      },
+    },
+    shouldNotTriggerNotification: true,
   },
 ];
