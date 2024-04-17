@@ -1,21 +1,11 @@
-enum CipherType {
-  Login = 1,
-  SecureNote = 2,
-  Card = 3,
-  Identity = 4,
-}
+import { CipherType, UriMatchType } from "../constants";
 
-enum UriMatchType {
-  Domain = 0,
-  Host = 1,
-  StartsWith = 2,
-  Exact = 3,
-  RegularExpression = 4,
-  Never = 5,
-}
+type CipherTypeAbstraction = (typeof CipherType)[keyof typeof CipherType];
+
+type UriMatchTypeAbstraction = (typeof UriMatchType)[keyof typeof UriMatchType];
 
 type LoginUriTemplate = {
-  match: UriMatchType;
+  match: UriMatchTypeAbstraction;
   uri: string;
 };
 
@@ -56,12 +46,6 @@ type IdentityItemTemplate = {
   licenseNumber: string;
 };
 
-type FieldTemplate = {
-  name: string;
-  value: string;
-  type: number;
-};
-
 type FolderTemplate = {
   name: string;
 };
@@ -74,7 +58,7 @@ type ItemTemplate = {
   name: string;
   notes: string;
   favorite: boolean;
-  fields: FieldTemplate[];
+  fields?: PageCipherField[];
   login: LoginItemTemplate | null;
   secureNote: null;
   card: CardItemTemplate | null;
@@ -91,16 +75,70 @@ type FolderItem = {
   id: string;
 } & FolderTemplate;
 
+type PageCipher = {
+  cipherType: CipherTypeAbstraction;
+  url: string;
+  uriMatchType?: UriMatchTypeAbstraction;
+  totpSecret?: string;
+  fields?: LoginFields & CardFields & IdentityFields;
+  additionalLoginUrls?: string[];
+};
+
+type LoginFields = {
+  username?: PageCipherField;
+  password?: PageCipherField;
+  totp?: PageCipherField;
+};
+
+type CardFields = {
+  cardholderName?: PageCipherField;
+  brand?: PageCipherField;
+  number?: PageCipherField;
+  expMonth?: PageCipherField;
+  expYear?: PageCipherField;
+  code?: PageCipherField;
+};
+
+type IdentityFields = {
+  title?: PageCipherField;
+  firstName?: PageCipherField;
+  middleName?: PageCipherField;
+  lastName?: PageCipherField;
+  address1?: PageCipherField;
+  address2?: PageCipherField;
+  address3?: PageCipherField;
+  city?: PageCipherField;
+  state?: PageCipherField;
+  postalCode?: PageCipherField;
+  country?: PageCipherField;
+  company?: PageCipherField;
+  email?: PageCipherField;
+  phone?: PageCipherField;
+  ssn?: PageCipherField;
+  passportNumber?: PageCipherField;
+  licenseNumber?: PageCipherField;
+};
+
+type PageCipherField = {
+  /**
+   * field selector name, not the field name in the vault
+   */
+  name?: string;
+  value: string;
+  type?: number;
+};
+
 export {
-  CipherType,
-  UriMatchType,
-  LoginUriTemplate,
-  LoginItemTemplate,
   CardItemTemplate,
-  IdentityItemTemplate,
-  FieldTemplate,
-  FolderTemplate,
-  ItemTemplate,
-  VaultItem,
+  CipherTypeAbstraction,
   FolderItem,
+  FolderTemplate,
+  IdentityItemTemplate,
+  ItemTemplate,
+  LoginItemTemplate,
+  LoginUriTemplate,
+  PageCipher,
+  PageCipherField,
+  UriMatchTypeAbstraction,
+  VaultItem,
 };

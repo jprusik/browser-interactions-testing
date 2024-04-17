@@ -1,107 +1,26 @@
-import { Page } from "@playwright/test";
 import path from "path";
 import {
-  debugIsActive,
   defaultGotoOptions,
+  defaultNavigationTimeout,
+  defaultTestTimeout,
   defaultWaitForOptions,
-  notificationPages,
-  testSiteHost,
-  vaultEmail,
-  vaultHostURL,
-  vaultPassword,
-  NotificationTestNames,
-} from "./constants";
+  screenshotsOutput,
+  TestNames,
+} from "../constants";
 import { test, expect } from "./fixtures";
 import { FillProperties } from "../abstractions";
-import { getNotificationPagesToTest, formatUrlToFilename } from "./utils";
-
-export const screenshotsOutput = path.join(__dirname, "../screenshots");
-
-let testPage: Page;
+import { getPagesToTest, formatUrlToFilename } from "./utils";
 
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
-  test("Log in to the vault, open pages, and autofill forms", async ({
+  test("Log in to the vault, open pages, and run page tests", async ({
     context,
     extensionId,
+    extensionSetup,
   }) => {
-    const [backgroundPage] = context.backgroundPages();
+    test.setTimeout(defaultTestTimeout);
 
-    await test.step("Close the extension welcome page when it pops up", async () => {
-      // Wait for the extension to open the welcome page before continuing
-      await context.waitForEvent("page");
-
-      let contextPages = await context.pages();
-      expect(contextPages.length).toBe(2);
-
-      const welcomePage = contextPages[1];
-      if (welcomePage) {
-        await welcomePage.close();
-      }
-
-      testPage = contextPages[0];
-
-      if (debugIsActive) {
-        console.log(
-          (await testPage.evaluate(() => navigator.userAgent)) + "\n",
-        );
-      }
-    });
-
-    await test.step("Configure the environment", async () => {
-      // @TODO check for and fill other settings
-      if (vaultHostURL) {
-        const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`;
-        await testPage.goto(extensionURL, defaultGotoOptions);
-        const baseUrlInput = await testPage.locator("input#baseUrl");
-        await baseUrlInput.waitFor(defaultWaitForOptions);
-
-        await testPage.fill("input#baseUrl", vaultHostURL);
-
-        await testPage.screenshot({
-          fullPage: true,
-          path: path.join(
-            screenshotsOutput,
-            "environment_configured-notification_bar_tests.png",
-          ),
-        });
-
-        const serverConfigContent = await testPage.locator("#baseUrlHelp");
-        await testPage.click("button[type='submit']");
-        await serverConfigContent.waitFor({
-          ...defaultWaitForOptions,
-          state: "detached",
-        });
-      }
-    });
-
-    await test.step("Log in to the extension vault", async () => {
-      const emailInput = await testPage.getByLabel("Email address");
-      await emailInput.waitFor(defaultWaitForOptions);
-      await emailInput.fill(vaultEmail);
-      const emailSubmitInput = await testPage.getByRole("button", {
-        name: "Continue",
-      });
-      await emailSubmitInput.click();
-
-      const masterPasswordInput = await testPage.locator(
-        "input#masterPassword",
-      );
-      await masterPasswordInput.waitFor(defaultWaitForOptions);
-      await masterPasswordInput.fill(vaultPassword);
-
-      const loginButton = await testPage.getByRole("button", {
-        name: "Log in with master password",
-      });
-      await loginButton.waitFor(defaultWaitForOptions);
-      await loginButton.click();
-
-      const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
-      await testPage.waitForURL(extensionURL, defaultGotoOptions);
-      const vaultFilterBox = await testPage
-        .locator("app-vault-filter main .box.list")
-        .first();
-      await vaultFilterBox.waitFor(defaultWaitForOptions);
-    });
+    let testPage = await extensionSetup;
+    testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
     // Needed to allow the background reload further down
     await test.step("Set vault to never timeout", async () => {
@@ -113,26 +32,15 @@ test.describe("Extension triggers a notification bar when a page form is submitt
       await testPage.getByRole("button", { name: "Yes" }).click();
     });
 
-    const pagesToTest = getNotificationPagesToTest(notificationPages);
-
-    test.setTimeout(480000);
-    testPage.setDefaultNavigationTimeout(60000);
+    const [backgroundPage] = context.backgroundPages();
+    const pagesToTest = getPagesToTest();
 
     for (const page of pagesToTest) {
       const { url, inputs, actions, shouldNotTriggerNotification, skipTests } =
         page;
-      const isLocalPage = url.startsWith(testSiteHost);
-
-      if (!isLocalPage) {
-        console.log(
-          "notification bar tests cannot be run against public sites",
-        );
-
-        return;
-      }
 
       await test.step(`fill the form with non-stored credentials at ${url}`, async () => {
-        if (skipTests?.includes(NotificationTestNames.NewCredentials)) {
+        if (skipTests?.includes(TestNames.NewCredentialsNotification)) {
           console.log(`Skipping known failure for ${url}`);
 
           return;
@@ -238,7 +146,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
       });
 
       await test.step(`fill the form with a stored username/email and a non-stored password at ${url}`, async () => {
-        if (skipTests?.includes(NotificationTestNames.PasswordUpdate)) {
+        if (skipTests?.includes(TestNames.PasswordUpdateNotification)) {
           console.log(`Skipping known failure for ${url}`);
 
           return;

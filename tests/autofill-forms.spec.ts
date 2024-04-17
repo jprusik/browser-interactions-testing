@@ -1,117 +1,40 @@
-import { Page } from "@playwright/test";
 import path from "path";
 import {
-  autofillTestPages,
   debugIsActive,
   defaultGotoOptions,
+  defaultNavigationTimeout,
+  defaultTestTimeout,
   defaultWaitForOptions,
-  testSiteHost,
-  vaultEmail,
-  vaultHostURL,
-  vaultPassword,
-} from "./constants";
+  screenshotsOutput,
+  TestNames,
+} from "../constants";
 import { test, expect } from "./fixtures";
 import { FillProperties } from "../abstractions";
 import { getPagesToTest, doAutofill, formatUrlToFilename } from "./utils";
 
-export const screenshotsOutput = path.join(__dirname, "../screenshots");
-
-let testPage: Page;
-
 test.describe("Extension autofills forms when triggered", () => {
-  test("Log in to the vault, open pages, and autofill forms", async ({
+  test("Log in to the vault, open pages, and run page tests", async ({
     context,
-    extensionId,
+    extensionSetup,
   }) => {
+    test.setTimeout(defaultTestTimeout);
+
+    let testPage = await extensionSetup;
+    testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
+
     const [backgroundPage] = context.backgroundPages();
-
-    await test.step("Close the extension welcome page when it pops up", async () => {
-      // Wait for the extension to open the welcome page before continuing
-      await context.waitForEvent("page");
-
-      let contextPages = await context.pages();
-      expect(contextPages.length).toBe(2);
-
-      const welcomePage = contextPages[1];
-      if (welcomePage) {
-        await welcomePage.close();
-      }
-
-      testPage = contextPages[0];
-
-      if (debugIsActive) {
-        console.log(
-          (await testPage.evaluate(() => navigator.userAgent)) + "\n",
-        );
-      }
-    });
-
-    await test.step("Configure the environment", async () => {
-      // @TODO check for and fill other settings
-      if (vaultHostURL) {
-        const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/environment`;
-        await testPage.goto(extensionURL, defaultGotoOptions);
-        const baseUrlInput = await testPage.locator("input#baseUrl");
-        await baseUrlInput.waitFor(defaultWaitForOptions);
-
-        await testPage.fill("input#baseUrl", vaultHostURL);
-
-        await testPage.screenshot({
-          fullPage: true,
-          path: path.join(
-            screenshotsOutput,
-            "environment_configured-autofill_tests.png",
-          ),
-        });
-
-        const serverConfigContent = await testPage.locator("#baseUrlHelp");
-        await testPage.click("button[type='submit']");
-        await serverConfigContent.waitFor({
-          ...defaultWaitForOptions,
-          state: "detached",
-        });
-      }
-    });
-
-    await test.step("Log in to the extension vault", async () => {
-      const emailInput = await testPage.getByLabel("Email address");
-      await emailInput.waitFor(defaultWaitForOptions);
-      await emailInput.fill(vaultEmail);
-      const emailSubmitInput = await testPage.getByRole("button", {
-        name: "Continue",
-      });
-      await emailSubmitInput.click();
-
-      const masterPasswordInput = await testPage.locator(
-        "input#masterPassword",
-      );
-      await masterPasswordInput.waitFor(defaultWaitForOptions);
-      await masterPasswordInput.fill(vaultPassword);
-
-      const loginButton = await testPage.getByRole("button", {
-        name: "Log in with master password",
-      });
-      await loginButton.waitFor(defaultWaitForOptions);
-      await loginButton.click();
-
-      const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
-      await testPage.waitForURL(extensionURL, defaultGotoOptions);
-      const vaultFilterBox = await testPage
-        .locator("app-vault-filter main .box.list")
-        .first();
-      await vaultFilterBox.waitFor(defaultWaitForOptions);
-    });
-
-    const pagesToTest = getPagesToTest(autofillTestPages);
-
-    test.setTimeout(480000);
-    testPage.setDefaultNavigationTimeout(60000);
+    const pagesToTest = getPagesToTest();
 
     for (const page of pagesToTest) {
-      const { url, inputs } = page;
-      const isLocalPage = url.startsWith(testSiteHost);
+      const { url, inputs, skipTests } = page;
 
       await test.step(`Autofill the form at ${url}`, async () => {
+        if (skipTests?.includes(TestNames.MessageAutofill)) {
+          console.log(`Skipping known failure for ${url}`);
+
+          return;
+        }
+
         await testPage.goto(url, defaultGotoOptions);
 
         const inputKeys = Object.keys(inputs);
@@ -150,12 +73,7 @@ test.describe("Extension autofills forms when triggered", () => {
             ? ""
             : currentInput.value;
 
-          // Do not soft expect on local test pages; we want to stop the tests before hitting live pages
-          if (isLocalPage) {
-            await expect(currentInputElement).toHaveValue(expectedValue);
-          } else {
-            await expect.soft(currentInputElement).toHaveValue(expectedValue);
-          }
+          await expect(currentInputElement).toHaveValue(expectedValue);
 
           await testPage.screenshot({
             fullPage: true,
@@ -201,21 +119,18 @@ test.describe("Extension autofills forms when triggered", () => {
         }
       });
 
-      // Skip form submission check for public sites
-      if (isLocalPage) {
-        await test.step(`Notification should not appear when submitting the form at ${url}`, async () => {
-          // Submit
-          await testPage.keyboard.press("Enter");
+      await test.step(`Notification should not appear when submitting the form at ${url}`, async () => {
+        // Submit
+        await testPage.keyboard.press("Enter");
 
-          // Target notification close button since it's present on all notification bar cases
-          const notificationBarCloseButtonLocator = testPage
-            .frameLocator("#bit-notification-bar-iframe")
-            .getByRole("button", { name: "Close" })
-            .first();
+        // Target notification close button since it's present on all notification bar cases
+        const notificationBarCloseButtonLocator = testPage
+          .frameLocator("#bit-notification-bar-iframe")
+          .getByRole("button", { name: "Close" })
+          .first();
 
-          await expect(notificationBarCloseButtonLocator).not.toBeVisible();
-        });
-      }
+        await expect(notificationBarCloseButtonLocator).not.toBeVisible();
+      });
     }
 
     // Hold the window open (don't automatically close out) when debugging

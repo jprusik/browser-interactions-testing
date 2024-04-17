@@ -1,182 +1,15 @@
-import { AutofillPageTest, CipherType, UriMatchType } from "../../abstractions";
-import { testSiteHost } from "./server";
-import { testUserName, testEmail, testUserEmail } from "./settings";
+import { testUserEmail, testUserName } from "../settings";
+import { TestNames } from "../test-pages";
+import { PageTest } from "../../abstractions";
 
-export const testPages: AutofillPageTest[] = [
-  /**
-   * Local webpages
-   */
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/simple`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: { selector: "#username", value: testUserName },
-      password: { selector: "#password", value: "fakeBasicFormPassword" },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/iframe-login`,
-    additionalLoginUrls: [`${testSiteHost}/login-page-bare`],
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: {
-        preFillActions: async (page) => {
-          // Accept the iframe fill prompt
-          await page.on("dialog", (dialog) => dialog.accept());
-        },
-        selector: async (page) =>
-          await page.frameLocator("#test-iframe").locator("#username"),
-        value: testUserName,
-      },
-      password: {
-        selector: async (page) =>
-          await page.frameLocator("#test-iframe").locator("#password"),
-        value: "fakeIframeBasicFormPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/iframe-sandboxed-login`,
-    additionalLoginUrls: [`${testSiteHost}/login-page-bare`],
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: {
-        preFillActions: async (page) => {
-          // Accept the iframe fill prompt
-          await page.on("dialog", (dialog) => dialog.accept());
-        },
-        shouldNotFill: true,
-        selector: async (page) =>
-          await page.frameLocator("#test-iframe").locator("#username"),
-        value: testUserName,
-      },
-      password: {
-        shouldNotFill: true,
-        selector: async (page) =>
-          await page.frameLocator("#test-iframe").locator("#password"),
-        value: "fakeSandboxedIframeBasicFormPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/multi-step-login`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: {
-        multiStepNextInputKey: "email",
-        selector: "#username",
-        value: testUserName,
-      },
-      email: {
-        multiStepNextInputKey: "password",
-        selector: "#email",
-        value: testEmail,
-      },
-      password: { selector: "#password", value: "fakeMultiStepPassword" },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/bare-inputs-login`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: { selector: "#username", value: testUserName },
-      password: { selector: "#password", value: "fakeBareInputsPassword" },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/input-constraints-login`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: { selector: "#email", value: testEmail },
-      password: {
-        selector: "#password",
-        value: "fakeInputConstraintsPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/shadow-root-inputs`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: {
-        selector: async (page) => await page.getByLabel("Username"),
-        value: testUserName,
-      },
-      password: {
-        selector: async (page) => await page.getByLabel("Password"),
-        value: "fakeShadowRootInputsPassword",
-      },
-    },
-  },
-  {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/search/simple-search`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: {
-        shouldNotFill: true,
-        selector: "#search",
-        value: testUserName,
-      },
-      password: {
-        shouldNotFill: true,
-        selector: "#search",
-        value: "fakeSearchPassword",
-      },
-    },
-  },
-
-  // Card and Identity Ciphers currently cannot be autofilled through the same mechanism that Login Ciphers are. This is because of how we handle messaging the background for autofilling login items. The extension will need to be updated to handle these types of Ciphers.
-  {
-    cipherType: CipherType.Card,
-    url: `${testSiteHost}/forms/payment/card-payment`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      cardholderName: { selector: "#card-name", value: "John Smith" },
-      // @TODO handle cases where there is no input for card brand/type
-      brand: { selector: "#card-number", value: "Visa" },
-      number: { selector: "#card-number", value: "4111111111111111" },
-      // @TODO handle inputs that enforce different and/or concatenated date formats
-      expMonth: { selector: "#card-expiration", value: "12" },
-      expYear: { selector: "#card-expiration", value: "2025" },
-      code: { selector: "#card-cvv", value: "123" },
-    },
-  },
-  {
-    cipherType: CipherType.Identity,
-    url: `${testSiteHost}/forms/identity/address-na`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      // @TODO handle cases where there is a single name input (e.g. "full name")
-      firstName: { selector: "#full-name", value: "John" },
-      middleName: { selector: "#full-name", value: "M" },
-      lastName: { selector: "#full-name", value: "Smith" },
-      address1: { selector: "#address", value: "123 Main St" },
-      address2: { selector: "#address-ext", value: "Apt 1" },
-      city: { selector: "#city", value: "New York" },
-      state: { selector: "#state", value: "NY" },
-      postalCode: { selector: "#postcode", value: "10001" },
-      country: { selector: "#country", value: "USA" },
-    },
-  },
-
-  /**
-   * Live websites
-   */
+// Live website test pages and instructions for interactions
+// Inclusion is roughly based on public traffic statistics as well as known popular user cases
+// Tests and notes here should be considered experimental and non-authoritative
+export const testPages: PageTest[] = [
   // @TODO In non-debug mode, LinkedIn is often hanging on page load
   // LinkedIn periodically redirects to https://www.linkedin.com/authwall...
   {
-    cipherType: CipherType.Login,
     url: "https://www.linkedin.com/",
-    additionalLoginUrls: ["https://www.linkedin.com/?original_referer="],
-    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector: "#session_key",
@@ -189,9 +22,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.linkedin.com/login",
-    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector: "#username",
@@ -206,7 +37,6 @@ export const testPages: AutofillPageTest[] = [
   // Samsung has aggressive automation-blocking, captcha step after email entry
   // Samsung also will periodically not load the login page
   {
-    cipherType: CipherType.Login,
     url: "https://account.samsung.com/membership/auth/sign-in",
     inputs: {
       username: {
@@ -218,7 +48,6 @@ export const testPages: AutofillPageTest[] = [
   },
   // Zillow has a bot/detection "press & hold" test that pariodically triggers
   {
-    cipherType: CipherType.Login,
     url: "https://www.zillow.com",
     inputs: {
       username: {
@@ -240,10 +69,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://beta.character.ai/",
-    additionalLoginUrls: ["https://character-ai.us.auth0.com"],
-    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         preFillActions: async (page) => {
@@ -290,7 +116,6 @@ export const testPages: AutofillPageTest[] = [
   },
   // Indeed is sometimes requiring captchas to make it to the first (email) and/or second (password) screen
   {
-    cipherType: CipherType.Login,
     url: "https://secure.indeed.com/auth",
     inputs: {
       username: {
@@ -309,7 +134,6 @@ export const testPages: AutofillPageTest[] = [
   // Home Depot's login requires an intermediate step of selecting a login with password option after entering an email
   // Additionally, the email login sometimes fails on the first step (presumably due to automation detection)
   {
-    cipherType: CipherType.Login,
     url: "https://www.homedepot.com/auth/view/signin",
     inputs: {
       username: {
@@ -332,7 +156,6 @@ export const testPages: AutofillPageTest[] = [
   // dailymail sometimes stalls waiting for the page load event
   // Note: dailymail also fires a notification permissions request. If you accept, it automatically downloads an executable called `MailOnlineSetup.exe`.
   {
-    cipherType: CipherType.Login,
     url: "https://www.dailymail.co.uk/registration/login.html",
     inputs: {
       username: {
@@ -346,7 +169,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://accounts.google.com",
     inputs: {
       username: {
@@ -361,7 +183,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.facebook.com",
     inputs: {
       username: {
@@ -375,7 +196,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.reddit.com/login",
     inputs: {
       username: {
@@ -390,7 +210,6 @@ export const testPages: AutofillPageTest[] = [
   },
   // Amazon sometimes adds an intermediate captcha step, skip testing password fill
   {
-    cipherType: CipherType.Login,
     url: "https://www.amazon.com/gp/sign-in.html",
     inputs: {
       username: {
@@ -406,7 +225,6 @@ export const testPages: AutofillPageTest[] = [
   },
   // When Twitter sees "unusual login activity", it requests the username or phone number in an intermediate step
   {
-    cipherType: CipherType.Login,
     url: "https://twitter.com/login?lang=en",
     inputs: {
       username: {
@@ -421,7 +239,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://login.yahoo.com",
     inputs: {
       username: {
@@ -436,7 +253,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page",
     inputs: {
       username: {
@@ -450,7 +266,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.instagram.com/accounts/login",
     inputs: {
       username: {
@@ -464,7 +279,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://auth.fandom.com/signin",
     inputs: {
       username: {
@@ -479,7 +293,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://weather.com/login",
     inputs: {
       username: {
@@ -493,7 +306,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://login.live.com",
     inputs: {
       username: {
@@ -509,7 +321,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://login.microsoftonline.com",
     inputs: {
       username: {
@@ -525,7 +336,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.tiktok.com",
     inputs: {
       username: {
@@ -551,7 +361,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.tiktok.com/login/phone-or-email/email",
     inputs: {
       username: {
@@ -565,7 +374,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://authentication.taboola.com",
     inputs: {
       username: {
@@ -579,7 +387,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.cnn.com/account/log-in",
     inputs: {
       username: {
@@ -593,7 +400,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://signin.ebay.com/signin",
     inputs: {
       username: {
@@ -608,7 +414,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.twitch.tv",
     inputs: {
       username: {
@@ -626,7 +431,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.walmart.com/account/login",
     inputs: {
       username: {
@@ -641,7 +445,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.quora.com",
     inputs: {
       username: {
@@ -655,7 +458,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://myaccount.nytimes.com/auth/login",
     inputs: {
       username: {
@@ -670,7 +472,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://my.foxnews.com",
     inputs: {
       username: {
@@ -684,7 +485,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://reg.usps.com/entreg/LoginAction_input",
     inputs: {
       username: {
@@ -698,7 +498,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.imdb.com/registration/signin",
     inputs: {
       username: {
@@ -719,7 +518,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.paypal.com/signin",
     inputs: {
       username: {
@@ -734,7 +532,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://zoom.us/signin",
     inputs: {
       username: {
@@ -748,7 +545,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://discord.com/login",
     inputs: {
       username: {
@@ -762,7 +558,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.netflix.com/login",
     inputs: {
       username: {
@@ -776,7 +571,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.etsy.com",
     inputs: {
       username: {
@@ -794,9 +588,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.pinterest.com/",
-    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         preFillActions: async (page) => {
@@ -816,9 +608,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.pinterest.com/login/",
-    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector: "#email",
@@ -831,7 +621,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://github.com/login",
     inputs: {
       username: {
@@ -845,7 +634,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://nypost.com/account/login",
     inputs: {
       username: {
@@ -859,7 +647,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://wwwl.accuweather.com/premium_login.php",
     inputs: {
       username: {
@@ -873,7 +660,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://platform.openai.com/login?launch",
     inputs: {
       username: {
@@ -888,7 +674,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.ups.com/lasso/login",
     inputs: {
       username: {
@@ -905,7 +690,6 @@ export const testPages: AutofillPageTest[] = [
   // Patreon will sometimes send login links to the email
   // Patreon prequalifies the email and starts account creation workflow if it isn't recognized as an existing account
   {
-    cipherType: CipherType.Login,
     url: "https://www.patreon.com/login",
     inputs: {
       username: {
@@ -921,7 +705,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://imgur.com/signin",
     inputs: {
       username: {
@@ -935,7 +718,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://ign.com",
     inputs: {
       username: {
@@ -965,9 +747,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://aws.amazon.com",
-    additionalLoginUrls: ["https://signin.aws.amazon.com"],
     inputs: {
       username: {
         preFillActions: async (page) => {
@@ -986,7 +766,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.roblox.com/login",
     inputs: {
       username: {
@@ -1000,7 +779,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://accounts.spotify.com/en/login",
     inputs: {
       username: {
@@ -1014,7 +792,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.instructure.com/canvas/login/free-for-teacher",
     inputs: {
       username: {
@@ -1028,7 +805,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://badgr.com/auth/login",
     inputs: {
       username: {
@@ -1042,7 +818,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://portfolium.com/login",
     inputs: {
       username: {
@@ -1056,7 +831,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://app.masteryconnect.com/login",
     inputs: {
       username: {
@@ -1070,7 +844,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://identity.us2.kimonocloud.com/login",
     inputs: {
       username: {
@@ -1085,7 +858,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://app.learnplatform.com/users/sign_in",
     inputs: {
       username: {
@@ -1099,7 +871,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.target.com/account",
     inputs: {
       username: {
@@ -1113,7 +884,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://accounts.craigslist.org/login",
     inputs: {
       username: {
@@ -1127,9 +897,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.capitalone.com",
-    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         selector: "input.login-username",
@@ -1142,9 +910,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://verified.capitalone.com/auth/signin",
-    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         selector: "input[aria-describedby='label-username-input']",
@@ -1157,7 +923,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.fedex.com/secure-login",
     inputs: {
       username: {
@@ -1171,7 +936,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.tumblr.com",
     inputs: {
       username: {
@@ -1192,7 +956,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://seguro.marca.com/registro/v3/?view=login",
     inputs: {
       username: {
@@ -1203,7 +966,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.bestbuy.com/identity/global/signin",
     inputs: {
       username: {
@@ -1217,7 +979,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.adobe.com",
     inputs: {
       username: {
@@ -1237,7 +998,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://auth.hulu.com/web/login",
     inputs: {
       username: {
@@ -1251,7 +1011,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://account.bbc.com/signin",
     inputs: {
       username: {
@@ -1265,9 +1024,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://steamcommunity.com/login/home",
-    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector:
@@ -1281,9 +1038,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://store.steampowered.com/login",
-    uriMatchType: UriMatchType.Exact,
     inputs: {
       username: {
         selector:
@@ -1297,7 +1052,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.lowes.com/u/login",
     inputs: {
       username: {
@@ -1311,7 +1065,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://login.xfinity.com/login",
     inputs: {
       username: {
@@ -1323,7 +1076,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.bezzypsa.com/signin/SIGNIN",
     inputs: {
       username: {
@@ -1337,7 +1089,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.yelp.com/login",
     inputs: {
       username: {
@@ -1351,7 +1102,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://wordpress.com/log-in",
     inputs: {
       username: {
@@ -1363,7 +1113,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://nextdoor.com/login",
     inputs: {
       username: {
@@ -1377,7 +1126,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://linktr.ee/login",
     inputs: {
       username: {
@@ -1391,7 +1139,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://quizlet.com",
     inputs: {
       username: {
@@ -1409,7 +1156,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://realtor.com",
     inputs: {
       username: {
@@ -1432,7 +1178,6 @@ export const testPages: AutofillPageTest[] = [
   },
   // Canva prequalifies the email and starts account creation workflow if it isn't recognized as an existing account
   {
-    cipherType: CipherType.Login,
     url: "https://www.canva.com",
     inputs: {
       username: {
@@ -1457,7 +1202,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.att.com/acctmgmt/login",
     inputs: {
       username: {
@@ -1472,10 +1216,7 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://auth0.com/api/auth/login",
-    additionalLoginUrls: ["https://auth0.auth0.com"],
-    uriMatchType: UriMatchType.Host,
     inputs: {
       username: {
         multiStepNextInputKey: "password",
@@ -1489,7 +1230,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.washingtonpost.com/subscribe/signin",
     inputs: {
       username: {
@@ -1502,7 +1242,6 @@ export const testPages: AutofillPageTest[] = [
   },
   // AOL uses a captcha between username entry and password entry
   {
-    cipherType: CipherType.Login,
     url: "https://login.aol.com",
     inputs: {
       username: {
@@ -1514,7 +1253,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.t-mobile.com",
     inputs: {
       username: {
@@ -1541,7 +1279,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://login.okta.com/signin",
     inputs: {
       username: {
@@ -1555,7 +1292,6 @@ export const testPages: AutofillPageTest[] = [
     },
   },
   {
-    cipherType: CipherType.Login,
     url: "https://bethesda.net",
     inputs: {
       username: {
@@ -1575,22 +1311,9 @@ export const testPages: AutofillPageTest[] = [
       },
     },
   },
-];
 
-// Known failure cases; expected to fail
-export const knownFailureCases: AutofillPageTest[] = [
+  // Known failure cases; expected to fail
   {
-    cipherType: CipherType.Login,
-    url: `${testSiteHost}/forms/login/many-inputs-login`,
-    uriMatchType: UriMatchType.StartsWith,
-    inputs: {
-      username: { selector: "#username", value: "js" },
-      password: { selector: "#password", value: "" },
-    },
-  },
-  // The Reddit modal sign in inputs are nested under several levels of shadow roots
-  {
-    cipherType: CipherType.Login,
     url: "https://www.reddit.com",
     inputs: {
       username: {
@@ -1613,29 +1336,35 @@ export const knownFailureCases: AutofillPageTest[] = [
         value: "fakeRedditInlineLoginPassword",
       },
     },
+    skipTests: [
+      // @TODO known failure: The Reddit modal sign in inputs are nested under several levels of shadow roots
+      TestNames.InlineMenuAutofill,
+    ],
   },
-  // The Max sign in inputs are nested two-deep within shadow roots
   {
-    cipherType: CipherType.Login,
     url: "https://auth.max.com/login",
     inputs: {
       username: { selector: "#username", value: "maxcom_user" },
       password: { selector: "#password", value: "maxcom_password" },
     },
+    skipTests: [
+      // @TODO known failure: The Max sign in inputs are nested two-deep within shadow roots
+      TestNames.InlineMenuAutofill,
+    ],
   },
-  // Each Clear login input is nested within a shadow root
   {
-    cipherType: CipherType.Login,
     url: "https://login.clear.com.br",
     inputs: {
       // Clear expects numerically-formatted values
       username: { selector: "#username", value: "12345678901111" },
       password: { selector: "#password", value: "098765" },
     },
+    skipTests: [
+      // @TODO known failure: Each Clear login input is nested within a shadow root
+      TestNames.InlineMenuAutofill,
+    ],
   },
-  // Auto-fill is targeting the registration form (on the same page) over the login form which appears after
   {
-    cipherType: CipherType.Login,
     url: "https://www.gamespot.com/login-signup",
     inputs: {
       username: {
@@ -1647,10 +1376,12 @@ export const knownFailureCases: AutofillPageTest[] = [
         value: "fakeGamespotPassword",
       },
     },
+    skipTests: [
+      // @TODO known failure: Auto-fill is targeting the registration form (on the same page) over the login form which appears after
+      TestNames.InlineMenuAutofill,
+    ],
   },
-  // Temu sometimes has a captcha challenge before showing the password field.
   {
-    cipherType: CipherType.Login,
     url: "https://temu.com",
     inputs: {
       username: {
@@ -1676,9 +1407,12 @@ export const knownFailureCases: AutofillPageTest[] = [
         value: "fakeTemuPassword",
       },
     },
+    skipTests: [
+      // @TODO known failure: Temu sometimes has a captcha challenge before showing the password field.
+      TestNames.InlineMenuAutofill,
+    ],
   },
   {
-    cipherType: CipherType.Login,
     url: "https://www.temu.com/login.html",
     inputs: {
       username: {
@@ -1692,9 +1426,7 @@ export const knownFailureCases: AutofillPageTest[] = [
       },
     },
   },
-  // Apple sign in form is within an iframe
   {
-    cipherType: CipherType.Login,
     url: "https://www.apple.com",
     inputs: {
       username: {
@@ -1713,11 +1445,12 @@ export const knownFailureCases: AutofillPageTest[] = [
         value: "fakeApplePassword",
       },
     },
+    skipTests: [
+      // @TODO known failure: Apple sign in form is within an iframe
+      TestNames.InlineMenuAutofill,
+    ],
   },
-  // Marvel sign in form is within an iframe
-  // Note; marvel.com has it's own login but checks against the existence of a Disney account before allowing password entry
   {
-    cipherType: CipherType.Login,
     url: "https://www.marvel.com/signin",
     inputs: {
       username: {
@@ -1730,14 +1463,13 @@ export const knownFailureCases: AutofillPageTest[] = [
         value: "fakeMarvelPassword",
       },
     },
+    skipTests: [
+      // @TODO known failure: Marvel sign in form is within an iframe. Note: marvel.com has its own login but checks against the existence of a Disney account before allowing password entry
+      TestNames.InlineMenuAutofill,
+    ],
   },
-  // ESPN sign in form is within an iframe; autofill will only work if the iframe domain is added to `additionalLoginUrls`
   {
-    cipherType: CipherType.Login,
     url: "https://www.espn.com",
-    // additionalLoginUrls: [
-    //   "https://cdn.registerdisney.go.com/v4/bundle/web/ESPN-ONESITE.WEB",
-    // ],
     inputs: {
       username: {
         multiStepNextInputKey: "password",
@@ -1758,5 +1490,9 @@ export const knownFailureCases: AutofillPageTest[] = [
         value: "fakeESPNPassword",
       },
     },
+    skipTests: [
+      // @TODO known failure: ESPN sign in form is within an iframe; autofill will only work if the iframe domain is added to `additionalLoginUrls`
+      TestNames.InlineMenuAutofill,
+    ],
   },
 ];

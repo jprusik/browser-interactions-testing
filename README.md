@@ -105,9 +105,8 @@ Create and start the containers and volumes with `docker compose up -d --build -
   - Ensure your targeted `API` and `Identity` services are configured and running (either [locally](https://contributing.bitwarden.com/getting-started/server/guide) or via Docker)
   - Ensure the Web Vault client is running (either with `npm run test:webserve` locally or via Docker)
     - Don't forget to [include your SSL key and cert file](https://contributing.bitwarden.com/getting-started/clients/web-vault/) in the `clients/apps/web` folder
-- Run headless testing with `npm run test:all:headless`
-- Run headed tests in debug mode with `npm run test:all:debug`
-- Run only the static pages testing with `npm run test:static:debug`
+- Run headless testing with `npm run test:static:headless`
+- Run headed tests in debug mode with `npm run test:static:debug`
 - Run only the public pages testing with `npm run test:public:debug`
 
 ## Feature flags
@@ -128,13 +127,13 @@ Pass the environment variable `HEADLESS=true` or use the provided npm scripts to
 
 ### Execute only selected page tests
 
-Each test page entry in the `testPages` constant of `tests/constants.ts` can take the optional property `onlyTest`. If debug mode is active and one or more pages has a truthy `onlyTest` value, only those pages will be tested.
+Each test page entry in the `testPages` constant of `constants/test-pages.ts` can take the optional property `onlyTest`. If debug mode is active and one or more pages has a truthy `onlyTest` value, only those pages will be tested.
 
 If debug mode is not active, `onlyTest` values will be ignored.
 
 ### Start tests from a specific point
 
-Passing the environment variable `START_FROM_TEST_URL` with the url of the test you wish to start with can help avoid re-running "known good" tests, when using `onlyTest` is impractical (e.g. `START_FROM_TEST_URL=https://www.pinterest.com/login/ npm run test:all:debug`)
+Passing the environment variable `START_FROM_TEST_URL` with the url of the test you wish to start with can help avoid re-running "known good" tests, when using `onlyTest` is impractical (e.g. `START_FROM_TEST_URL=https://www.pinterest.com/login/ npm run test:static:debug`)
 
 ## CI / CD
 
