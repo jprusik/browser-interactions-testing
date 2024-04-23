@@ -28,11 +28,18 @@ const pathToExtension = path.join(
 
 export const test = base.extend<{
   context: BrowserContext;
+  background: Page;
   extensionId: string;
   extensionSetup: Page;
+  manifestVersion: number;
 }>({
   // eslint-disable-next-line no-empty-pattern
-  context: async ({}, use) => {
+  context: async ({ browser }, use) => {
+    console.log(
+      "\x1b[1m\x1b[36m%s\x1b[0m",
+      `\tTesting with:\n\t${browser.browserType().name()} version ${browser.version()}`,
+    );
+
     const context = await chromium.launchPersistentContext("", {
       acceptDownloads: false, // for safety, do not accept downloads
       headless: false, // should always be `false`, even when testing headless Chrome
@@ -67,13 +74,10 @@ export const test = base.extend<{
 
     await use(context);
   },
-  extensionId: async ({ context }, use) => {
+  background: async ({ context, manifestVersion }, use) => {
     let background;
-    const manifest = JSON.parse(
-      fs.readFileSync(path.join(pathToExtension, "manifest.json"), "utf8"),
-    );
 
-    if (manifest?.manifest_version === 3) {
+    if (manifestVersion === 3) {
       background = context.serviceWorkers()[0];
 
       if (!background) {
@@ -88,6 +92,9 @@ export const test = base.extend<{
       }
     }
 
+    use(background);
+  },
+  extensionId: async ({ background }, use) => {
     const extensionId = background.url().split("/")[2];
     await use(extensionId);
   },
@@ -108,12 +115,6 @@ export const test = base.extend<{
       );
 
       testPage = contextPages[0];
-
-      if (debugIsActive) {
-        console.log(
-          (await testPage.evaluate(() => navigator.userAgent)) + "\n",
-        );
-      }
     });
 
     await test.step("Configure the environment", async () => {
@@ -172,6 +173,19 @@ export const test = base.extend<{
     });
 
     await use(testPage);
+  },
+  manifestVersion: async ({}, use) => {
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(pathToExtension, "manifest.json"), "utf8"),
+    );
+
+    const manifestVersion = manifest?.manifest_version;
+    console.log(
+      "\x1b[1m\x1b[36m%s\x1b[0m",
+      `\textension manifest version ${manifestVersion}`,
+    );
+
+    use(manifestVersion);
   },
 });
 

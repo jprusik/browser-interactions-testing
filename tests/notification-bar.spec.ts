@@ -13,7 +13,6 @@ import { getPagesToTest, formatUrlToFilename } from "./utils";
 
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
   test("Log in to the vault, open pages, and run page tests", async ({
-    context,
     extensionId,
     extensionSetup,
   }) => {
@@ -32,7 +31,6 @@ test.describe("Extension triggers a notification bar when a page form is submitt
       await testPage.getByRole("button", { name: "Yes" }).click();
     });
 
-    const [backgroundPage] = context.backgroundPages();
     const pagesToTest = getPagesToTest();
 
     for (const page of pagesToTest) {
@@ -41,15 +39,18 @@ test.describe("Extension triggers a notification bar when a page form is submitt
 
       await test.step(`fill the form with non-stored credentials at ${url}`, async () => {
         if (skipTests?.includes(TestNames.NewCredentialsNotification)) {
-          console.log(`Skipping known failure for ${url}`);
+          console.log(
+            "\x1b[1m\x1b[33m%s\x1b[0m",
+            `\tSkipping known failure for ${url}`,
+          );
 
           return;
         }
 
         await testPage.goto(url, defaultGotoOptions);
 
-        // @TODO workaround for extension not handling popstate events
-        await backgroundPage.reload();
+        // @TODO workaround for content script not being ready
+        await testPage.waitForTimeout(300);
 
         const inputKeys = Object.keys(inputs);
 
@@ -60,7 +61,11 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             try {
               await currentInput.preFillActions(testPage);
             } catch (error) {
-              console.log("There was a prefill error:", error);
+              console.log(
+                "\x1b[1m\x1b[31m%s\x1b[0m",
+                "\tThere was a prefill error:",
+                error,
+              );
             }
           }
 
@@ -95,7 +100,11 @@ test.describe("Extension triggers a notification bar when a page form is submitt
               try {
                 await nextInputPreFill(testPage);
               } catch (error) {
-                console.log("There was a prefill error:", error);
+                console.log(
+                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\tThere was a prefill error:",
+                  error,
+                );
               }
             }
 
@@ -147,15 +156,18 @@ test.describe("Extension triggers a notification bar when a page form is submitt
 
       await test.step(`fill the form with a stored username/email and a non-stored password at ${url}`, async () => {
         if (skipTests?.includes(TestNames.PasswordUpdateNotification)) {
-          console.log(`Skipping known failure for ${url}`);
+          console.log(
+            "\x1b[1m\x1b[33m%s\x1b[0m",
+            `\tSkipping known failure for ${url}`,
+          );
 
           return;
         }
 
         await testPage.goto(url, defaultGotoOptions);
 
-        // @TODO workaround for extension not handling popstate events
-        await backgroundPage.reload();
+        // @TODO workaround for content script not being ready
+        await testPage.waitForTimeout(300);
 
         const inputKeys = Object.keys(inputs);
 
@@ -166,7 +178,11 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             try {
               await currentInput.preFillActions(testPage);
             } catch (error) {
-              console.log("There was a prefill error:", error);
+              console.log(
+                "\x1b[1m\x1b[31m%s\x1b[0m",
+                "\tThere was a prefill error:",
+                error,
+              );
             }
           }
 
@@ -200,7 +216,11 @@ test.describe("Extension triggers a notification bar when a page form is submitt
               try {
                 await nextInputPreFill(testPage);
               } catch (error) {
-                console.log("There was a prefill error:", error);
+                console.log(
+                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\tThere was a prefill error:",
+                  error,
+                );
               }
             }
 

@@ -14,7 +14,7 @@ import { getPagesToTest, doAutofill, formatUrlToFilename } from "./utils";
 
 test.describe("Extension autofills forms when triggered", () => {
   test("Log in to the vault, open pages, and run page tests", async ({
-    context,
+    background,
     extensionSetup,
   }) => {
     test.setTimeout(defaultTestTimeout);
@@ -22,7 +22,6 @@ test.describe("Extension autofills forms when triggered", () => {
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
-    const [backgroundPage] = context.backgroundPages();
     const pagesToTest = getPagesToTest();
 
     for (const page of pagesToTest) {
@@ -30,7 +29,10 @@ test.describe("Extension autofills forms when triggered", () => {
 
       await test.step(`Autofill the form at ${url}`, async () => {
         if (skipTests?.includes(TestNames.MessageAutofill)) {
-          console.log(`Skipping known failure for ${url}`);
+          console.log(
+            "\x1b[1m\x1b[33m%s\x1b[0m",
+            `\tSkipping known failure for ${url}`,
+          );
 
           return;
         }
@@ -44,7 +46,11 @@ test.describe("Extension autofills forms when triggered", () => {
           try {
             await firstInputPreFill(testPage);
           } catch (error) {
-            console.log("There was a prefill error:", error);
+            console.log(
+              "\x1b[1m\x1b[31m%s\x1b[0m",
+              "\tThere was a prefill error:",
+              error,
+            );
 
             if (debugIsActive) {
               await testPage.pause();
@@ -59,7 +65,7 @@ test.describe("Extension autofills forms when triggered", () => {
             : await firstInputSelector(testPage);
         await firstInputElement.waitFor(defaultWaitForOptions);
 
-        await doAutofill(backgroundPage);
+        await doAutofill(background);
 
         for (const inputKey of inputKeys) {
           const currentInput: FillProperties = inputs[inputKey];
@@ -95,7 +101,11 @@ test.describe("Extension autofills forms when triggered", () => {
               try {
                 await nextInputPreFill(testPage);
               } catch (error) {
-                console.log("There was a prefill error:", error);
+                console.log(
+                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\tThere was a prefill error:",
+                  error,
+                );
 
                 if (debugIsActive) {
                   await testPage.pause();
@@ -110,7 +120,7 @@ test.describe("Extension autofills forms when triggered", () => {
                 : await nextInputSelector(testPage);
             await nextInputElement.waitFor(defaultWaitForOptions);
 
-            await doAutofill(backgroundPage);
+            await doAutofill(background);
           }
 
           if (debugIsActive) {
