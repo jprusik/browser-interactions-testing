@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Page, Worker } from "@playwright/test";
 import { debugIsActive, startFromTestUrl, testPages } from "../constants";
 import { testPages as publicTestPages } from "../constants/public";
 
@@ -27,7 +27,7 @@ export function getPagesToTest(usePublicTestPages: boolean = false) {
   return filteredPageTests;
 }
 
-export async function doAutofill(background: Page) {
+export async function doAutofill(background: Page | Worker) {
   await background.evaluate(() =>
     chrome.tabs.query({ active: true }, (tabs) => {
       if (tabs[0]) {

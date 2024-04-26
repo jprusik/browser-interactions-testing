@@ -270,5 +270,9 @@ test.describe("Extension triggers a notification bar when a page form is submitt
         });
       });
     }
+
+    // Add some buffer at the end of testing so any animations/transitions have a chance to
+    // complete before the recording is ended
+    await testPage.waitForTimeout(2000);
   });
 });

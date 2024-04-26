@@ -139,6 +139,10 @@ test.describe("Extension presents page input inline menu with options for vault 
       });
     }
 
+    // Add some buffer at the end of testing so any animations/transitions have a chance to
+    // complete before the recording is ended
+    await testPage.waitForTimeout(2000);
+
     // Hold the window open (don't automatically close out) when debugging
     if (debugIsActive) {
       await testPage.pause();

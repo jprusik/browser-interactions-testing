@@ -36,8 +36,12 @@ export const test = base.extend<{
   // eslint-disable-next-line no-empty-pattern
   context: async ({ browser }, use) => {
     console.log(
-      "\x1b[1m\x1b[36m%s\x1b[0m",
-      `\tTesting with:\n\t${browser.browserType().name()} version ${browser.version()}`,
+      "\x1b[1m\x1b[36m%s\x1b[0m", // cyan foreground
+      "\tTesting with:",
+    );
+    console.log(
+      "\x1b[1m\x1b[36m%s\x1b[0m", // cyan foreground
+      `\t${browser.browserType().name()} version ${browser.version()}`,
     );
 
     const context = await chromium.launchPersistentContext("", {
@@ -103,7 +107,7 @@ export const test = base.extend<{
 
     await test.step("Close the extension welcome page when it pops up", async () => {
       // Wait for the extension to open the welcome page before continuing
-      if (!debugIsActive) {
+      if (!debugIsActive && process.env.HEADLESS !== "true") {
         await context.waitForEvent("page");
       }
 
@@ -181,7 +185,7 @@ export const test = base.extend<{
 
     const manifestVersion = manifest?.manifest_version;
     console.log(
-      "\x1b[1m\x1b[36m%s\x1b[0m",
+      "\x1b[1m\x1b[36m%s\x1b[0m", // cyan foreground
       `\textension manifest version ${manifestVersion}`,
     );
 
