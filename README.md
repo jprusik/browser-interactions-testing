@@ -108,6 +108,7 @@ Create and start the containers and volumes with `docker compose up -d --build -
 - Run headless testing with `npm run test:static:headless`
 - Run headed tests in debug mode with `npm run test:static:debug`
 - Run only the public pages testing with `npm run test:public:debug`
+- Testing builds and uses the Menifest v3 version of the browser client by default; the v2 version can be build with `npm run build:extension:v2`
 
 ## Feature flags
 
@@ -122,6 +123,8 @@ Several features are available for ease of testing/debugging
 Pass the playwright flag `--debug` or use the provided npm scripts to run your tests in Debug Mode. While Debug Mode is active, additional information will be returned to console, tests will pause at various points until [the user selects the play button to continue](https://playwright.dev/docs/debug#stepping-through-your-tests).
 
 ### Headless Mode
+
+> Note: headless testing is currently broken with MV3
 
 Pass the environment variable `HEADLESS=true` or use the provided npm scripts to run your tests in headless mode. Note, Debug Mode can be used with Headless Mode to debug behaviour differences between headed and headless tests.
 
