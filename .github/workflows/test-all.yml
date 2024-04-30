@@ -1,24 +1,36 @@
-name: test-all
-run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
+name: Test-all
+run-name: All tests with MV${{ inputs.TEST_MV2 == true && 2 || 3 }} extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
+  push:
+    branches:
+      - "main"
+  pull_request:
   workflow_dispatch:
     inputs:
+      TEST_MV2:
+        default: false
+        description: "test with the manifest version 2 extension build"
+        required: false
+        type: boolean
       CLIENTS_BRANCH:
-        required: true
         default: "main"
         description: "clients branch of browser build to use"
+        required: true
         type: string
       FEATURE_FLAGS:
-        required: true
-        default: '{"autofill-v2": true, "autofill-overlay": true}'
+        default: "{}"
         description: 'JSON key-value pairs representing feature flag states. (e.g. {"autofill-v2": true, "autofill-overlay": false})'
+        required: true
         type: string
 jobs:
   build-and-test:
+    name: Build and test
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      - name: Checkout
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - name: Setup Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
@@ -30,7 +42,7 @@ jobs:
           echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
 
       - name: Create feature flags file
-        run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS }}}" > flags.json
+        run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS || '{}' }}}" > flags.json
 
       - name: Download extension artifact
         uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
@@ -38,16 +50,17 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build-browser.yml
           workflow_conclusion: ""
-          branch: ${{ inputs.CLIENTS_BRANCH }}
-          name: ^dist-chrome-(?!MV3-)\w{7}\.zip$
+          branch: ${{ inputs.CLIENTS_BRANCH || 'main' }}
+          name: ${{ inputs.TEST_MV2 == true && '^dist-chrome-\w{7}\.zip$' || 'dist-chrome-MV3-\w{7}\.zip' }}
           name_is_regexp: true
           repo: bitwarden/clients
           if_no_artifact_found: fail
+          skip_unpack: true
 
       - name: Unzip extension artifact
         run: |
-          mkdir -p build
-          unzip -o dist-chrome-*.zip/dist-chrome.zip -d build
+          unzip -o *dist-chrome-*.zip.zip
+          unzip -o 'dist-chrome*.zip' -d build
 
       - name: Generate and install certs
         run: |
@@ -82,7 +95,7 @@ jobs:
           npm run setup:test-site
 
       - name: Run all tests
-        run: npm run test:static:headless
+        run: npm run test:static:ci
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3

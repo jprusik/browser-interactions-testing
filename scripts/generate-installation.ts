@@ -34,7 +34,7 @@ async function getValues() {
 
   if (!VAULT_EMAIL?.length) {
     console.error(
-      "\x1b[1m\x1b[31m%s\x1b[0m",
+      "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
       `Your dotenv file is missing a valid value for VAULT_EMAIL. Installation values will not be fetched.`,
       "\n",
     );
@@ -44,7 +44,7 @@ async function getValues() {
 
   if (BW_INSTALLATION_ID?.length || BW_INSTALLATION_KEY?.length) {
     console.warn(
-      "\x1b[1m\x1b[33m%s\x1b[0m",
+      "\x1b[1m\x1b[33m%s\x1b[0m", // bold, yellow foreground
       "There are existing installation values in your dotenv file. Remove them or update the values manually with the tools on https://bitwarden.com/host\n",
     );
 
@@ -68,7 +68,7 @@ async function getValues() {
 
   if (!id || !key) {
     console.error(
-      "\x1b[1m\x1b[31m%s\x1b[0m",
+      "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
       `There was a problem getting the installation values.`,
       "\n",
     );

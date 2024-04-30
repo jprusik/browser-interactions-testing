@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Page, Worker } from "@playwright/test";
 import { debugIsActive, startFromTestUrl, testPages } from "../constants";
 import { testPages as publicTestPages } from "../constants/public";
 
@@ -27,18 +27,17 @@ export function getPagesToTest(usePublicTestPages: boolean = false) {
   return filteredPageTests;
 }
 
-export async function doAutofill(backgroundPage: Page) {
-  await backgroundPage.evaluate(() =>
-    chrome.tabs.query(
-      { active: true },
-      (tabs) =>
-        tabs[0] &&
-        chrome.tabs.sendMessage(tabs[0]?.id || 0, {
+export async function doAutofill(background: Page | Worker) {
+  await background.evaluate(() =>
+    chrome.tabs.query({ active: true }, (tabs) => {
+      if (tabs[0]) {
+        return chrome.tabs.sendMessage(tabs[0]?.id || 0, {
           command: "collectPageDetails",
           tab: tabs[0],
           sender: "autofill_cmd",
-        }),
-    ),
+        });
+      }
+    }),
   );
 }
 
