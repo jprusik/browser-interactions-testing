@@ -4,6 +4,7 @@ import {
   test as base,
   chromium,
   Page,
+  Worker,
   type BrowserContext,
 } from "@playwright/test";
 import { configDotenv } from "dotenv";
@@ -27,8 +28,8 @@ const pathToExtension = path.join(
 );
 
 export const test = base.extend<{
+  background: Page | Worker;
   context: BrowserContext;
-  background: Page;
   extensionId: string;
   extensionSetup: Page;
   manifestVersion: number;

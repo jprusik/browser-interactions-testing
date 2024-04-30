@@ -13,6 +13,7 @@ import { getPagesToTest, formatUrlToFilename } from "./utils";
 
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
   test("Log in to the vault, open pages, and run page tests", async ({
+    background,
     extensionId,
     extensionSetup,
   }) => {
@@ -50,7 +51,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
         await testPage.goto(url, defaultGotoOptions);
 
         // @TODO workaround for content script not being ready
-        await testPage.waitForTimeout(300);
+        await testPage.waitForTimeout(500);
 
         const inputKeys = Object.keys(inputs);
 
@@ -167,7 +168,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
         await testPage.goto(url, defaultGotoOptions);
 
         // @TODO workaround for content script not being ready
-        await testPage.waitForTimeout(300);
+        await testPage.waitForTimeout(500);
 
         const inputKeys = Object.keys(inputs);
 

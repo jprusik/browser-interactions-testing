@@ -1,4 +1,4 @@
-name: test-inline-menu
+name: Test-inline-menu
 run-name: Inline menu tests with MV${{ inputs.TEST_MV2 == true && 2 || 3 }} extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
   workflow_dispatch:
@@ -20,10 +20,13 @@ on:
         type: string
 jobs:
   build-and-test:
+    name: Build and test
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      - name: Checkout
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - name: Setup Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
@@ -87,7 +90,7 @@ jobs:
           ssh-add - <<< '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}'
           npm run setup:test-site
 
-      - name: Run autofill tests
+      - name: Run inline-menu tests
         run: npm run test:static:inline-menu:ci
 
       - name: Upload results as artifact
