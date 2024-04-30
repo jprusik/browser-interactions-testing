@@ -34,7 +34,7 @@ test.describe("Extension autofills forms when triggered", () => {
       await test.step(`Autofill the form at ${url}`, async () => {
         if (skipTests?.includes(TestNames.MessageAutofill)) {
           console.log(
-            "\x1b[1m\x1b[33m%s\x1b[0m",
+            "\x1b[1m\x1b[33m%s\x1b[0m", // bold, yellow foreground
             `\tSkipping known failure for ${url}`,
           );
 
@@ -51,7 +51,7 @@ test.describe("Extension autofills forms when triggered", () => {
             await firstInputPreFill(testPage);
           } catch (error) {
             console.log(
-              "\x1b[1m\x1b[31m%s\x1b[0m",
+              "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
               "\tThere was a prefill error:",
               error,
             );
@@ -107,7 +107,7 @@ test.describe("Extension autofills forms when triggered", () => {
                 await nextInputPreFill(testPage);
               } catch (error) {
                 console.log(
-                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
                   "\tThere was a prefill error:",
                   error,
                 );

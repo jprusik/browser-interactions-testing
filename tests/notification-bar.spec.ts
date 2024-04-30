@@ -41,7 +41,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
       await test.step(`fill the form with non-stored credentials at ${url}`, async () => {
         if (skipTests?.includes(TestNames.NewCredentialsNotification)) {
           console.log(
-            "\x1b[1m\x1b[33m%s\x1b[0m",
+            "\x1b[1m\x1b[33m%s\x1b[0m", // bold, yellow foreground
             `\tSkipping known failure for ${url}`,
           );
 
@@ -63,7 +63,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
               await currentInput.preFillActions(testPage);
             } catch (error) {
               console.log(
-                "\x1b[1m\x1b[31m%s\x1b[0m",
+                "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
                 "\tThere was a prefill error:",
                 error,
               );
@@ -102,7 +102,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
                 await nextInputPreFill(testPage);
               } catch (error) {
                 console.log(
-                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
                   "\tThere was a prefill error:",
                   error,
                 );
@@ -158,7 +158,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
       await test.step(`fill the form with a stored username/email and a non-stored password at ${url}`, async () => {
         if (skipTests?.includes(TestNames.PasswordUpdateNotification)) {
           console.log(
-            "\x1b[1m\x1b[33m%s\x1b[0m",
+            "\x1b[1m\x1b[33m%s\x1b[0m", // bold, yellow foreground
             `\tSkipping known failure for ${url}`,
           );
 
@@ -180,7 +180,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
               await currentInput.preFillActions(testPage);
             } catch (error) {
               console.log(
-                "\x1b[1m\x1b[31m%s\x1b[0m",
+                "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
                 "\tThere was a prefill error:",
                 error,
               );
@@ -218,7 +218,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
                 await nextInputPreFill(testPage);
               } catch (error) {
                 console.log(
-                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
                   "\tThere was a prefill error:",
                   error,
                 );

@@ -31,7 +31,7 @@ test.describe("Extension presents page input inline menu with options for vault 
       await test.step(`fill the form via inline menu and submit at ${url}`, async () => {
         if (skipTests?.includes(TestNames.InlineMenuAutofill)) {
           console.log(
-            "\x1b[1m\x1b[33m%s\x1b[0m",
+            "\x1b[1m\x1b[33m%s\x1b[0m", // bold, yellow foreground
             `\tSkipping known failure for ${url}`,
           );
 
@@ -48,7 +48,7 @@ test.describe("Extension presents page input inline menu with options for vault 
             await firstInputPreFill(testPage);
           } catch (error) {
             console.log(
-              "\x1b[1m\x1b[31m%s\x1b[0m",
+              "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
               "\tThere was a prefill error:",
               error,
             );
@@ -108,7 +108,7 @@ test.describe("Extension presents page input inline menu with options for vault 
                 await nextInputPreFill(testPage);
               } catch (error) {
                 console.log(
-                  "\x1b[1m\x1b[31m%s\x1b[0m",
+                  "\x1b[1m\x1b[31m%s\x1b[0m", // bold, red foreground
                   "\tThere was a prefill error:",
                   error,
                 );
