@@ -41,26 +41,26 @@ jobs:
           sudo setcap 'cap_net_bind_service=+ep' `which node`
           echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
 
-      - name: Create feature flags file
-        run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS || '{}' }}}" > flags.json
+      # - name: Create feature flags file
+      #   run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS || '{}' }}}" > flags.json
 
-      - name: Download extension artifact
-        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: build-browser.yml
-          workflow_conclusion: ""
-          branch: ${{ inputs.CLIENTS_BRANCH || 'main' }}
-          name: ${{ inputs.TEST_MV2 == true && '^dist-chrome-\w{7}\.zip$' || 'dist-chrome-MV3-\w{7}\.zip' }}
-          name_is_regexp: true
-          repo: bitwarden/clients
-          if_no_artifact_found: fail
-          skip_unpack: true
+      # - name: Download extension artifact
+      #   uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     workflow: build-browser.yml
+      #     workflow_conclusion: ""
+      #     branch: ${{ inputs.CLIENTS_BRANCH || 'main' }}
+      #     name: ${{ inputs.TEST_MV2 == true && '^dist-chrome-\w{7}\.zip$' || 'dist-chrome-MV3-\w{7}\.zip' }}
+      #     name_is_regexp: true
+      #     repo: bitwarden/clients
+      #     if_no_artifact_found: fail
+      #     skip_unpack: true
 
-      - name: Unzip extension artifact
-        run: |
-          unzip -o *dist-chrome-*.zip.zip
-          unzip -o 'dist-chrome*.zip' -d build
+      # - name: Unzip extension artifact
+      #   run: |
+      #     unzip -o *dist-chrome-*.zip.zip
+      #     unzip -o 'dist-chrome*.zip' -d build
 
       - name: Generate and install certs
         run: |
@@ -71,38 +71,62 @@ jobs:
           certutil -d $HOME/.pki/nssdb -N --empty-password
           certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
 
-      - name: Install Bitwarden CLI
-        run: npm install -g @bitwarden/cli@2024.2.0
+      # - name: Install Bitwarden CLI
+      #   run: npm install -g @bitwarden/cli@2024.2.0
 
-      - name: Install project dependencies
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
+      # - name: Install project dependencies
+      #   run: |
+      #     npm ci
+      #     npx playwright install --with-deps chromium
 
-      - name: Build and start the test vault
-        run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
+      # - name: Build and start the test vault
+      #   run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
 
-      - name: Setup the vault test account
-        run: npm run seed:vault:account
+      # - name: Setup the vault test account
+      #   run: npm run seed:vault:account
 
-      - name: Setup the vault test account ciphers
-        run: npm run seed:vault:ciphers:ci
+      # - name: Setup the vault test account ciphers
+      #   run: npm run seed:vault:ciphers:ci
 
-      - name: Setup test site
-        run: |
-          ssh -vT git@github.com
-          git clone git@github.com:bitwarden/test-the-web.git test-site
-          npm run setup:test-site
+      # - name: Setup test site
+      #   run: |
+      #     ssh -vT git@github.com
+      #     git clone git@github.com:bitwarden/test-the-web.git test-site
+      #     npm run setup:test-site
 
-      - name: Run all tests
-        run: npm run test:static:ci
-
-      - name: Upload results as artifact
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
-        if: always()
+      - name: Download test site build
+        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
         with:
-          name: test-summary
-          path: |
-            ./test-summary
-            ./tests-out/videos
-            ./tests-out/screenshots
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          workflow_conclusion: ""
+          # @TODO revert this back to 'main' after testing
+          branch: pm-7889
+          name: build-files
+          path: test-site
+          repo: bitwarden/test-the-web
+          if_no_artifact_found: fail
+
+      - name: Install test site dependencies
+        run: |
+          cd test-site
+          npm ci
+
+      - name: Start SSH session
+        uses: luchihoratiu/debug-via-ssh@main
+        with:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+          SSH_PASS: ${{ secrets.SSH_PASS }}
+
+      # - name: Run all tests
+      #   run: npm run test:static:ci
+
+      # - name: Upload results as artifact
+      #   uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      #   if: always()
+      #   with:
+      #     name: test-summary
+      #     path: |
+      #       ./test-summary
+      #       ./tests-out/videos
+      #       ./tests-out/screenshots
