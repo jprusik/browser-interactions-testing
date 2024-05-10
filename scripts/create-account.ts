@@ -15,6 +15,8 @@ type AccountCreationResponseData = {
   object?: "register" | "error";
 };
 
+let failedAttemptsCount = 0;
+
 async function createAccount() {
   const {
     GENERATED_RSA_KEY_PAIR_PROTECTED_PRIVATE_KEY,
@@ -79,8 +81,13 @@ async function createAccount() {
     // Server isn't ready yet
   }
 
+  if (failedAttemptsCount > 60) {
+    throw new Error("The account was unable to be created.");
+  }
+
   console.log(`Retrying account creation at ${vaultHost}...`);
 
+  failedAttemptsCount++;
   setTimeout(createAccount, 3000);
 }
 
