@@ -81,6 +81,9 @@ jobs:
       - name: Setup the vault test account
         run: npm run seed:vault:account
 
+      - name: Start the Vault Management API server
+        run: npm run start:cli
+
       - name: Setup the vault test account ciphers
         run: npm run seed:vault:ciphers:ci
 

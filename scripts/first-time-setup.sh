@@ -8,9 +8,11 @@ npx playwright install --with-deps chromium
 
 npm run setup:extension
 npm run build:extension
-
 npm run setup:install
 docker compose up -d --build --remove-orphans --wait --wait-timeout 60
-npm run setup:vault
+npm run seed:vault:account
+npm run start:cli
+npm run seed:vault:ciphers
+npm run stop:cli
 
 npm run setup:test-site
