@@ -39,7 +39,7 @@
     "build:extension:prod": "cd clients/apps/browser && rimraf build && npm run build:prod",
     "build:extension:v2": "cd clients/apps/browser && rimraf build && npm run build",
     "prettier:fix": "prettier --write .",
-    "seed:vault:account": "ts-node ./scripts/create-account.ts",
+    "seed:vault:account": "NODE_EXTRA_CA_CERTS=ssl.crt ts-node ./scripts/create-account.ts",
     "seed:vault:ciphers": "ts-node ./scripts/vault-seeder.ts",
     "seed:vault:ciphers:refresh": "./scripts/cli-serve-helper.sh && REFRESH=true ts-node ./scripts/vault-seeder.ts && kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
     "setup:all": "./scripts/first-time-setup.sh",

@@ -30,7 +30,7 @@ class VaultSeeder {
     });
   }
 
-  private async runSeeder() {
+  private async runSeeder(isRetry = false) {
     console.log("Connected to Vault Management API, unlocking vault...");
 
     const sessionToken = await this.unlockVault();
@@ -42,11 +42,14 @@ class VaultSeeder {
       PLAYWRIGHT_CIPHERS_FOLDER,
     );
 
-    if (!testsFolder) {
+    if (testsFolder) {
+      await this.seedVault(testsFolder);
+    } else if (!isRetry) {
+      console.log("Tests folder not found, trying again...");
+      await setTimeout(() => this.runSeeder(true), 3000);
+    } else {
       throw new Error("Unable to seed vault, tests folder not found.");
     }
-
-    await this.seedVault(testsFolder);
   }
 
   private async seedVault(testsFolder: FolderItem): Promise<void> {
