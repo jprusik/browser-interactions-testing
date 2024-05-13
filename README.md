@@ -41,7 +41,6 @@ The aim of this project is to track and anticipate the compatibility of the Bitw
 - [node](https://nodejs.org/en)
 - [Bitwarden CLI](https://bitwarden.com/help/cli/)
 - [OpenSSL](https://www.openssl.org/)
-- [jq](https://github.com/jqlang/jq/wiki/Installation) (optional if not using the account creation script)
 - [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (optional if not using nvm; manually manage your node version to `.nvmrc`)
 
 ## Quick start
@@ -93,7 +92,7 @@ Create and start the containers and volumes with `docker compose up -d --build -
 
 > If using Docker Compose to host the server environment (as described in the previous section), you may need to wait for the services within the `bitwarden` container to enter a running state before running any seeding scripts.
 
-- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed and configured on your host machine.
+- Ensure that the [Bitwarden CLI](https://bitwarden.com/help/cli/) is installed and configured on your host machine. You will need to be running the [CLI Vault Management API](https://bitwarden.com/help/cli/#serve) server in order to seed the vault. You can start the server with `npm run start:cli` and stop it with `npm run stop:cli`
   - Use `npm run setup:vault` to set up your running, targeted vault (e.g. Docker container)
     - This command will handle creating a test account, logging in, setting up the CLI, running the Vault Management Server, seeding the vault with any new test credentials, and updating values that have changed. It will place those test credentials within a folder named `AutofillPlaywrightTestItems` in your vault.
   - If you have already created the test account in the vault, use `npm run seed:vault:ciphers` to only seed the vault with the test credentials.
@@ -108,7 +107,7 @@ Create and start the containers and volumes with `docker compose up -d --build -
 - Run headless testing with `npm run test:static:headless`
 - Run headed tests in debug mode with `npm run test:static:debug`
 - Run only the public pages testing with `npm run test:public:debug`
-- Testing builds and uses the Menifest v3 version of the browser client by default; the v2 version can be build with `npm run build:extension:v2`
+- Testing builds and uses the Manifest v3 version of the browser client by default; the v2 version can be build with `npm run build:extension:v2`
 
 ## Feature flags
 
@@ -141,5 +140,3 @@ Passing the environment variable `START_FROM_TEST_URL` with the url of the test 
 ## CI / CD
 
 In order to leverage the provided Github Actions testing workflows, you'll need to create an actions secret named `ENV_FILE` in your project repo settings at `https://github.com/<your fork owner>/browser-interactions-testing/settings/secrets/actions`. The value of that secret should be the contents of your `.env` in Base64 format.
-
-Additionally, in order to use the provided test site, you will also need to add an actions secret named `DEPLOY_SSH_PRIVATE_KEY`. The value of this secret should be the private key of a [public/private key pair](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key). The public key should be registered as a read-only [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys), by the test site project owner or fork owner.

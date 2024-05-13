@@ -79,6 +79,9 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Generate and install keys
+        run: npm run setup:install
+
       - name: Build and start the test vault
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
 
@@ -86,7 +89,9 @@ jobs:
         run: npm run seed:vault:account
 
       - name: Setup the vault test account ciphers
-        run: npm run seed:vault:ciphers:ci
+        run: |
+          npm run start:cli
+          npm run seed:vault:ciphers
 
       - name: Download test site build
         uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
