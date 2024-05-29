@@ -108,7 +108,12 @@ export const test = base.extend<{
 
     await test.step("Close the extension welcome page when it pops up", async () => {
       // Wait for the extension to open the welcome page before continuing
-      if (!debugIsActive && process.env.HEADLESS !== "true") {
+      // (only relevant when using prod or build artifacts in CI)
+      if (
+        !debugIsActive &&
+        process.env.HEADLESS !== "true" &&
+        process.env.CI === "true"
+      ) {
         await context.waitForEvent("page");
       }
 
