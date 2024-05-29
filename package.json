@@ -14,6 +14,7 @@
   },
   "homepage": "https://bitwarden.com",
   "devDependencies": {
+    "@axe-core/playwright": "4.9.1",
     "@playwright/test": "1.44.1",
     "@types/chrome": "0.0.268",
     "@types/node": "20.12.12",
@@ -51,6 +52,9 @@
     "start:cli": "./scripts/cli-serve-helper.sh",
     "start:test-site": "./scripts/serve-test-site.sh",
     "stop:cli": "kill $(ps -e | grep 'bw serve' | grep -v 'vault-seeder' | awk '{print $1}')",
+    "test:a11y": "npm run pretest && NODE_EXTRA_CA_CERTS=ssl.crt playwright test tests/a11y",
+    "test:a11y:headless": "npm run pretest && NODE_EXTRA_CA_CERTS=ssl.crt HEADLESS=true playwright test tests/a11y",
+    "test:a11y:ci": "npm run pretest && NODE_EXTRA_CA_CERTS=ssl.crt xvfb-run playwright test tests/a11y",
     "test:public": "npm run pretest:public && NODE_EXTRA_CA_CERTS=ssl.crt playwright test tests-public",
     "test:public:debug": "npm run pretest:public && NODE_EXTRA_CA_CERTS=ssl.crt playwright test tests-public --debug",
     "test:public:headless": "npm run pretest:public && NODE_EXTRA_CA_CERTS=ssl.crt HEADLESS=true playwright test tests-public",
