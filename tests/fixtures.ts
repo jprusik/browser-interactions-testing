@@ -144,7 +144,7 @@ export const test = base.extend<{
           fullPage: true,
           path: path.join(
             screenshotsOutput,
-            "environment_configured-autofill_tests.png",
+            "browser_client_environment_configured.png",
           ),
         });
 
