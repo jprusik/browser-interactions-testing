@@ -41,7 +41,5 @@ test.describe("Browser client", () => {
     if (debugIsActive) {
       await testPage.pause();
     }
-
-    await testPage.close();
   });
 });

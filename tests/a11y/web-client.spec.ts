@@ -55,7 +55,5 @@ test.describe("Web client", () => {
     if (debugIsActive) {
       await testPage.pause();
     }
-
-    await testPage.close();
   });
 });
