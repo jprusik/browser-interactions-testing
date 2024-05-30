@@ -51,7 +51,7 @@ export async function a11yTestView({
 
           console.log(
             logColor,
-            `\t${violatingNode.impact} issue(s) found with nodes: ${violatingNode.target}\n`,
+            `\t${violatingNode.impact} issue(s) found with '${viewPath}' view nodes: ${violatingNode.target}\n`,
             `\t${violatingNode.failureSummary.replaceAll("\n", "\n\t")}\n`,
           );
         }
