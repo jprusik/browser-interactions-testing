@@ -3,7 +3,6 @@ import {
   debugIsActive,
   defaultGotoOptions,
   defaultNavigationTimeout,
-  defaultTestTimeout,
   defaultWaitForOptions,
   screenshotsOutput,
   TestNames,
@@ -18,8 +17,6 @@ test.describe("Extension presents page input inline menu with options for vault 
   test("Log in to the vault, open pages, and run page tests", async ({
     extensionSetup,
   }) => {
-    test.setTimeout(defaultTestTimeout);
-
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 

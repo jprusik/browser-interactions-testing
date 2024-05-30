@@ -1,8 +1,8 @@
 import {
+  authenticatedWebClientViewPaths,
   debugIsActive,
   defaultGotoOptions,
   defaultNavigationTimeout,
-  authenticatedWebClientViewPaths,
   unauthenticatedWebClientViewPaths,
   vaultEmail,
   vaultHostURL,

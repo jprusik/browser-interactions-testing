@@ -3,7 +3,6 @@ import {
   debugIsActive,
   defaultGotoOptions,
   defaultNavigationTimeout,
-  defaultTestTimeout,
   defaultWaitForOptions,
   screenshotsOutput,
   TestNames,
@@ -17,8 +16,6 @@ test.describe("Extension autofills forms when triggered", () => {
     background,
     extensionSetup,
   }) => {
-    test.setTimeout(defaultTestTimeout);
-
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 

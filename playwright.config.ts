@@ -3,6 +3,7 @@ import path from "path";
 import type { PlaywrightTestConfig } from "@playwright/test";
 import { devices } from "@playwright/test";
 import dotenv from "dotenv";
+import { defaultTestTimeout } from "./constants";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -11,7 +12,7 @@ import { testSiteHost } from "./constants";
 const config: PlaywrightTestConfig = {
   testDir: "./tests-out",
   /* Maximum time one test can run for. */
-  timeout: 30 * 1000,
+  timeout: defaultTestTimeout,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.

@@ -1,7 +1,7 @@
 import {
+  browserClientViewPaths,
   debugIsActive,
   defaultNavigationTimeout,
-  browserClientViewPaths,
 } from "../../constants";
 import { test, expect } from "../fixtures";
 import { a11yTestView } from "./a11y-test-view";
