@@ -25,7 +25,7 @@ test.describe("Web client", () => {
       testInfo,
     });
 
-    test.step("Log out of the web client in order to test the unauthenticated views", async () => {
+    await test.step("Log out of the web client in order to test the unauthenticated views", async () => {
       await testPage.getByRole("button", { name: vaultEmail }).click();
       await testPage.getByRole("menuitem", { name: "Log out" }).click();
       await testPage.waitForURL(`${urlBase}login`, defaultGotoOptions);
