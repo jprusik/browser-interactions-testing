@@ -34,7 +34,13 @@ const config: PlaywrightTestConfig = {
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     process.env.CI
-      ? ["github", { printSteps: true }]
+      ? [
+          "@estruyf/github-actions-reporter",
+          {
+            useDetails: true,
+            showError: true,
+          },
+        ]
       : ["list", { printSteps: true }],
     ["html", { open: "never", outputFolder: "test-summary" }],
     ["json", { outputFile: "test-summary/test-results.json" }],
