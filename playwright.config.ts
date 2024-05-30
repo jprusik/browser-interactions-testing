@@ -33,7 +33,9 @@ const config: PlaywrightTestConfig = {
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ["list", { printSteps: true }],
+    process.env.CI
+      ? ["github", { printSteps: true }]
+      : ["list", { printSteps: true }],
     ["html", { open: "never", outputFolder: "test-summary" }],
     ["json", { outputFile: "test-summary/test-results.json" }],
   ],
