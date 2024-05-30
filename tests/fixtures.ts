@@ -70,7 +70,10 @@ export const test = base.extend<{
         width: 1200,
         height: 1000,
       },
-      recordVideo: { dir: "tests-out/videos" },
+      recordVideo:
+        process.env.DISABLE_VIDEO === "true"
+          ? undefined
+          : { dir: "tests-out/videos" },
     });
 
     await Promise.all([
@@ -177,10 +180,12 @@ export const test = base.extend<{
 
       const extensionURL = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/tabs/vault`;
       await testPage.waitForURL(extensionURL, defaultGotoOptions);
-      const vaultFilterBox = await testPage
-        .locator("app-vault-filter main .box.list")
-        .first();
-      await vaultFilterBox.waitFor(defaultWaitForOptions);
+      // const vaultFilterBox = await testPage
+      //   .locator("app-vault-filter main .box.list")
+      //   .first();
+
+      // hangs on MV3 headless
+      // await vaultFilterBox.waitFor(defaultWaitForOptions);
     });
 
     await use(testPage);
