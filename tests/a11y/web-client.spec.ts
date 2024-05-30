@@ -1,24 +1,38 @@
 import {
   debugIsActive,
+  defaultGotoOptions,
   defaultNavigationTimeout,
-  browserClientViewPaths,
+  authenticatedWebClientViewPaths,
+  unauthenticatedWebClientViewPaths,
+  vaultEmail,
+  vaultHostURL,
 } from "../../constants";
 import { test, expect } from "../fixtures";
 import { a11yTestView } from "./a11y-test-view";
 
-test.describe("Browser client", () => {
-  test(`a11y checks should pass`, async ({
-    extensionId,
-    extensionSetup,
-  }, testInfo) => {
-    const urlBase = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/`;
+test.describe("Web client", () => {
+  test(`a11y checks should pass`, async ({ webClientSetup }, testInfo) => {
+    const urlBase = `${vaultHostURL}/#/`;
 
-    let testPage = await extensionSetup;
+    let testPage = await webClientSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
     let violationsCount = 0;
 
     violationsCount += await a11yTestView({
-      viewPaths: browserClientViewPaths,
+      viewPaths: authenticatedWebClientViewPaths,
+      urlBase,
+      testPage,
+      testInfo,
+    });
+
+    test.step("Log out of the web client in order to test the unauthenticated views", async () => {
+      await testPage.getByRole("button", { name: vaultEmail }).click();
+      await testPage.getByRole("menuitem", { name: "Log out" }).click();
+      await testPage.waitForURL(`${urlBase}login`, defaultGotoOptions);
+    });
+
+    violationsCount += await a11yTestView({
+      viewPaths: unauthenticatedWebClientViewPaths,
       urlBase,
       testPage,
       testInfo,
