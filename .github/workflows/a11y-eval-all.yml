@@ -1,0 +1,122 @@
+name: All-a11y-evaluation
+run-name: All a11y evaluations with MV${{ inputs.TEST_MV2 == true && 2 || 3 }} extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
+on:
+  workflow_dispatch:
+    inputs:
+      TEST_MV2:
+        default: false
+        description: "test with the manifest version 2 extension build"
+        required: false
+        type: boolean
+      CLIENTS_BRANCH:
+        default: "main"
+        description: "clients branch of browser build to use"
+        required: true
+        type: string
+      FEATURE_FLAGS:
+        default: "{}"
+        description: 'JSON key-value pairs representing feature flag states. (e.g. {"autofill-v2": true, "autofill-overlay": false})'
+        required: true
+        type: string
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      - name: Setup Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+          node-version: "20"
+
+      - name: Create dotenv file
+        run: |
+          sudo setcap 'cap_net_bind_service=+ep' `which node`
+          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+
+      - name: Create feature flags file
+        run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS }}}" > flags.json
+
+      - name: Download extension artifact
+        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-browser.yml
+          workflow_conclusion: ""
+          branch: ${{ inputs.CLIENTS_BRANCH }}
+          name: ${{ inputs.TEST_MV2 == true && '^dist-chrome-\w{7}\.zip$' || 'dist-chrome-MV3-\w{7}\.zip' }}
+          name_is_regexp: true
+          repo: bitwarden/clients
+          if_no_artifact_found: fail
+          skip_unpack: true
+
+      - name: Unzip extension artifact
+        run: |
+          unzip -o *dist-chrome-*.zip.zip
+          unzip -o 'dist-chrome*.zip' -d build
+
+      - name: Generate and install certs
+        run: |
+          npm run setup:ssl
+          sudo apt-get install libnss3-tools=2:3.68.2-0ubuntu1
+          . .env
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N --empty-password
+          certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
+
+      - name: Install Bitwarden CLI
+        run: npm install -g @bitwarden/cli@2024.2.0
+
+      - name: Install project dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Generate and install keys
+        run: npm run setup:install
+
+      - name: Build and start the test vault
+        run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
+
+      - name: Setup the vault test account
+        run: npm run seed:vault:account
+
+      - name: Setup the vault test account ciphers
+        run: |
+          npm run start:cli
+          npm run seed:vault:ciphers
+
+      - name: Download test site build
+        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          workflow_conclusion: ""
+          branch: main
+          name: build-files
+          path: test-site
+          repo: bitwarden/test-the-web
+          if_no_artifact_found: fail
+
+      - name: Copy over certs and install test site dependencies
+        run: |
+          cp ssl.crt test-site/api/
+          cp ssl.key test-site/api/
+          cd test-site
+          npm ci
+
+      - name: Run all a11y evaluation
+        run: npm run test:a11y:ci
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        if: always()
+        with:
+          name: test-summary
+          path: |
+            ./test-summary
+            ./tests-out/videos
+            ./tests-out/screenshots
