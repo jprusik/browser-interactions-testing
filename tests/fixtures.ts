@@ -70,7 +70,10 @@ export const test = base.extend<{
         width: 1200,
         height: 1000,
       },
-      recordVideo: { dir: "tests-out/videos" },
+      recordVideo:
+        process.env.DISABLE_VIDEO === "true"
+          ? undefined
+          : { dir: "tests-out/videos" },
     });
 
     await Promise.all([
