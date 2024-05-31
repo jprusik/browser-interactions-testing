@@ -10,9 +10,10 @@ import {
 import { test, expect } from "../fixtures";
 import { a11yTestView } from "./a11y-test-view";
 
-test.describe("Web client", () => {
+test.describe("Web client", { tag: ["@web-client", "@a11y"] }, () => {
   test(`a11y checks should pass`, async ({ webClientSetup }, testInfo) => {
-    const urlBase = `${vaultHostURL}/#/`;
+    const urlSharedPathBase = "/#/";
+    const urlBase = `${vaultHostURL}${urlSharedPathBase}`;
 
     let testPage = await webClientSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);

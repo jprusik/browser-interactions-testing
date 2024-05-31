@@ -1,7 +1,7 @@
 import { Page, TestInfo } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { defaultGotoOptions } from "../../constants";
-import { test } from "../fixtures";
+import { test, expect } from "../fixtures";
 
 const violationColor = {
   minor: "\x1b[1m\x1b[36m%s\x1b[0m", // cyan foreground
@@ -26,7 +26,8 @@ export async function a11yTestView({
   for (const viewPath of viewPaths) {
     const isBrowserClient = urlBase.startsWith("chrome-extension://");
     const viewUrl = `${urlBase}${viewPath}`;
-    await test.step(`for ${viewPath}`, async () => {
+
+    await test.step(`a11y eval for path: ${viewPath}`, async () => {
       await testPage.goto(viewUrl, defaultGotoOptions);
 
       const accessibilityScanResults = await new AxeBuilder({
@@ -56,6 +57,10 @@ export async function a11yTestView({
           );
         }
       }
+
+      await expect
+        .soft(violationsCount, `${viewPath} should yield 0 a11y violations`)
+        .toEqual(0);
     });
   }
 
