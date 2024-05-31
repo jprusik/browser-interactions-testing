@@ -1,32 +1,51 @@
 import {
   browserClientViewPaths,
   debugIsActive,
-  defaultNavigationTimeout,
+  messageColor,
 } from "../../constants";
 import { test, expect } from "../fixtures";
 import { a11yTestView } from "./a11y-test-view";
 
-test.describe("Browser client", () => {
-  test(`a11y checks should pass`, async ({
+test.describe("Browser client", { tag: ["@browser-client", "@a11y"] }, () => {
+  test(`a11y evaluation should pass`, async ({
     extensionId,
     extensionSetup,
   }, testInfo) => {
     const urlBase = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/`;
 
     let testPage = await extensionSetup;
-    testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
     let violationsCount = 0;
 
-    violationsCount += await a11yTestView({
-      viewPaths: browserClientViewPaths,
-      urlBase,
-      testPage,
-      testInfo,
-    });
+    for (const viewPath of browserClientViewPaths) {
+      await test.step(`for path: popout#/${viewPath}`, async () => {
+        const newViolationsCount = await a11yTestView({
+          viewPath,
+          urlBase,
+          testPage,
+          testInfo,
+        });
+
+        if (newViolationsCount) {
+          await testInfo.annotations.push({
+            type: `issue`,
+            description: `${newViolationsCount} a11y violations found for popout#/${viewPath}`,
+          });
+        }
+
+        await expect
+          .soft(
+            newViolationsCount,
+            `view for \`popout#/${viewPath}\` should yield 0 violations`,
+          )
+          .toEqual(0);
+
+        violationsCount += newViolationsCount;
+      });
+    }
 
     if (violationsCount) {
       console.warn(
-        "\x1b[1m\x1b[33m%s\x1b[0m", // bold, yellow foreground
+        messageColor.yellowForeground,
         `${violationsCount} a11y issues were discovered. See log output and attached report for details.`,
       );
     }
