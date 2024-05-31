@@ -1,8 +1,4 @@
-import {
-  browserClientViewPaths,
-  debugIsActive,
-  defaultNavigationTimeout,
-} from "../../constants";
+import { browserClientViewPaths, debugIsActive } from "../../constants";
 import { test, expect } from "../fixtures";
 import { a11yTestView } from "./a11y-test-view";
 
@@ -14,15 +10,27 @@ test.describe("Browser client", () => {
     const urlBase = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/`;
 
     let testPage = await extensionSetup;
-    testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
     let violationsCount = 0;
 
-    violationsCount += await a11yTestView({
-      viewPaths: browserClientViewPaths,
-      urlBase,
-      testPage,
-      testInfo,
-    });
+    for (const viewPath of browserClientViewPaths) {
+      await test.step(`for path: popout#/${viewPath}`, async () => {
+        const newViolationsCount = await a11yTestView({
+          viewPath,
+          urlBase,
+          testPage,
+          testInfo,
+        });
+
+        await expect
+          .soft(
+            newViolationsCount,
+            `view for \`popout#/${viewPath}\` should yield 0 violations`,
+          )
+          .toEqual(0);
+
+        violationsCount += newViolationsCount;
+      });
+    }
 
     if (violationsCount) {
       console.warn(

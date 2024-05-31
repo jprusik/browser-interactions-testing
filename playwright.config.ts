@@ -22,8 +22,8 @@ const config: PlaywrightTestConfig = {
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
-  /* Limit the number of failures on CI to save resources */
-  maxFailures: process.env.CI ? 5 : undefined,
+  /* Note: a11y tests have expected failures (as soft assertions), so we shouldn't bail early */
+  maxFailures: undefined,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */

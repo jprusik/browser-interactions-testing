@@ -1,3 +1,4 @@
+# @TODO We should use the clients web build artifacts for testing; right now, these tests are tied to whatever version of web is served from the self-host image used in the `docker-compose.yml`
 name: Web-client-a11y-evaluation
 run-name: Web client a11y evaluation with MV${{ inputs.TEST_MV2 == true && 2 || 3 }} extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
@@ -40,6 +41,7 @@ jobs:
       - name: Create feature flags file
         run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS }}}" > flags.json
 
+      # @TODO remove this - extension is not needed for web client testing
       - name: Download extension artifact
         uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
         with:
@@ -53,6 +55,7 @@ jobs:
           if_no_artifact_found: fail
           skip_unpack: true
 
+      # @TODO remove this - extension is not needed for web client testing
       - name: Unzip extension artifact
         run: |
           unzip -o *dist-chrome-*.zip.zip
