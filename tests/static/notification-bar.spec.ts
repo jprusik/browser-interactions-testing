@@ -2,23 +2,19 @@ import path from "path";
 import {
   defaultGotoOptions,
   defaultNavigationTimeout,
-  defaultTestTimeout,
   defaultWaitForOptions,
   screenshotsOutput,
   TestNames,
-} from "../constants";
-import { test, expect } from "./fixtures";
-import { FillProperties } from "../abstractions";
-import { getPagesToTest, formatUrlToFilename } from "./utils";
+} from "../../constants";
+import { test, expect } from "../fixtures";
+import { FillProperties } from "../../abstractions";
+import { getPagesToTest, formatUrlToFilename } from "../utils";
 
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
   test("Log in to the vault, open pages, and run page tests", async ({
-    background,
     extensionId,
     extensionSetup,
   }) => {
-    test.setTimeout(defaultTestTimeout);
-
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 

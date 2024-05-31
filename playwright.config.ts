@@ -3,6 +3,7 @@ import path from "path";
 import type { PlaywrightTestConfig } from "@playwright/test";
 import { devices } from "@playwright/test";
 import dotenv from "dotenv";
+import { defaultTestTimeout } from "./constants";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -11,7 +12,7 @@ import { testSiteHost } from "./constants";
 const config: PlaywrightTestConfig = {
   testDir: "./tests-out",
   /* Maximum time one test can run for. */
-  timeout: 30 * 1000,
+  timeout: defaultTestTimeout,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -26,13 +27,15 @@ const config: PlaywrightTestConfig = {
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI && process.env.DISABLE_RETRY !== "true" ? 1 : 0,
   /* Opt out of parallel tests on CI. */
   // Note: MV3 build currently requires single worker operation
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ["list", { printSteps: true }],
+    process.env.CI
+      ? ["github", { printSteps: true }]
+      : ["list", { printSteps: true }],
     ["html", { open: "never", outputFolder: "test-summary" }],
     ["json", { outputFile: "test-summary/test-results.json" }],
   ],
