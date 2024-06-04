@@ -7,8 +7,8 @@ import {
   vaultEmail,
   vaultHostURL,
 } from "../../constants";
-import { test, expect } from "../fixtures";
-import { a11yTestView } from "./a11y-test-view";
+import { test, expect } from "../fixtures.web";
+import { a11yTestView } from "../utils";
 
 test.describe("Web client", { tag: ["@web-client", "@a11y"] }, async () => {
   await test(`a11y evaluation should pass`, async ({

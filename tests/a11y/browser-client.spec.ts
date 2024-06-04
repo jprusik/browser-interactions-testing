@@ -3,8 +3,8 @@ import {
   debugIsActive,
   messageColor,
 } from "../../constants";
-import { test, expect } from "../fixtures";
-import { a11yTestView } from "./a11y-test-view";
+import { test, expect } from "../fixtures.browser";
+import { a11yTestView } from "../utils";
 
 test.describe("Browser client", { tag: ["@browser-client", "@a11y"] }, () => {
   test(`a11y evaluation should pass`, async ({
