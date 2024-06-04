@@ -12,17 +12,19 @@ class MarkdownReporter implements Reporter {
   lines: string[];
   outputFolder: string;
   steps: string;
-  totalCompletedTests: number;
   totalFailedTests: number;
+  totalPassedTests: number;
   totalSkippedTests: number;
+  totalTests: number;
 
   constructor(options: { outputFolder?: string } = {}) {
     this.lines = [];
     this.outputFolder = options.outputFolder || ".";
     this.steps = "";
-    this.totalCompletedTests = 0;
     this.totalFailedTests = 0;
+    this.totalPassedTests = 0;
     this.totalSkippedTests = 0;
+    this.totalTests = 0;
   }
 
   onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
@@ -34,9 +36,10 @@ class MarkdownReporter implements Reporter {
 
   onTestEnd(test: TestCase, result: TestResult) {
     const resultStatus = result.status;
+    this.totalTests++;
 
     if (resultStatus === "passed") {
-      this.totalCompletedTests++;
+      this.totalPassedTests++;
     }
 
     if (resultStatus === "skipped") {
@@ -95,7 +98,7 @@ class MarkdownReporter implements Reporter {
   onEnd(result: FullResult) {
     const markdownDoc = [
       "# Test Summary",
-      `\nTotal tests: ${this.totalCompletedTests} | Failed: ${this.totalFailedTests}\n`,
+      `\nTotal tests: ${this.totalTests} | Passed: ${this.totalPassedTests} | Failed: ${this.totalFailedTests} | Skipped: ${this.totalSkippedTests}\n`,
       ...this.lines,
     ].join("\n");
 

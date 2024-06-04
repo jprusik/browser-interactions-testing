@@ -89,10 +89,6 @@ jobs:
           npm run start:cli
           npm run seed:vault:ciphers
 
-      - name: Update job summary
-        if: always()
-        run: echo "$(<./test-summary/test-summary.md)" >> $GITHUB_STEP_SUMMARY
-
       - name: Download test site build
         uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
         with:
@@ -114,6 +110,10 @@ jobs:
 
       - name: Run notification tests
         run: npm run test:static:notification:ci
+
+      - name: Update job summary
+        if: always()
+        run: echo "$(<./test-summary/test-summary.md)" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
