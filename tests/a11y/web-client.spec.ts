@@ -21,20 +21,14 @@ test.describe("Web client", { tag: ["@web-client", "@a11y"] }, async () => {
     let violationsCount = 0;
 
     for (const viewPath of authenticatedWebClientViewPaths) {
-      await test.step(`for path: ${urlSharedPathBase + viewPath}`, async () => {
+      await test.step(`for path: \`${urlSharedPathBase + viewPath}\``, async () => {
         const newViolationsCount = await a11yTestView({
-          viewPath,
-          urlBase,
-          testPage,
           testInfo,
+          testPage,
+          urlBase,
+          urlSharedPathBase,
+          viewPath,
         });
-
-        if (newViolationsCount) {
-          await testInfo.annotations.push({
-            type: `issue`,
-            description: `${newViolationsCount} a11y violations found for ${urlSharedPathBase + viewPath}`,
-          });
-        }
 
         await expect
           .soft(
@@ -58,20 +52,14 @@ test.describe("Web client", { tag: ["@web-client", "@a11y"] }, async () => {
     );
 
     for (const viewPath of unauthenticatedWebClientViewPaths) {
-      await test.step(`for path: ${urlSharedPathBase + viewPath}`, async () => {
+      await test.step(`for path: \`${urlSharedPathBase + viewPath}\``, async () => {
         const newViolationsCount = await a11yTestView({
-          viewPath,
-          urlBase,
-          testPage,
           testInfo,
+          testPage,
+          urlBase,
+          urlSharedPathBase,
+          viewPath,
         });
-
-        if (newViolationsCount) {
-          await testInfo.annotations.push({
-            type: `issue`,
-            description: `${newViolationsCount} a11y violations found for ${urlSharedPathBase + viewPath}`,
-          });
-        }
 
         await expect
           .soft(

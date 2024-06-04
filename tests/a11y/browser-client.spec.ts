@@ -11,26 +11,21 @@ test.describe("Browser client", { tag: ["@browser-client", "@a11y"] }, () => {
     extensionId,
     extensionSetup,
   }, testInfo) => {
+    const urlSharedPathBase = "popout#/";
     const urlBase = `chrome-extension://${extensionId}/popup/index.html?uilocation=popout#/`;
 
     let testPage = await extensionSetup;
     let violationsCount = 0;
 
     for (const viewPath of browserClientViewPaths) {
-      await test.step(`for path: popout#/${viewPath}`, async () => {
+      await test.step(`for path: \`${urlSharedPathBase}${viewPath}\``, async () => {
         const newViolationsCount = await a11yTestView({
-          viewPath,
-          urlBase,
-          testPage,
           testInfo,
+          testPage,
+          urlBase,
+          urlSharedPathBase,
+          viewPath,
         });
-
-        if (newViolationsCount) {
-          await testInfo.annotations.push({
-            type: `issue`,
-            description: `${newViolationsCount} a11y violations found for popout#/${viewPath}`,
-          });
-        }
 
         await expect
           .soft(

@@ -7,15 +7,17 @@ import {
 } from "../../constants";
 
 export async function a11yTestView({
-  viewPath,
-  urlBase,
-  testPage,
   testInfo,
+  testPage,
+  urlBase,
+  urlSharedPathBase,
+  viewPath,
 }: {
-  viewPath: string;
-  urlBase: string;
-  testPage: Page;
   testInfo: TestInfo;
+  testPage: Page;
+  urlBase: string;
+  urlSharedPathBase: string;
+  viewPath: string;
 }): Promise<number> {
   let violationsCount = 0;
 
@@ -43,6 +45,8 @@ export async function a11yTestView({
     contentType: "application/json",
   });
 
+  let annotationMessages: string[][] = [];
+
   for (const violation of accessibilityScanResults.violations) {
     violationsCount += violation.nodes.length;
 
@@ -51,16 +55,36 @@ export async function a11yTestView({
         ? violationColor[violatingNode.impact]
         : "";
 
-      console.log(
-        logColor,
-        `\t${violatingNode.impact} issue(s) found with '${viewPath}' view nodes:`,
-      );
+      // Some hacky whitespace formatting for shared spacing between stout and markdown-reporter
+      const annotationMessage = [
+        `${violatingNode.impact} issue(s) found with \`${viewPath}\` view nodes:\n`,
+        `  \`${violatingNode.target[0].toLocaleString()}\`\n`,
+        `  ${violatingNode.failureSummary.replaceAll("\n", "\n\n      ")}\n`,
+      ];
+
+      annotationMessages = [...annotationMessages, annotationMessage];
+
+      console.log(logColor, `     ${annotationMessage[0]}`);
       console.log(
         messageColor.boldForeground,
-        `\t${violatingNode.target[0].toLocaleString()}\n\n`,
-        `\t${violatingNode.failureSummary.replaceAll("\n", "\n\t")}\n`,
+        `     ${annotationMessage[1]}\n`,
+        `     ${annotationMessage[2]}`,
       );
     }
+  }
+
+  if (violationsCount) {
+    await testInfo.annotations.push({
+      type: `issue`,
+      description: `${violationsCount} a11y violations found for \`${urlSharedPathBase + viewPath}\``,
+    });
+
+    await annotationMessages.forEach(async (violationMessage) => {
+      await testInfo.annotations.push({
+        type: `issue-details`,
+        description: violationMessage.join("\n  "),
+      });
+    });
   }
 
   return violationsCount;
