@@ -50,9 +50,7 @@ export const testPages: PageTest[] = [
           .click(),
     },
     skipTests: [
-      TestNames.InlineMenuAutofill, // @TODO known failure
-      TestNames.MessageAutofill, // @TODO known failure
-      TestNames.PasswordUpdateNotification, // @TODO known failure
+      TestNames.InlineMenuAutofill, // @TODO known failure - inline menu appears, but fails to autofill (PM-8704)
     ],
   },
   {
@@ -81,9 +79,8 @@ export const testPages: PageTest[] = [
           .click(),
     },
     skipTests: [
-      TestNames.InlineMenuAutofill, // @TODO known failure
-      TestNames.MessageAutofill, // @TODO known failure
-      TestNames.PasswordUpdateNotification, // @TODO known failure
+      TestNames.InlineMenuAutofill, // @TODO known failure - inline menu appears, but fails to autofill (PM-8693)
+      TestNames.MessageAutofill, // @TODO known failure - fails to autofill (PM-8693)
     ],
   },
   {
@@ -97,22 +94,85 @@ export const testPages: PageTest[] = [
         await page.getByRole("button", { name: "Login", exact: true }).click(),
     },
     skipTests: [
-      TestNames.NewCredentialsNotification, // @TODO known failure
-      TestNames.PasswordUpdateNotification, // @TODO known failure
+      TestNames.NewCredentialsNotification, // @TODO known failure - save prompt does not appear (PM-8694)
+      TestNames.PasswordUpdateNotification, // @TODO known failure - update prompt does not appear (PM-8694)
     ],
   },
-  // @TODO add test for /forms/login/hidden-login
+  {
+    url: `${testSiteHost}/forms/login/hidden-login`,
+    inputs: {
+      username: {
+        preFillActions: async (page) => {
+          // Click button to display form step
+          await page
+            .getByRole("button", { name: "Show login", exact: true })
+            .click();
+        },
+        multiStepNextInputKey: "email",
+        selector: "#username",
+        value: testUserName,
+      },
+      email: {
+        multiStepNextInputKey: "password",
+        selector: "#email",
+        value: testEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeHiddenFormPassword",
+      },
+    },
+    skipTests: [
+      TestNames.NewCredentialsNotification, // @TODO known failure - save prompt does not appear (PM-8697)
+      TestNames.PasswordUpdateNotification, // @TODO known failure - update prompt does not appear (PM-8697)
+    ],
+  },
   {
     url: `${testSiteHost}/forms/login/input-constraints-login`,
     inputs: {
-      username: { selector: "#email", value: testEmail },
+      username: {
+        selector: "#email",
+        value: testEmail,
+      },
       password: {
         selector: "#password",
         value: "123456",
       },
     },
   },
-  // @TODO add test for /forms/login/login-honeypot
+  {
+    url: `${testSiteHost}/forms/login/login-honeypot`,
+    inputs: {
+      username: {
+        selector: "#username",
+        value: testUserName,
+      },
+      code: {
+        selector: "input[name='honeypotCode']",
+        shouldNotFill: true,
+        value: "fakeLoginHoneypotCode",
+      },
+      newPassword: {
+        selector: "input[name='honeypotPassword']",
+        shouldNotFill: true,
+        value: "fakeLoginHoneypotPassword",
+      },
+      email: {
+        selector: "input[name='honeypotEmail']",
+        shouldNotFill: true,
+        value: "fakeLoginHoneypotEmail",
+      },
+      password: {
+        selector: "#password",
+        value: "fakeLoginHoneypotPassword",
+      },
+    },
+    skipTests: [
+      TestNames.NewCredentialsNotification, // @TODO known failure - save prompt does not appear (PM-8696)
+      TestNames.PasswordUpdateNotification, // @TODO known failure - update prompt does not appear (PM-8696)
+      TestNames.InlineMenuAutofill, // @TODO known failure - inline menu fills "honeypotPassword" honeypot input (PM-8695)
+    ],
+  },
   {
     url: `${testSiteHost}/forms/login/multi-step-login`,
     inputs: {
@@ -129,11 +189,13 @@ export const testPages: PageTest[] = [
       password: { selector: "#password", value: "fakeMultiStepPassword" },
     },
     skipTests: [
-      TestNames.NewCredentialsNotification, // @TODO known failure
-      TestNames.PasswordUpdateNotification, // @TODO known failure
+      TestNames.NewCredentialsNotification, // @TODO known failure - save prompt does not appear (PM-8697)
+      TestNames.PasswordUpdateNotification, // @TODO known failure - update prompt does not appear (PM-8697)
     ],
   },
-  // @TODO add test for /forms/login/security-code-multi-input
+  // @TODO add test for /forms/create/security-code-multi-input
+  // (Note, TOTP autofill is a Premium subscription feature)
+  // @TODO known failure - auto-fill fails to correctly fill multi-input TOTP entry (PM-8703)
   {
     url: `${testSiteHost}/forms/login/shadow-root-inputs`,
     inputs: {
@@ -151,12 +213,13 @@ export const testPages: PageTest[] = [
         await page.getByRole("button", { name: "Login", exact: true }).click(),
     },
     skipTests: [
-      TestNames.NewCredentialsNotification, // @TODO known failure
-      TestNames.PasswordUpdateNotification, // @TODO known failure
+      TestNames.NewCredentialsNotification, // @TODO known failure - save prompt does not appear (PM-8698)
+      TestNames.PasswordUpdateNotification, // @TODO known failure - update prompt does not appear (PM-8698)
     ],
   },
   // @TODO add test for /forms/create/create-account
-  // Card and Identity Ciphers currently cannot be autofilled through the same mechanism that Login Ciphers are. This is because of how we handle messaging the background for autofilling login items. The extension will need to be updated to handle these types of Ciphers.
+  // @TODO add test for /forms/create/create-account-extended/
+  // Card and Identity Ciphers currently cannot be autofilled through the same mechanism that Login Ciphers are. This is because of how we handle messaging for autofilling login items. The extension will need to be updated to handle these types of Ciphers.
   {
     url: `${testSiteHost}/forms/identity/address-na`,
     inputs: {
@@ -174,8 +237,8 @@ export const testPages: PageTest[] = [
     skipTests: [
       TestNames.InlineMenuAutofill, // No autofill available for this type of cipher
       TestNames.MessageAutofill, // No autofill available for this type of cipher
-      TestNames.NewCredentialsNotification, // No new cipher notification available for this type of cipher
-      TestNames.PasswordUpdateNotification, // No update notification available for this type of cipher
+      TestNames.NewCredentialsNotification, // No new cipher notification available for this type of cipher (PM-8699)
+      TestNames.PasswordUpdateNotification, // No update notification available for this type of cipher (PM-8699)
     ],
   },
   {
@@ -193,8 +256,8 @@ export const testPages: PageTest[] = [
     skipTests: [
       TestNames.InlineMenuAutofill, // No autofill available for this type of cipher
       TestNames.MessageAutofill, // No autofill available for this type of cipher
-      TestNames.NewCredentialsNotification, // No new cipher notification available for this type of
-      TestNames.PasswordUpdateNotification, // No update notification available for this type of cipher
+      TestNames.NewCredentialsNotification, // No new cipher notification available for this type of cipher (PM-8699)
+      TestNames.PasswordUpdateNotification, // No update notification available for this type of cipher (PM-8699)
     ],
   },
   {
@@ -202,6 +265,7 @@ export const testPages: PageTest[] = [
     inputs: {
       username: {
         shouldNotFill: true,
+        shouldNotHaveInlineMenu: true,
         selector: "#search",
         value: testUserName,
       },
@@ -211,13 +275,93 @@ export const testPages: PageTest[] = [
         value: "fakeSearchPassword",
       },
     },
-    shouldNotTriggerNotification: true,
+    shouldNotTriggerNewNotification: true,
+    shouldNotTriggerUpdateNotification: true,
+    skipTests: [],
+  },
+  {
+    url: `${testSiteHost}/forms/search/inline-search`,
+    inputs: {
+      username: {
+        shouldNotFill: true,
+        shouldNotHaveInlineMenu: true,
+        selector: "#search",
+        value: testUserName,
+      },
+      password: {
+        shouldNotFill: true,
+        shouldNotHaveInlineMenu: true,
+        selector: "#search",
+        value: "fakeSearchPassword",
+      },
+    },
+    shouldNotTriggerNewNotification: true,
+    shouldNotTriggerUpdateNotification: true,
+    skipTests: [],
+  },
+  {
+    url: `${testSiteHost}/forms/search/typeless-search`,
+    inputs: {
+      username: {
+        shouldNotFill: true,
+        shouldNotHaveInlineMenu: true,
+        selector: "input.typeless-search-input",
+        value: testUserName,
+      },
+      password: {
+        shouldNotFill: true,
+        selector: "input.typeless-search-input",
+        value: "fakeSearchPassword",
+      },
+    },
+    shouldNotTriggerNewNotification: true,
+    shouldNotTriggerUpdateNotification: true,
+    skipTests: [],
+  },
+  {
+    url: `${testSiteHost}/forms/update/update-email`,
+    inputs: {
+      username: {
+        shouldNotFill: true,
+        selector: "#email",
+        value: "new" + testEmail,
+      },
+      password: {
+        selector: "#password",
+        value: "fakeUpdateEmailPagePassword",
+      },
+    },
+    shouldNotTriggerNewNotification: true,
     skipTests: [
-      TestNames.InlineMenuAutofill, // No inline menu to test for this input
+      TestNames.NewCredentialsNotification, // @TODO need to update test design to handle this test page case (e.g. existing password should be used for the password field) // @TODO known failure - because the email is being updated, the update is seen as a new cipher, rather than an update to an existing one (PM-8700)
+      TestNames.PasswordUpdateNotification, // @TODO need to update test design to handle this test page case (e.g. existing password should be used for the password field) // @TODO known failure - because the email is being updated, the update is seen as a new cipher, rather than an update to an existing one (PM-8700)
+      TestNames.InlineMenuAutofill, // @TODO known failure - fills new email input with attribute `autocomplete="off"` (PM-8701)
+      TestNames.MessageAutofill, // @TODO known failure - fills new email input with attribute `autocomplete="off"` (PM-8701)
     ],
   },
-  // @TODO add test for /forms/search/inline-search
-  // @TODO add test for /forms/search/typeless-search
-  // @TODO add test for /forms/update/update-email
-  // @TODO add test for /forms/update/update-password
+  {
+    url: `${testSiteHost}/forms/update/update-password`,
+    inputs: {
+      password: {
+        selector: "#currentPassword",
+        value: "fakeUpdatePasswordPagePassword",
+      },
+      newPassword: {
+        shouldNotFill: true,
+        selector: "#newPassword",
+        value: "newFakeUpdatePasswordPagePassword",
+      },
+      newPasswordRetype: {
+        shouldNotFill: true,
+        selector: "#newPasswordRetype",
+        value: "newFakeUpdatePasswordPagePassword",
+      },
+    },
+    shouldNotTriggerNewNotification: true,
+    skipTests: [
+      TestNames.PasswordUpdateNotification, // @TODO need to update test design to handle this test page case (e.g. existing password should be used for the current password field)
+      TestNames.InlineMenuAutofill, // @TODO known failure - fills new password inputs with attribute `autocomplete="new-password"` (PM-8701)
+      TestNames.MessageAutofill, // @TODO known failure - fills new password inputs with attribute `autocomplete="new-password"` (PM-8701)
+    ],
+  },
 ];

@@ -5,6 +5,7 @@ type FillProperties = {
   multiStepNextInputKey?: string;
   preFillActions?: (page: Page) => void;
   selector: string | ((page: Page) => Promise<Locator>);
+  shouldNotHaveInlineMenu?: boolean;
   shouldNotFill?: boolean;
   value: string;
 };
@@ -15,6 +16,8 @@ type PageTest = {
     // Login fields
     username?: FillProperties;
     password?: FillProperties;
+    newPassword?: FillProperties;
+    newPasswordRetype?: FillProperties;
     totp?: FillProperties;
 
     // Card fields
@@ -49,7 +52,8 @@ type PageTest = {
   actions?: {
     submit?: (page: Page) => void;
   };
-  shouldNotTriggerNotification?: boolean;
+  shouldNotTriggerNewNotification?: boolean;
+  shouldNotTriggerUpdateNotification?: boolean;
 };
 
 type TestNameKeys = (typeof TestNames)[keyof typeof TestNames];
