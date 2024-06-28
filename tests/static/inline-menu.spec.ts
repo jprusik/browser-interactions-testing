@@ -25,7 +25,10 @@ test.describe("Extension presents page input inline menu with options for vault 
   test("Log in to the vault, open pages, and run page tests", async ({
     extensionSetup,
     extensionId,
-  }) => {
+  }, testInfo) => {
+    const testRetryPath = testInfo.retry
+      ? `${testOutputPath}-retry-${testInfo.retry}`
+      : testOutputPath;
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
@@ -126,7 +129,7 @@ test.describe("Extension presents page input inline menu with options for vault 
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              testOutputPath,
+              testRetryPath,
               `${formatUrlToFilename(url)}-${inputKey}-inline_menu.png`,
             ),
           });

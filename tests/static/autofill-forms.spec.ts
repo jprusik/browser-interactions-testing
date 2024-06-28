@@ -24,7 +24,11 @@ test.describe("Extension autofills forms when triggered", () => {
   test("Log in to the vault, open pages, and run page tests", async ({
     background,
     extensionSetup,
-  }) => {
+  }, testInfo) => {
+    const testRetryPath = testInfo.retry
+      ? `${testOutputPath}-retry-${testInfo.retry}`
+      : testOutputPath;
+
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
@@ -96,7 +100,7 @@ test.describe("Extension autofills forms when triggered", () => {
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              testOutputPath,
+              testRetryPath,
               `${formatUrlToFilename(url)}-${inputKey}-autofill.png`,
             ),
           });

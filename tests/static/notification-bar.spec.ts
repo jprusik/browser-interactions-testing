@@ -23,7 +23,10 @@ test.describe("Extension triggers a notification bar when a page form is submitt
   test("Log in to the vault, open pages, and run page tests", async ({
     extensionId,
     extensionSetup,
-  }) => {
+  }, testInfo) => {
+    const testRetryPath = testInfo.retry
+      ? `${testOutputPath}-retry-${testInfo.retry}`
+      : testOutputPath;
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
@@ -141,7 +144,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              testOutputPath,
+              testRetryPath,
               `${formatUrlToFilename(url)}-notification-new-cipher.png`,
             ),
           });
