@@ -6,6 +6,7 @@ import {
   Page,
   Worker,
   type BrowserContext,
+  type BrowserContextOptions,
 } from "@playwright/test";
 import { configDotenv } from "dotenv";
 
@@ -33,8 +34,10 @@ export const test = base.extend<{
   extensionId: string;
   extensionSetup: Page;
   manifestVersion: number;
+  recordVideoConfig: BrowserContextOptions["recordVideo"];
+  testOutputPath?: string;
 }>({
-  context: async ({ browser }, use) => {
+  context: async ({ browser, recordVideoConfig }, use) => {
     console.log(
       "\x1b[1m\x1b[36m%s\x1b[0m", // cyan foreground
       "\tTesting with:",
@@ -68,10 +71,7 @@ export const test = base.extend<{
         width: 1200,
         height: 1000,
       },
-      recordVideo:
-        process.env.DISABLE_VIDEO === "true"
-          ? undefined
-          : { dir: "tests-out/videos" },
+      recordVideo: recordVideoConfig,
     });
 
     await Promise.all([
@@ -105,7 +105,7 @@ export const test = base.extend<{
     const extensionId = background.url().split("/")[2];
     await use(extensionId);
   },
-  extensionSetup: async ({ context, extensionId }, use) => {
+  extensionSetup: async ({ context, extensionId, testOutputPath }, use) => {
     let testPage: Page;
 
     await test.step("Close the extension welcome page when it pops up", async () => {
@@ -142,6 +142,7 @@ export const test = base.extend<{
           fullPage: true,
           path: path.join(
             screenshotsOutput,
+            testOutputPath,
             "browser_client_environment_configured.png",
           ),
         });
@@ -199,6 +200,11 @@ export const test = base.extend<{
 
     use(manifestVersion);
   },
+  recordVideoConfig:
+    process.env.DISABLE_VIDEO === "true"
+      ? undefined
+      : { dir: "tests-out/videos" },
+  testOutputPath: "",
 });
 
 export const expect = test.expect;

@@ -11,7 +11,16 @@ import { test, expect } from "../fixtures.browser";
 import { FillProperties } from "../../abstractions";
 import { getPagesToTest, doAutofill, formatUrlToFilename } from "../utils";
 
+const testOutputPath = "autofill-forms";
+
 test.describe("Extension autofills forms when triggered", () => {
+  test.use({
+    recordVideoConfig: process.env.DISABLE_VIDEO !== "true" && {
+      dir: `tests-out/videos/${testOutputPath}`,
+    },
+    testOutputPath,
+  });
+
   test("Log in to the vault, open pages, and run page tests", async ({
     background,
     extensionSetup,
@@ -87,6 +96,7 @@ test.describe("Extension autofills forms when triggered", () => {
             fullPage: true,
             path: path.join(
               screenshotsOutput,
+              testOutputPath,
               `${formatUrlToFilename(url)}-${inputKey}-autofill.png`,
             ),
           });

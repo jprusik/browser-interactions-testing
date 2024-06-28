@@ -10,7 +10,16 @@ import { test, expect } from "../fixtures.browser";
 import { FillProperties } from "../../abstractions";
 import { getPagesToTest, formatUrlToFilename } from "../utils";
 
+const testOutputPath = "notification-bar";
+
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
+  test.use({
+    recordVideoConfig: process.env.DISABLE_VIDEO !== "true" && {
+      dir: `tests-out/videos/${testOutputPath}`,
+    },
+    testOutputPath,
+  });
+
   test("Log in to the vault, open pages, and run page tests", async ({
     extensionId,
     extensionSetup,
@@ -132,6 +141,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
+              testOutputPath,
               `${formatUrlToFilename(url)}-notification-new-cipher.png`,
             ),
           });
@@ -248,6 +258,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
+              testOutputPath,
               `${formatUrlToFilename(url)}-notification-update-cipher.png`,
             ),
           });
