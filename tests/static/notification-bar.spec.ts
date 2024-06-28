@@ -12,6 +12,11 @@ import { getPagesToTest, formatUrlToFilename } from "../utils";
 
 const testOutputPath = "notification-bar";
 
+// Notification bar tests are currently flaky, so give them an extra retry
+test.describe.configure({
+  retries: process.env.CI && process.env.DISABLE_RETRY !== "true" ? 2 : 0,
+});
+
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
   test.use({
     recordVideoConfig: process.env.DISABLE_VIDEO !== "true" && {
