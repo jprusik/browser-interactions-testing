@@ -11,6 +11,7 @@ import { FillProperties } from "../../abstractions";
 import { getPagesToTest, formatUrlToFilename } from "../utils";
 
 const testOutputPath = "notification-bar";
+let testRetryCount = 0;
 
 // Notification bar tests are currently flaky, so give them an extra retry
 test.describe.configure({
@@ -29,9 +30,10 @@ test.describe("Extension triggers a notification bar when a page form is submitt
     extensionId,
     extensionSetup,
   }, testInfo) => {
-    const testRetryPath = testInfo.retry
-      ? `${testOutputPath}-retry-${testInfo.retry}`
-      : testOutputPath;
+    if (testInfo.retry > testRetryCount) {
+      testRetryCount = testInfo.retry;
+    }
+
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
@@ -149,8 +151,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              testRetryPath,
-              `${formatUrlToFilename(url)}-notification-new-cipher.png`,
+              `${formatUrlToFilename(url)}-notification-new-cipher-attempt-${testRetryCount + 1}.png`,
             ),
           });
 
@@ -266,8 +267,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              testOutputPath,
-              `${formatUrlToFilename(url)}-notification-update-cipher.png`,
+              `${formatUrlToFilename(url)}-notification-update-cipher-attempt-${testRetryCount + 1}.png`,
             ),
           });
 

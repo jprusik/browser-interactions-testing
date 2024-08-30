@@ -12,6 +12,7 @@ import { FillProperties } from "../../abstractions";
 import { getPagesToTest, doAutofill, formatUrlToFilename } from "../utils";
 
 const testOutputPath = "autofill-forms";
+let testRetryCount = 0;
 
 test.describe("Extension autofills forms when triggered", () => {
   test.use({
@@ -25,9 +26,9 @@ test.describe("Extension autofills forms when triggered", () => {
     background,
     extensionSetup,
   }, testInfo) => {
-    const testRetryPath = testInfo.retry
-      ? `${testOutputPath}-retry-${testInfo.retry}`
-      : testOutputPath;
+    if (testInfo.retry > testRetryCount) {
+      testRetryCount = testInfo.retry;
+    }
 
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
@@ -100,8 +101,7 @@ test.describe("Extension autofills forms when triggered", () => {
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              testRetryPath,
-              `${formatUrlToFilename(url)}-${inputKey}-autofill.png`,
+              `${formatUrlToFilename(url)}-${inputKey}-autofill-attempt-${testRetryCount + 1}.png`,
             ),
           });
 
