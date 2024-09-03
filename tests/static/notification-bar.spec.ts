@@ -10,11 +10,30 @@ import { test, expect } from "../fixtures.browser";
 import { FillProperties } from "../../abstractions";
 import { getPagesToTest, formatUrlToFilename } from "../utils";
 
+const testOutputPath = "notification-bar";
+let testRetryCount = 0;
+
+// Notification bar tests are currently flaky, so give them an extra retry
+test.describe.configure({
+  retries: process.env.CI && process.env.DISABLE_RETRY !== "true" ? 2 : 0,
+});
+
 test.describe("Extension triggers a notification bar when a page form is submitted with non-stored values", () => {
+  test.use({
+    recordVideoConfig: process.env.DISABLE_VIDEO !== "true" && {
+      dir: `tests-out/videos/${testOutputPath}`,
+    },
+    testOutputPath,
+  });
+
   test("Log in to the vault, open pages, and run page tests", async ({
     extensionId,
     extensionSetup,
-  }) => {
+  }, testInfo) => {
+    if (testInfo.retry > testRetryCount) {
+      testRetryCount = testInfo.retry;
+    }
+
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
@@ -132,7 +151,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${formatUrlToFilename(url)}-notification-new-cipher.png`,
+              `${formatUrlToFilename(url)}-notification-new-cipher-attempt-${testRetryCount + 1}.png`,
             ),
           });
 
@@ -248,7 +267,7 @@ test.describe("Extension triggers a notification bar when a page form is submitt
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${formatUrlToFilename(url)}-notification-update-cipher.png`,
+              `${formatUrlToFilename(url)}-notification-update-cipher-attempt-${testRetryCount + 1}.png`,
             ),
           });
 

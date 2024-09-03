@@ -12,12 +12,25 @@ import { FillProperties } from "../../abstractions";
 import { getPagesToTest, formatUrlToFilename } from "../utils";
 
 const inlineMenuAppearanceDelay = 800;
+const testOutputPath = "inline-menu";
+let testRetryCount = 0;
 
 test.describe("Extension presents page input inline menu with options for vault interaction", () => {
+  test.use({
+    recordVideoConfig: process.env.DISABLE_VIDEO !== "true" && {
+      dir: `tests-out/videos/${testOutputPath}`,
+    },
+    testOutputPath,
+  });
+
   test("Log in to the vault, open pages, and run page tests", async ({
     extensionSetup,
     extensionId,
-  }) => {
+  }, testInfo) => {
+    if (testInfo.retry > testRetryCount) {
+      testRetryCount = testInfo.retry;
+    }
+
     let testPage = await extensionSetup;
     testPage.setDefaultNavigationTimeout(defaultNavigationTimeout);
 
@@ -118,7 +131,7 @@ test.describe("Extension presents page input inline menu with options for vault 
             fullPage: true,
             path: path.join(
               screenshotsOutput,
-              `${formatUrlToFilename(url)}-${inputKey}-inline_menu.png`,
+              `${formatUrlToFilename(url)}-${inputKey}-inline_menu-attempt-${testRetryCount + 1}.png`,
             ),
           });
 
