@@ -36,10 +36,5 @@ BW_COMMAND config server $VAULT_HOST || true # no error if already configured
 BW_COMMAND login "$VAULT_EMAIL" "$VAULT_PASSWORD" --nointeraction --quiet || true # no error if already logged in
 BW_COMMAND sync || true # no error if already synced
 
-# Unlock and set session token
-export BW_SESSION=$(
-    VAULT_PASSWORD=${VAULT_PASSWORD} BW_COMMAND unlock --passwordenv VAULT_PASSWORD --raw --nointeraction
-)
-
 # Start Vault Management API
 BW_COMMAND serve --hostname $CLI_SERVE_HOST --port $CLI_SERVE_PORT &

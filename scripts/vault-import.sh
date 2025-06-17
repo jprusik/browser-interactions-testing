@@ -40,7 +40,7 @@ BW_COMMAND sync || true # no error if already synced
 
 # Unlock and set session token
 export BW_SESSION=$(
-    VAULT_PASSWORD=${VAULT_PASSWORD} BW_COMMAND unlock --passwordenv VAULT_PASSWORD --raw --nointeraction
+    BW_COMMAND unlock --passwordenv VAULT_PASSWORD --raw --nointeraction
 )
 
 printf "Importing...\n"
