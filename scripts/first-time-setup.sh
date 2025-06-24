@@ -15,5 +15,6 @@ npm run seed:vault:account
 npm run start:cli
 npm run seed:vault:ciphers
 npm run stop:cli
+npm run seed:vault:import
 
 npm run setup:test-site
