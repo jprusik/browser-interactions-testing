@@ -77,7 +77,7 @@ jobs:
               issue_number: github.event.inputs.origin_issue.number,
               owner: github.event.inputs.origin_repo.repo.owner,
               repo: github.event.inputs.origin_repo.repo.repo,
-              body: JSON.stringify(message);
+              body: JSON.stringify(message)
             });
 
       # - name: Unzip extension artifact
