@@ -1,6 +1,8 @@
 name: Test-all
 run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
+  repository_dispatch:
+    types: [trigger-workflow]
   push:
     branches:
       - "main"
@@ -34,29 +36,12 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
           node-version: "23"
 
-      - name: Log in to Azure
-        uses: bitwarden/gh-actions/azure-login@main
-        with:
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-
-      - name: Get Azure Key Vault secrets
-        id: get-kv-secrets
-        uses: bitwarden/gh-actions/get-keyvault-secrets@main
-        with:
-          keyvault: gh-browser-interactions
-          secrets: "ENV-FILE,BW-INSTALLATION-ID,BW-INSTALLATION-KEY"
-
-      - name: Log out from Azure
-        uses: bitwarden/gh-actions/azure-logout@main
-
       - name: Create dotenv file
         run: |
           sudo setcap 'cap_net_bind_service=+ep' `which node`
-          echo "${{ steps.get-kv-secrets.outputs.ENV-FILE }}" | base64 --decode > .env
-          echo "BW_INSTALLATION_ID=${{ steps.get-kv-secrets.outputs.BW-INSTALLATION-ID }}" >> .env
-          echo "BW_INSTALLATION_KEY=${{ steps.get-kv-secrets.outputs.BW-INSTALLATION-KEY }}" >> .env
+          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+          echo "BW_INSTALLATION_ID=${{ secrets.BW_INSTALLATION_ID }}" >> .env
+          echo "BW_INSTALLATION_KEY=${{ secrets.BW_INSTALLATION_KEY }}" >> .env
           echo "REMOTE_VAULT_CONFIG_MATCH=${{ inputs.REMOTE_VAULT_CONFIG_MATCH || vars.BW_REMOTE_VAULT_CONFIG_MATCH }}" >> .env
 
       - name: Download extension artifact
@@ -65,84 +50,106 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build-browser.yml
           workflow_conclusion: ""
-          branch: ${{ inputs.CLIENTS_BRANCH || 'main' }}
+          branch: ${{ github.event.inputs.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
           repo: bitwarden/clients
           if_no_artifact_found: fail
           skip_unpack: true
 
-      - name: Unzip extension artifact
-        run: |
-          unzip -o *dist-chrome-*.zip.zip
-          unzip -o 'dist-chrome*.zip' -d build
-
-      - name: Generate and install certs
-        run: |
-          npm run setup:ssl
-          sudo apt-get install libnss3-tools=2:3.98-1build1
-          . .env
-          mkdir -p $HOME/.pki/nssdb
-          certutil -d $HOME/.pki/nssdb -N --empty-password
-          certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
-
-      - name: Install Bitwarden CLI
-        run: npm install -g @bitwarden/cli@2024.2.0
-
-      - name: Install project dependencies
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
-
-      - name: Match feature flags file to remote config
-        run: |
-          touch flags.json
-          npm run setup:flags
-
-      - name: Build and start the test vault
-        run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
-
-      - name: Setup the vault test account
-        run: npm run seed:vault:account
-
-      - name: Setup the vault test account ciphers
-        run: |
-          npm run start:cli
-          npm run seed:vault:ciphers
-
-      - name: Download test site build
-        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+      - name: Comment BIT summary on originating issue
+        # if: github.event.inputs.origin_issues && github.event.inputs.origin_issues.length
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: build.yml
-          workflow_conclusion: ""
-          branch: main
-          name: build-files
-          path: test-site
-          repo: bitwarden/test-the-web
-          if_no_artifact_found: fail
+          script: |
+            console.log('🚀 🚀 event:', github.event);
+            console.log('🚀 🚀 context:', context);
+            const message = {
+              issue_number: github.event.inputs.origin_issues[0].number,
+              owner: github.event.owner,
+              repo: github.event.inputs.origin_repo.repo.repo,
+              body: message
+            };
+            console.log('🚀 🚀 message:', message);
 
-      - name: Copy over certs and install test site dependencies
-        run: |
-          cp ssl.crt test-site/api/
-          cp ssl.key test-site/api/
-          cd test-site
-          npm ci
+            github.rest.issues.createComment({
+              issue_number: github.event.inputs.origin_issue.number,
+              owner: github.event.inputs.origin_repo.repo.owner,
+              repo: github.event.inputs.origin_repo.repo.repo,
+              body: JSON.stringify(message);
+            });
 
-      - name: Run all tests
-        run: npm run test:static:ci
+      # - name: Unzip extension artifact
+      #   run: |
+      #     unzip -o *dist-chrome-*.zip.zip
+      #     unzip -o 'dist-chrome*.zip' -d build
 
-      - name: Update job summary
-        if: always()
-        run: echo "$(<./test-summary/test-summary.md)" >> $GITHUB_STEP_SUMMARY
+      # - name: Generate and install certs
+      #   run: |
+      #     npm run setup:ssl
+      #     sudo apt-get install libnss3-tools=2:3.98-1build1
+      #     . .env
+      #     mkdir -p $HOME/.pki/nssdb
+      #     certutil -d $HOME/.pki/nssdb -N --empty-password
+      #     certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
 
-      - name: Upload results as artifact
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
-        if: always()
-        with:
-          name: test-summary
-          path: |
-            ./flags.json
-            ./test-summary
-            ./tests-out/videos
-            ./tests-out/screenshots
+      # - name: Install Bitwarden CLI
+      #   run: npm install -g @bitwarden/cli@2024.2.0
+
+      # - name: Install project dependencies
+      #   run: |
+      #     npm ci
+      #     npx playwright install --with-deps chromium
+
+      # - name: Match feature flags file to remote config
+      #   run: |
+      #     touch flags.json
+      #     npm run setup:flags
+
+      # - name: Build and start the test vault
+      #   run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
+
+      # - name: Setup the vault test account
+      #   run: npm run seed:vault:account
+
+      # - name: Setup the vault test account ciphers
+      #   run: |
+      #     npm run start:cli
+      #     npm run seed:vault:ciphers
+
+      # - name: Download test site build
+      #   uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     workflow: build.yml
+      #     workflow_conclusion: ""
+      #     branch: main
+      #     name: build-files
+      #     path: test-site
+      #     repo: bitwarden/test-the-web
+      #     if_no_artifact_found: fail
+
+      # - name: Copy over certs and install test site dependencies
+      #   run: |
+      #     cp ssl.crt test-site/api/
+      #     cp ssl.key test-site/api/
+      #     cd test-site
+      #     npm ci
+
+      # - name: Run all tests
+      #   run: npm run test:static:ci
+
+      # - name: Update job summary
+      #   if: always()
+      #   run: echo "$(<./test-summary/test-summary.md)" >> $GITHUB_STEP_SUMMARY
+
+      # - name: Upload results as artifact
+      #   uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+      #   if: always()
+      #   with:
+      #     name: test-summary
+      #     path: |
+      #       ./flags.json
+      #       ./test-summary
+      #       ./tests-out/videos
+      #       ./tests-out/screenshots
