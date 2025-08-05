@@ -31,29 +31,29 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
           node-version: "23"
 
-      - name: Log in to Azure
-        uses: bitwarden/gh-actions/azure-login@main
-        with:
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-
-      - name: Get Azure Key Vault secrets
-        id: get-kv-secrets
-        uses: bitwarden/gh-actions/get-keyvault-secrets@main
-        with:
-          keyvault: gh-browser-interactions
-          secrets: "ENV-FILE,BW-INSTALLATION-ID,BW-INSTALLATION-KEY"
-
-      - name: Log out from Azure
-        uses: bitwarden/gh-actions/azure-logout@main
-
       - name: Create dotenv file
-        run: |
-          sudo setcap 'cap_net_bind_service=+ep' `which node`
-          echo "${{ steps.get-kv-secrets.outputs.ENV-FILE }}" | base64 --decode > .env
-          echo "BW_INSTALLATION_ID=${{ steps.get-kv-secrets.outputs.BW-INSTALLATION-ID }}" >> .env
-          echo "BW_INSTALLATION_KEY=${{ steps.get-kv-secrets.outputs.BW-INSTALLATION-KEY }}" >> .env
+        uses: ./.github/actions/setup-env-file
+        with:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BW_DB_PORT: ${{ vars.BW_DB_PORT }}
+          BW_DB_PROVIDER: ${{ vars.BW_DB_PROVIDER }}
+          BW_DB_SERVER: ${{ vars.BW_DB_SERVER }}
+          BW_DOMAIN: ${{ vars.BW_DOMAIN }}
+          BW_ENABLE_SSL: ${{ vars.BW_ENABLE_SSL }}
+          BW_SSL_CERT: ${{ vars.BW_SSL_CERT }}
+          BW_SSL_KEY: ${{ vars.BW_SSL_KEY }}
+          CI: true
+          CLI_SERVE_HOST: ${{ vars.CLI_SERVE_HOST }}
+          CLI_SERVE_PORT: ${{ vars.CLI_SERVE_PORT }}
+          EXTENSION_BUILD_PATH: ${{ vars.EXTENSION_BUILD_PATH }}
+          PAGES_HOST_INSECURE_PORT: ${{ vars.PAGES_HOST_INSECURE_PORT }}
+          PAGES_HOST_PORT: ${{ vars.PAGES_HOST_PORT }}
+          PAGES_HOST: ${{ vars.PAGES_HOST }}
+          VAULT_HOST_INSECURE_PORT: ${{ vars.VAULT_HOST_INSECURE_PORT }}
+          VAULT_HOST_PORT: ${{ vars.VAULT_HOST_PORT }}
+          VAULT_HOST_URL: ${{ vars.VAULT_HOST_URL }}
 
       - name: Create feature flags file
         run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS }}}" > flags.json
