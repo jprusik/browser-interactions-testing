@@ -60,27 +60,27 @@ jobs:
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
           script: |
-            console.log('🚀 🚀 github.event:', github.event);
-            console.log('🚀 🚀 context:', context);
+            console.log('🚀 🚀 github.event:', github.event)
+            console.log('🚀 🚀 context:', context)
             const message = {
               issue_number: 4,
               owner: "jprusik",
               repo: "clients",
               body: "test"
-            };
+            }
             /*
             const message = {
               issue_number: github.event.inputs.origin_issue.number,
               owner: github.event.owner,
               repo: github.event.inputs.origin_repo.repo.repo,
               body: message
-            };
+            }
             */
-            console.log('🚀 🚀 message:', message);
+            console.log('🚀 🚀 message:', message)
 
             github.rest.issues.createComment({
               issue_number: github.event.inputs.origin_issue.number,
               owner: github.event.inputs.origin_repo.repo.owner,
               repo: github.event.inputs.origin_repo.repo.repo,
-              body: JSON.stringify(message);
-            });
+              body: JSON.stringify(message)
+            })
