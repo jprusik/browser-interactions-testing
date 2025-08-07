@@ -62,25 +62,18 @@ jobs:
           script: |
             console.log('🚀 🚀 github.event:', github.event)
             console.log('🚀 🚀 context:', context)
-            const message = {
-              issue_number: 4,
-              owner: "jprusik",
-              repo: "clients",
-              body: "test"
-            }
+            const message = "test"
+
             /*
-            const message = {
-              issue_number: github.event.inputs.origin_issue.number,
-              owner: github.event.owner,
-              repo: github.event.inputs.origin_repo.repo.repo,
-              body: message
-            }
+            issue_number: github.event.inputs.origin_issue.number,
+            owner: github.event.inputs.origin_repo.repo.owner,
+            repo: github.event.inputs.origin_repo.repo.repo,
             */
             console.log('🚀 🚀 message:', message)
 
             github.rest.issues.createComment({
-              issue_number: github.event.inputs.origin_issue.number,
-              owner: github.event.inputs.origin_repo.repo.owner,
-              repo: github.event.inputs.origin_repo.repo.repo,
+              issue_number: 4,
+              owner: "jprusik",
+              repo: "clients",
               body: JSON.stringify(message)
             })
