@@ -1,8 +1,11 @@
 name: Test-all
 run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
 on:
-  repository_dispatch:
-    types: [trigger-workflow]
+  workflow_dispatch:
+    inputs:
+      origin_issue:
+        description: "Origin clients PR with successful build"
+        required: true
   push:
     branches:
       - "main"
