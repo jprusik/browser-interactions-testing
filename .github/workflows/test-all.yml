@@ -67,15 +67,15 @@ jobs:
           script: |
             // @TODO remove hardcoded test value
             const owner = 'jprusik' || 'bitwarden';
-            const message = `⚠️ **Files have been modified in this PR that impact the Autofill experience:**`
+            const message = `⚠️ **Files have been modified in this PR that impact the Autofill experience:**
 
             [BIT](https://github.com/jprusik/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience.
 
-            You can view the detailed results of the tests [here](https://github.com/jprusik/browser-interactions-testing/actions/runs/${context.runId}).`
+            You can view the detailed results of the tests [here](https://github.com/jprusik/browser-interactions-testing/actions/runs/${context.runId}).`;
 
             github.rest.issues.createComment({
               issue_number: context.payload.client_payload.origin_issue,
               owner: owner,
               repo: 'clients',
-              body: JSON.stringify(message)
-            })
+              body: message
+            });
