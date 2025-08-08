@@ -146,7 +146,7 @@ jobs:
             const runURL = `https://github.com/${owner}/browser-interactions-testing/actions/runs/${context.runId}`;
             const message = `⚠️ **Files have been modified in this PR that impact the Autofill experience** ⚠️
 
-            [BIT](https://github.com/${owner}/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience. The tests ran with the same feature flag configuration used by the `${{ vars.BW_REMOTE_VAULT_CONFIG_MATCH || 'US production' }}` server.
+            [BIT](https://github.com/${owner}/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience. The tests ran with the same feature flag configuration used by the \`${{ vars.BW_REMOTE_VAULT_CONFIG_MATCH || 'US production' }}\` server.
 
             ❌ Unfortunately, one or more of these BIT tests failed. 😞
 
