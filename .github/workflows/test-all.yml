@@ -58,9 +58,26 @@ jobs:
       #     if_no_artifact_found: fail
       #     skip_unpack: true
 
+      # - name: Comment BIT summary on originating issue
+      #   uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+      #   with:
+      #     message: |
+      #       test!
+      #     pr-number: https://github.com/jprusik/clients/pull/4
+
       - name: Comment BIT summary on originating issue
-        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
+        # if: github.event.client_payload.origin_issue
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          message: |
-            test!
-          pr-number: https://github.com/jprusik/clients/pull/4
+          github-token: ${{ secrets.CROSS_REPO_TOKEN }}
+          script: |
+            console.log('🚀 🚀 context:', context)
+            console.log('🚀 🚀 context:', context.payload || undefined)
+            const message = "test"
+
+            github.rest.issues.createComment({
+              issue_number: context.payload.client_payload.origin_issue,
+              owner: github.event.inputs.origin_repo.repo.owner || 'bitwarden',
+              repo: github.event.inputs.origin_repo.repo.repo || 'clients',
+              body: JSON.stringify(message)
+            })
