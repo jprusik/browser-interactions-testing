@@ -4,22 +4,19 @@ on:
   push:
     branches:
       - "main"
+  repository_dispatch:
+    types: [trigger-bit-tests]
   workflow_dispatch:
-    inputs:
-      origin_issue:
-        description: "Origin clients PR with successful build"
-        type: object
-        required: true
   pull_request:
-      CLIENTS_BRANCH:
-        default: "main"
-        description: "clients branch of browser build to use"
-        required: true
-        type: string
-      REMOTE_VAULT_CONFIG_MATCH:
-        description: "URL to an endpoint returning a vault configuration (will default to US prod configuration)"
-        required: false
-        type: string
+    CLIENTS_BRANCH:
+      default: "main"
+      description: "clients branch of browser build to use"
+      required: true
+      type: string
+    REMOTE_VAULT_CONFIG_MATCH:
+      description: "URL to an endpoint returning a vault configuration (will default to US prod configuration)"
+      required: false
+      type: string
 jobs:
   build-and-test:
     name: Build and test
@@ -52,7 +49,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build-browser.yml
           workflow_conclusion: ""
-          branch: ${{ github.event.inputs.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
+          branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
           repo: bitwarden/clients
@@ -60,7 +57,7 @@ jobs:
           skip_unpack: true
 
       - name: Comment BIT summary on originating issue
-        if: github.event.inputs.origin_issue
+        if: github.event.client_payload.origin_issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
@@ -71,7 +68,7 @@ jobs:
             const message = "test"
 
             github.rest.issues.createComment({
-              issue_number: github.event.inputs.origin_issue.number,
+              issue_number: github.event.client_payload.origin_issue,
               owner: github.event.inputs.origin_repo.repo.owner,
               repo: github.event.inputs.origin_repo.repo.repo,
               body: JSON.stringify(message)
