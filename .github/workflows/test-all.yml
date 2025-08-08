@@ -44,18 +44,18 @@ jobs:
           echo "BW_INSTALLATION_KEY=${{ secrets.BW_INSTALLATION_KEY }}" >> .env
           echo "REMOTE_VAULT_CONFIG_MATCH=${{ inputs.REMOTE_VAULT_CONFIG_MATCH || vars.BW_REMOTE_VAULT_CONFIG_MATCH }}" >> .env
 
-      - name: Download extension artifact
-        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: build-browser.yml
-          workflow_conclusion: ""
-          branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
-          name: ^dist-chrome-MV3-\w{7}\.zip$
-          name_is_regexp: true
-          repo: ${{ github.event.inputs.origin_repo.repo.owner || 'bitwarden' }}/${{ github.event.inputs.origin_repo.repo.repo || 'clients' }}
-          if_no_artifact_found: fail
-          skip_unpack: true
+      # - name: Download extension artifact
+      #   uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     workflow: build-browser.yml
+      #     workflow_conclusion: ""
+      #     branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
+      #     name: ^dist-chrome-MV3-\w{7}\.zip$
+      #     name_is_regexp: true
+      #     repo: ${{ github.event.inputs.origin_repo.repo.owner || 'bitwarden' }}/${{ github.event.inputs.origin_repo.repo.repo || 'clients' }}
+      #     if_no_artifact_found: fail
+      #     skip_unpack: true
 
       - name: Comment BIT summary on originating issue
         if: github.event.client_payload.origin_issue
