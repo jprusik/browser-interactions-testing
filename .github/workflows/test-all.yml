@@ -55,7 +55,7 @@ jobs:
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
           # @TODO remove hardcoded test value
-          repo: ${{ 'jprusik' || 'bitwarden' }}/clients }}
+          repo: ${{ 'jprusik' || 'bitwarden' }}/clients
           if_no_artifact_found: fail
           skip_unpack: true
 
