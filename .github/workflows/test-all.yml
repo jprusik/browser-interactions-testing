@@ -55,7 +55,7 @@ jobs:
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
           # @TODO remove hardcoded test value
-          repo: ${{ 'jprusik' || 'bitwarden' }}/${{ context.payload.client_payload.origin_repo || 'clients' }}
+          repo: ${{ 'jprusik' || 'bitwarden' }}/clients }}
           if_no_artifact_found: fail
           skip_unpack: true
 
@@ -71,6 +71,6 @@ jobs:
             github.rest.issues.createComment({
               issue_number: context.payload.client_payload.origin_issue,
               owner: 'jprusik' || 'bitwarden',
-              repo: context.payload.client_payload.origin_repo || 'clients',
+              repo: 'clients',
               body: JSON.stringify(message)
             })
