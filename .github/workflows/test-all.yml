@@ -125,7 +125,7 @@ jobs:
         run: echo "$(<./test-summary/test-summary.md)" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload results as artifact
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: test-summary
@@ -135,7 +135,7 @@ jobs:
             ./tests-out/videos
             ./tests-out/screenshots
 
-      - name: Communicate BIT success on originating issue
+      - name: Communicate BIT failure on originating issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: failure() && github.event.client_payload.origin_issue
         with:
@@ -145,10 +145,11 @@ jobs:
             const owner = 'jprusik' || 'bitwarden';
             const message = `⚠️ **Files have been modified in this PR that impact the Autofill experience** ⚠️
 
-            [BIT](https://github.com/jprusik/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience.
+            [BIT](https://github.com/${owner}/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience. The tests ran with the same feature flag configuration used by the `${{ REMOTE_VAULT_CONFIG_MATCH || 'US production'}}` server.
 
-            ❌ Unfortunately, one or more of the BIT tests failed. 😞
-            Please resolve the failure before merging; reach out to @bitwarden/team-autofill-dev if you need help.
+            ❌ Unfortunately, one or more of these BIT tests failed. 😞
+
+            Please resolve the failure before merging; reach out to `@bitwarden/team-autofill-dev` if you'd like help.
 
             You can view the detailed results of the tests [here](https://github.com/${owner}/browser-interactions-testing/actions/runs/${context.runId}).`;
 
@@ -159,7 +160,7 @@ jobs:
               body: message
             });
 
-      - name: Communicate BIT failure on originating issue
+      - name: Communicate BIT success on originating issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: success() && github.event.client_payload.origin_issue
         with:
@@ -169,11 +170,9 @@ jobs:
             const owner = 'jprusik' || 'bitwarden';
             const message = `⚠️ **Files have been modified in this PR that impact the Autofill experience** ⚠️
 
-            [BIT](https://github.com/jprusik/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience.
+            [BIT](https://github.com/${owner}/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience.
 
-            ✅ Fortunately, the BIT tests have passed! 🎉
-
-            You can view the detailed results of the tests [here](https://github.com/${owner}/browser-interactions-testing/actions/runs/${context.runId}).`;
+            ✅ Fortunately, [these BIT tests have passed](https://github.com/${owner}/browser-interactions-testing/actions/runs/${context.runId})! 🎉
 
             github.rest.issues.createComment({
               issue_number: context.payload.client_payload.origin_issue,
