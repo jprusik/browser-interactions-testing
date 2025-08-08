@@ -53,7 +53,7 @@ jobs:
           branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
-          repo: ${{ github.event.client_payload.origin_repo || "bitwarden/clients" }}
+          repo: ${{ github.event.client_payload.origin_repo || 'bitwarden/clients' }}
           if_no_artifact_found: fail
           skip_unpack: true
 
