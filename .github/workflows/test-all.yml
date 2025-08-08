@@ -1,5 +1,5 @@
 name: Test-all
-run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH || inputs.origin_issue.head.ref }} by @${{ github.actor }}
+run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH || github.event.client_payload.origin_branch }} by @${{ github.actor }}
 on:
   push:
     branches:
