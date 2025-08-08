@@ -1,17 +1,16 @@
 name: Test-all
-run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH }} by @${{ github.actor }}
+run-name: All tests with extension build ${{ inputs.CLIENTS_BRANCH || inputs.origin_issue.head.ref }} by @${{ github.actor }}
 on:
+  push:
+    branches:
+      - "main"
   workflow_dispatch:
     inputs:
       origin_issue:
         description: "Origin clients PR with successful build"
+        type: object
         required: true
-  push:
-    branches:
-      - "main"
   pull_request:
-  workflow_dispatch:
-    inputs:
       CLIENTS_BRANCH:
         default: "main"
         description: "clients branch of browser build to use"
@@ -67,18 +66,13 @@ jobs:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
           script: |
             console.log('🚀 🚀 github.event:', github.event)
+            console.log('🚀 🚀 github.event.inputs:', github.event.inputs)
             console.log('🚀 🚀 context:', context)
             const message = "test"
 
-            /*
-              issue_number: 4,
-              owner: "jprusik",
-              repo: "clients",
-            */
-            console.log('🚀 🚀 message:', message)
-            issue_number: github.event.inputs.origin_issue.number,
-            owner: github.event.inputs.origin_repo.repo.owner,
-            repo: github.event.inputs.origin_repo.repo.repo,
             github.rest.issues.createComment({
+              issue_number: github.event.inputs.origin_issue.number,
+              owner: github.event.inputs.origin_repo.repo.owner,
+              repo: github.event.inputs.origin_repo.repo.repo,
               body: JSON.stringify(message)
             })
