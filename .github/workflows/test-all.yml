@@ -8,15 +8,16 @@ on:
     types: [trigger-bit-tests]
   workflow_dispatch:
   pull_request:
-    CLIENTS_BRANCH:
-      default: "main"
-      description: "clients branch of browser build to use"
-      required: true
-      type: string
-    REMOTE_VAULT_CONFIG_MATCH:
-      description: "URL to an endpoint returning a vault configuration (will default to US prod configuration)"
-      required: false
-      type: string
+    inputs:
+      CLIENTS_BRANCH:
+        default: "main"
+        description: "clients branch of browser build to use"
+        required: true
+        type: string
+      REMOTE_VAULT_CONFIG_MATCH:
+        description: "URL to an endpoint returning a vault configuration (will default to US prod configuration)"
+        required: false
+        type: string
 jobs:
   build-and-test:
     name: Build and test
@@ -52,7 +53,7 @@ jobs:
           branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
           name: ^dist-chrome-MV3-\w{7}\.zip$
           name_is_regexp: true
-          repo: bitwarden/clients
+          repo: ${{ github.event.client_payload.origin_repo || "bitwarden/clients"}
           if_no_artifact_found: fail
           skip_unpack: true
 
