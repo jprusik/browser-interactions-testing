@@ -73,8 +73,8 @@ jobs:
           certutil -d $HOME/.pki/nssdb -N --empty-password
           certutil -d sql:$HOME/.pki/nssdb -A -t "CP,CP," -n TestAutomationSSL -i ./$BW_SSL_CERT
 
-      # - name: Install Bitwarden CLI
-      #   run: npm install -g @bitwarden/cli@2024.2.0
+      - name: Install Bitwarden CLI
+        run: npm install -g @bitwarden/cli@2024.2.0
 
       - name: Install project dependencies
         run: |
@@ -89,13 +89,13 @@ jobs:
       - name: Build and start the test vault
         run: docker compose up -d --build --remove-orphans --wait --wait-timeout 60
 
-      # - name: Setup the vault test account
-      #   run: npm run seed:vault:account
+      - name: Setup the vault test account
+        run: npm run seed:vault:account
 
-      # - name: Setup the vault test account ciphers
-      #   run: |
-      #     npm run start:cli
-      #     npm run seed:vault:ciphers
+      - name: Setup the vault test account ciphers
+        run: |
+          npm run start:cli
+          npm run seed:vault:ciphers
 
       - name: Download test site build
         uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
@@ -137,7 +137,7 @@ jobs:
 
       - name: Communicate BIT success on originating issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        if: success() && github.event.client_payload.origin_issue
+        if: failure() && github.event.client_payload.origin_issue
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
           script: |
@@ -150,7 +150,7 @@ jobs:
             ❌ Unfortunately, one or more of the BIT tests failed. 😞
             Please resolve the failure before merging; reach out to @bitwarden/team-autofill-dev if you need help.
 
-            You can view the detailed results of the tests [here](https://github.com/jprusik/browser-interactions-testing/actions/runs/${context.runId}).`;
+            You can view the detailed results of the tests [here](https://github.com/${owner}/browser-interactions-testing/actions/runs/${context.runId}).`;
 
             github.rest.issues.createComment({
               issue_number: context.payload.client_payload.origin_issue,
@@ -161,7 +161,7 @@ jobs:
 
       - name: Communicate BIT failure on originating issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        if: failure() && github.event.client_payload.origin_issue
+        if: success() && github.event.client_payload.origin_issue
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
           script: |
@@ -173,7 +173,7 @@ jobs:
 
             ✅ Fortunately, the BIT tests have passed! 🎉
 
-            You can view the detailed results of the tests [here](https://github.com/jprusik/browser-interactions-testing/actions/runs/${context.runId}).`;
+            You can view the detailed results of the tests [here](https://github.com/${owner}/browser-interactions-testing/actions/runs/${context.runId}).`;
 
             github.rest.issues.createComment({
               issue_number: context.payload.client_payload.origin_issue,
