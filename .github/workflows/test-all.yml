@@ -150,7 +150,7 @@ jobs:
 
             ❌ Unfortunately, one or more of these BIT tests failed. 😞
 
-            Please resolve the failure before merging; reach out to `@bitwarden/team-autofill-dev` if you'd like help.
+            Please resolve the failure before merging; reach out to \`@bitwarden/team-autofill-dev\` if you'd like help.
 
             You can view the detailed results of the tests [here](${runURL}).`;
 
