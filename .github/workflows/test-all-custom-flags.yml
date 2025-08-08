@@ -38,29 +38,29 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
           node-version: "23"
 
-      - name: Create dotenv file
-        uses: ./.github/actions/setup-env-file
+      - name: Log in to Azure
+        uses: bitwarden/gh-actions/azure-login@main
         with:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          BW_DB_PORT: ${{ vars.BW_DB_PORT }}
-          BW_DB_PROVIDER: ${{ vars.BW_DB_PROVIDER }}
-          BW_DB_SERVER: ${{ vars.BW_DB_SERVER }}
-          BW_DOMAIN: ${{ vars.BW_DOMAIN }}
-          BW_ENABLE_SSL: ${{ vars.BW_ENABLE_SSL }}
-          BW_SSL_CERT: ${{ vars.BW_SSL_CERT }}
-          BW_SSL_KEY: ${{ vars.BW_SSL_KEY }}
-          CI: true
-          CLI_SERVE_HOST: ${{ vars.CLI_SERVE_HOST }}
-          CLI_SERVE_PORT: ${{ vars.CLI_SERVE_PORT }}
-          EXTENSION_BUILD_PATH: ${{ vars.EXTENSION_BUILD_PATH }}
-          PAGES_HOST_INSECURE_PORT: ${{ vars.PAGES_HOST_INSECURE_PORT }}
-          PAGES_HOST_PORT: ${{ vars.PAGES_HOST_PORT }}
-          PAGES_HOST: ${{ vars.PAGES_HOST }}
-          VAULT_HOST_INSECURE_PORT: ${{ vars.VAULT_HOST_INSECURE_PORT }}
-          VAULT_HOST_PORT: ${{ vars.VAULT_HOST_PORT }}
-          VAULT_HOST_URL: ${{ vars.VAULT_HOST_URL }}
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Get Azure Key Vault secrets
+        id: get-kv-secrets
+        uses: bitwarden/gh-actions/get-keyvault-secrets@main
+        with:
+          keyvault: gh-browser-interactions
+          secrets: "ENV-FILE,BW-INSTALLATION-ID,BW-INSTALLATION-KEY"
+
+      - name: Log out from Azure
+        uses: bitwarden/gh-actions/azure-logout@main
+
+      - name: Create dotenv file
+        run: |
+          sudo setcap 'cap_net_bind_service=+ep' `which node`
+          echo "${{ steps.get-kv-secrets.outputs.ENV-FILE }}" | base64 --decode > .env
+          echo "BW_INSTALLATION_ID=${{ steps.get-kv-secrets.outputs.BW-INSTALLATION-ID }}" >> .env
+          echo "BW_INSTALLATION_KEY=${{ steps.get-kv-secrets.outputs.BW-INSTALLATION-KEY }}" >> .env
 
       - name: Create feature flags file
         run: echo "{\"flagValues\":${{ inputs.FEATURE_FLAGS || '{}' }}}" > flags.json
@@ -120,7 +120,7 @@ jobs:
           branch: main
           name: build-files
           path: test-site
-          repo: jprusik/test-the-web
+          repo: bitwarden/test-the-web
           if_no_artifact_found: fail
 
       - name: Copy over certs and install test site dependencies
@@ -151,7 +151,7 @@ jobs:
 
       # Only post back to the PR if there was a failure since test-all has the
       # typical config case covered for success feedback
-      - name: Communicate BIT success on originating issue
+      - name: Communicate BIT failure on originating issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: failure() && github.event.client_payload.origin_issue
         with:
@@ -162,7 +162,7 @@ jobs:
 
             [BIT](https://github.com/${owner}/browser-interactions-testing) was run to verify no regressions have been introduced to the core Autofill experience. The tests ran with ${{ inputs.FEATURE_FLAGS === '{}' ? 'all feature flags disabled.': '\n\n<details><summary><div>The following flags enabled:</div></summary>```json\n${{inputs.FEATURE_FLAGS}}```'}
 
-            ❌ Unfortunately, one or more of the BIT tests failed. 😞
+            ❌ Unfortunately, one or more of these BIT tests failed. 😞
 
             Please resolve the failure before merging; reach out to `@bitwarden/team-autofill-dev` if you'd like help.
 
