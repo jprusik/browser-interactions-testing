@@ -37,33 +37,27 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
           node-version: "23"
 
-      # - name: Create dotenv file
-      #   run: |
-      #     sudo setcap 'cap_net_bind_service=+ep' `which node`
-      #     echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
-      #     echo "BW_INSTALLATION_ID=${{ secrets.BW_INSTALLATION_ID }}" >> .env
-      #     echo "BW_INSTALLATION_KEY=${{ secrets.BW_INSTALLATION_KEY }}" >> .env
-      #     echo "REMOTE_VAULT_CONFIG_MATCH=${{ inputs.REMOTE_VAULT_CONFIG_MATCH || vars.BW_REMOTE_VAULT_CONFIG_MATCH }}" >> .env
+      - name: Create dotenv file
+        run: |
+          sudo setcap 'cap_net_bind_service=+ep' `which node`
+          echo "${{ secrets.ENV_FILE }}" | base64 --decode > .env
+          echo "BW_INSTALLATION_ID=${{ secrets.BW_INSTALLATION_ID }}" >> .env
+          echo "BW_INSTALLATION_KEY=${{ secrets.BW_INSTALLATION_KEY }}" >> .env
+          echo "REMOTE_VAULT_CONFIG_MATCH=${{ inputs.REMOTE_VAULT_CONFIG_MATCH || vars.BW_REMOTE_VAULT_CONFIG_MATCH }}" >> .env
 
-      # - name: Download extension artifact
-      #   uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     workflow: build-browser.yml
-      #     workflow_conclusion: ""
-      #     branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
-      #     name: ^dist-chrome-MV3-\w{7}\.zip$
-      #     name_is_regexp: true
-      #     repo: ${{ github.event.inputs.origin_repo.repo.owner || 'bitwarden' }}/${{ github.event.inputs.origin_repo.repo.repo || 'clients' }}
-      #     if_no_artifact_found: fail
-      #     skip_unpack: true
-
-      # - name: Comment BIT summary on originating issue
-      #   uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
-      #   with:
-      #     message: |
-      #       test!
-      #     pr-number: https://github.com/jprusik/clients/pull/4
+      - name: Download extension artifact
+        uses: dawidd6/action-download-artifact@09f2f74827fd3a8607589e5ad7f9398816f540fe # v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-browser.yml
+          workflow_conclusion: ""
+          branch: ${{ github.event.client_payload.origin_branch || inputs.CLIENTS_BRANCH || 'main' }}
+          name: ^dist-chrome-MV3-\w{7}\.zip$
+          name_is_regexp: true
+          # @TODO remove hardcoded test value
+          repo: ${{ 'jprusik' || 'bitwarden' }}/${{ context.payload.client_payload.origin_repo || 'clients' }}
+          if_no_artifact_found: fail
+          skip_unpack: true
 
       - name: Comment BIT summary on originating issue
         # if: github.event.client_payload.origin_issue
@@ -71,13 +65,12 @@ jobs:
         with:
           github-token: ${{ secrets.CROSS_REPO_TOKEN }}
           script: |
-            console.log('🚀 🚀 context:', context)
-            console.log('🚀 🚀 context:', context.payload || undefined)
             const message = "test"
 
+            // @TODO remove hardcoded test value
             github.rest.issues.createComment({
               issue_number: context.payload.client_payload.origin_issue,
-              owner: github.event.inputs.origin_repo.repo.owner || 'bitwarden',
-              repo: github.event.inputs.origin_repo.repo.repo || 'clients',
+              owner: 'jprusik' || 'bitwarden',
+              repo: context.payload.client_payload.origin_repo || 'clients',
               body: JSON.stringify(message)
             })
